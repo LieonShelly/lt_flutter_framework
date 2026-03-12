@@ -1,6 +1,10 @@
 # Flutter Super App
 
-一个基于 Flutter，采用 Monorepo + 分层架构设计。
+## 项目简介
+
+这是一个基于 Flutter 的企业级应用框架，采用 Monorepo + 分层架构设计。项目使用 Riverpod 进行状态管理，GoRouter 处理路由导航，Dio 实现网络请求。架构分为四层：Apps 层（应用入口）、Domain 层（功能模块）、Service 层（业务逻辑与数据访问）、Core 层（基础设施）。
+
+项目包含日历、问答、AI 助手、用户中心等多个功能模块，每个模块独立封装为 Package，支持代码复用和独立维护。采用 UseCase 模式封装业务逻辑，Repository 模式隔离数据源，通过接口抽象实现依赖倒置，便于单元测试。使用 Freezed 和 JSON Serializable 保证类型安全，支持代码自动生成。整体架构清晰、模块化程度高，适合中大型 Flutter 应用开发和团队协作。
 
 ## 项目架构
 
