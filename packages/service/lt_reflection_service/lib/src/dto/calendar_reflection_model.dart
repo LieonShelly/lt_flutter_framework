@@ -1,6 +1,6 @@
 import 'package:lt_annotation/annotation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-part 'calendar_reflection_model.lt_json.g.dart';
+part 'calendar_reflection_model.lt_model.dart';
 part 'calendar_reflection_model.freezed.dart';
 
 enum IconStatus {
