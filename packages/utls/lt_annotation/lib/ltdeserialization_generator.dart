@@ -7,7 +7,7 @@ import 'package:source_gen/source_gen.dart';
 import 'package:lt_annotation/src/ltdeserialization.dart';
 
 Builder jsonDeserializationBuilder(BuilderOptions options) {
-  return PartBuilder([LtDeserializationGenerator()], '.lt_json.g.dart');
+  return PartBuilder([LtDeserializationGenerator()], '.lt_model.dart');
 }
 
 class LtDeserializationGenerator
