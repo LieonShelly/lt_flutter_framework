@@ -1,5 +1,3 @@
-import 'dart:isolate';
-
 import 'package:intl/intl.dart';
 import 'package:lt_network/network.dart';
 import '../dto/answer_submitted_param.dart';
@@ -27,7 +25,7 @@ class ReflectionRepository implements ReflectionRepositoryType {
     );
     final data = response['data'];
     if (data is List) {
-      return data.map((e) => CalendardayDto.fromJson(e)).toList();
+      return await ComputeTransformer.decodeList(data, CalendardayDto.fromJson);
     } else {
       return [];
     }
@@ -38,9 +36,8 @@ class ReflectionRepository implements ReflectionRepositoryType {
     final response = await _apiClient.get('/api/questions-of-the-day');
     final data = response['data'];
     if (data is List) {
-      return await Isolate.run(() {
-        return data.map((e) => QuestionModel.fromJson(e)).toList();
-      });
+      return data.map((e) => QuestionModel.fromJson(e)).toList();
+      //  return await ComputeTransformer.decodeList(data, QuestionModel.fromJson);
     } else {
       return [];
     }
@@ -53,7 +50,7 @@ class ReflectionRepository implements ReflectionRepositoryType {
       data: param.mapToJson(),
     );
     final data = response["data"];
-    return AnswerModel.fromJson(data);
+    return await ComputeTransformer.decodeObject(data, AnswerModel.fromJson);
   }
 
   @override
@@ -61,7 +58,7 @@ class ReflectionRepository implements ReflectionRepositoryType {
     final response = await _apiClient.get('/api/thread-view');
     final data = response['data'];
     if (data is List) {
-      return data.map((e) => QuestionModel.fromJson(e)).toList();
+      return await ComputeTransformer.decodeList(data, QuestionModel.fromJson);
     } else {
       return [];
     }

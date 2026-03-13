@@ -7,14 +7,12 @@ import 'package:source_gen/source_gen.dart';
 import 'package:lt_annotation/src/ltdeserialization.dart';
 
 Builder jsonDeserializationBuilder(BuilderOptions options) {
-  return SharedPartBuilder([
-    LtDeserializationGenerator(),
-  ], 'json_model_generator');
+  return PartBuilder([LtDeserializationGenerator()], '.lt_json.g.dart');
 }
 
 class LtDeserializationGenerator
     extends GeneratorForAnnotation<LtDeserialization> {
-  static const _jsonKeyChecker = TypeChecker.typeNamed(JsonKey);
+  static const _jsonKeyChecker = TypeChecker.typeNamed(LtJsonKey);
   @override
   generateForAnnotatedElement(
     Element2 element,
@@ -53,7 +51,12 @@ class LtDeserializationGenerator
   String _generateDeserialization(DartType type, String jsonKey) {
     if (type.isDartCoreList) {
       final geneicType = (type as InterfaceType).typeArguments.first;
-      return "(json['$jsonKey'] as List).map((e) => ${geneicType.element3!.name3}.fromJson(e)).toList()";
+      final isNullable = type.nullabilitySuffix == NullabilitySuffix.question;
+      if (isNullable) {
+        return "json['$jsonKey'] == null ? null : (json['$jsonKey'] as List).map((e) => ${geneicType.element3!.name3}.fromJson(e)).toList()";
+      } else {
+        return "(json['$jsonKey'] as List).map((e) => ${geneicType.element3!.name3}.fromJson(e)).toList()";
+      }
     }
     if (type.isDartCoreString ||
         type.isDartCoreInt ||

@@ -114,10 +114,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     );
     final year = Text(
       DateFormat('yyyy').format(calendarState.focusedMonth),
-      style: TextStyle(
+      style: AppTextStyle.feltTipSeniorRegular(
         fontSize: 24,
         color: Color(0xFF000000),
-        fontFamily: 'FeltTipSeniorRegular',
       ),
     );
     final montheaderList = AnimatedContainer(
