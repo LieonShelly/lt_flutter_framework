@@ -4,8 +4,8 @@ class LtDeserialization {
 
 const ltDeserialization = LtDeserialization();
 
-class JsonKey {
+class LtJsonKey {
   final String? name;
 
-  const JsonKey(this.name);
+  const LtJsonKey(this.name);
 }

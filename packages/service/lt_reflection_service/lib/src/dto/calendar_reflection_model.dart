@@ -1,5 +1,7 @@
 import 'package:lt_annotation/annotation.dart';
-part 'calendar_reflection_model.g.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+part 'calendar_reflection_model.lt_json.g.dart';
+part 'calendar_reflection_model.freezed.dart';
 
 enum IconStatus {
   generated,
@@ -22,8 +24,9 @@ enum IconStatus {
   }
 }
 
+@freezed
 @ltDeserialization
-class IconModel {
+class IconModel with _$IconModel {
   final String? url;
   final IconStatus status;
 
@@ -51,7 +54,7 @@ class QuestionModel {
   final String title;
   final CategoryModel category;
   final bool? pinned;
-  @JsonKey('sub_category')
+  @LtJsonKey('sub_category')
   final CategoryModel? subCategory;
   final List<AnswerModel>? answers;
 
@@ -72,7 +75,7 @@ class QuestionModel {
 class AnswerModel {
   final String id;
   final String content;
-  @JsonKey('created_ymd')
+  @LtJsonKey('created_ymd')
   final String createdYmd;
   final QuestionModel? question;
   final IconModel? icon;

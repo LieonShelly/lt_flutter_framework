@@ -1,3 +1,4 @@
+// dart format width=80
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'calendar_reflection_model.dart';
@@ -26,9 +27,11 @@ QuestionModel _$QuestionModelFromJson(Map<String, dynamic> json) {
     subCategory: json['sub_category'] == null
         ? null
         : CategoryModel.fromJson(json['sub_category']),
-    answers: (json['answers'] as List)
-        .map((e) => AnswerModel.fromJson(e))
-        .toList(),
+    answers: json['answers'] == null
+        ? null
+        : (json['answers'] as List)
+              .map((e) => AnswerModel.fromJson(e))
+              .toList(),
   );
 }
 

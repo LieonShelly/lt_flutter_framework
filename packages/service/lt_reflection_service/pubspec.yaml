@@ -19,13 +19,17 @@ dependencies:
   flutter_cache_manager: ^3.4.1
   path_provider: ^2.1.5
   intl: ^0.20.2
+  lt_annotation:
+    path: '../../../packages/utls/lt_annotation'
   
+  freezed_annotation: ^3.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  lt_annotation:
-    path: '../../../packages/utls/lt_annotation'
+  build_runner: ^2.4.8
+  freezed: ^3.2.3
+
   
   

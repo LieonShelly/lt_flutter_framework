@@ -2,9 +2,9 @@ builders:
   json_deserialization_generator:
       import: "package:lt_annotation/ltdeserialization_generator.dart"
       builder_factories: ["jsonDeserializationBuilder"]
-      build_extensions: {".dart" : [".json_model_generator.g.part"]}
+      build_extensions: {".dart" : [".lt_json.g.dart"]}
       auto_apply: dependents
-      build_to: cache
+      build_to: source
 
     
   
