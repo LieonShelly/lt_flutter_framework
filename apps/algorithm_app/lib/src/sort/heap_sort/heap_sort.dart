@@ -1,4 +1,4 @@
-import '../core/core.dart';
+import '../../core/core.dart';
 
 void heapSort(List<int> arr) {
   int n = arr.length;
@@ -6,7 +6,7 @@ void heapSort(List<int> arr) {
   // 从最后一个 “非子节点” 开始，自底向上进行堆化
   // 最后一个非子节点的索引总是 (n ~/ 2) - 1
   for (int i = (n ~/ 2) - 1; i >= 0; i--) {
-    heapify(arr, i, 0);
+    heapify(arr, n, i);
   }
 
   // 阶段2：一个一个从堆顶取出最大元素，放到数组尾部
