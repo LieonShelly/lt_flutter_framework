@@ -31,7 +31,7 @@ class AppTextStyle extends TextStyle {
     super.height,
     super.letterSpacing,
     super.decoration,
-  }) : super(fontFamily: font.value);
+  }) : super(fontFamily: font.value, package: 'lt_uicomponent');
 
   AppTextStyle.poppins({
     double? fontSize,

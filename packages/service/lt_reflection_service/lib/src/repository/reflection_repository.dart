@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:intl/intl.dart';
 import 'package:lt_network/network.dart';
 import '../dto/answer_submitted_param.dart';
@@ -36,7 +38,9 @@ class ReflectionRepository implements ReflectionRepositoryType {
     final response = await _apiClient.get('/api/questions-of-the-day');
     final data = response['data'];
     if (data is List) {
-      return data.map((e) => QuestionModel.fromJson(e)).toList();
+      return await Isolate.run(() {
+        return data.map((e) => QuestionModel.fromJson(e)).toList();
+      });
     } else {
       return [];
     }
