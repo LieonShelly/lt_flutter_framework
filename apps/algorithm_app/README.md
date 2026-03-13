@@ -6,11 +6,15 @@
 
 ```
 algorithm_app/
-├── core/           # 核心工具函数
-├── heap_sort/      # 堆排序
-├── sort/           # 其他排序算法
-│   ├── merge_sort/ # 归并排序
-│   └── quick_sort/ # 快速排序
+├── lib/
+│   └── src/
+│       ├── core/           # 核心工具函数
+│       ├── heap_sort/      # 堆排序
+│       └── sort/           # 其他排序算法
+│           ├── bubble_sort/    # 冒泡排序
+│           ├── insertion_sort/ # 插入排序
+│           ├── merge_sort/     # 归并排序
+│           └── quick_sort/     # 快速排序
 └── test/           # 单元测试
 ```
 
@@ -32,6 +36,8 @@ dart test
 dart test test/heap_sort_test.dart
 dart test test/merge_sort_test.dart
 dart test test/quick_sort_test.dart
+dart test test/bubble_sort_test.dart
+dart test test/insertion_sort_test.dart
 ```
 
 ### 查看测试覆盖率
@@ -42,6 +48,19 @@ dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage
 ```
 
 ## 算法说明
+
+### 冒泡排序 (Bubble Sort)
+- 时间复杂度: O(n²)
+- 空间复杂度: O(1)
+- 稳定性: 稳定
+
+### 插入排序 (Insertion Sort)
+- 最好时间复杂度: O(n)
+- 平均时间复杂度: O(n²)
+- 最坏时间复杂度: O(n²)
+- 空间复杂度: O(1)
+- 稳定性: 稳定
+- 适用场景: 小数据集、基本有序的数据
 
 ### 堆排序 (Heap Sort)
 - 时间复杂度: O(n log n)
