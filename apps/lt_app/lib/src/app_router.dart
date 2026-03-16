@@ -38,7 +38,7 @@ GoRouter router(Ref ref) {
               GoRoute(
                 path: AppRoutePath.thread,
                 pageBuilder: (context, state) =>
-                    const NoTransitionPage(child: ToxicRenderPage()),
+                    const NoTransitionPage(child: A2uiTestPage()),
               ),
             ],
           ),
