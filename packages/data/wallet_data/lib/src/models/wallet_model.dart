@@ -18,12 +18,10 @@ class WalletModel {
   factory WalletModel.fromJson(Map<String, dynamic> json) =>
       _$WalletModelFromJson(json);
 
-  /// DTO → Entity 转换
   WalletEntity toEntity() {
     return WalletEntity(id: id, balance: balance, currency: currency);
   }
 
-  /// Entity → DTO 转换
   factory WalletModel.fromEntity(WalletEntity entity) {
     return WalletModel(
       id: entity.id,
@@ -51,7 +49,6 @@ class TransactionModel {
   factory TransactionModel.fromJson(Map<String, dynamic> json) =>
       _$TransactionModelFromJson(json);
 
-  /// DTO → Entity 转换
   TransactionEntity toEntity() {
     return TransactionEntity(
       id: id,
@@ -61,7 +58,6 @@ class TransactionModel {
     );
   }
 
-  /// Entity → DTO 转换
   factory TransactionModel.fromEntity(TransactionEntity entity) {
     return TransactionModel(
       id: entity.id,

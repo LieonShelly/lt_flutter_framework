@@ -2,7 +2,6 @@ import 'package:user_domain/user_domain.dart';
 import '../datasources/datasources.dart';
 import '../models/models.dart';
 
-/// 用户相关的数据仓储实现
 class UserRepositoryImpl implements UserRepository {
   final UserRemoteDataSource _remoteDataSource;
 

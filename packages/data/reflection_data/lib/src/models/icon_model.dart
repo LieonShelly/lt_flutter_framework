@@ -16,12 +16,10 @@ class IconModel with _$IconModel {
   factory IconModel.fromJson(Map<String, dynamic> json) =>
       _$IconModelFromJson(json);
 
-  /// DTO → Entity 转换
   IconEntity toEntity() {
     return IconEntity(status: IconStatus.fromString(status), url: url ?? "");
   }
 
-  /// Entity → DTO 转换
   factory IconModel.fromEntity(IconEntity entity) {
     return IconModel(url: entity.url, status: IconStatus.generated.toString());
   }

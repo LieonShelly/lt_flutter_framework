@@ -308,7 +308,6 @@ class CalendarItemView extends ConsumerWidget with ImageCacheKeyType {
             context.push('/answer_detail', extra: answert);
           },
           child: Container(
-            // color: Colors.red,
             padding: EdgeInsets.all(3),
             child: ProcessedIconView(
               imageUrl: icon.url ?? "",
@@ -328,10 +327,8 @@ class CalendarItemView extends ConsumerWidget with ImageCacheKeyType {
     AnswerEntity? icon, {
     Alignment alignment = Alignment.bottomCenter,
   }) {
-    // if (icon == null) return const SizedBox();
     return Container(
       alignment: alignment,
-      // color: Colors.red,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final size = constraints.maxHeight < constraints.maxWidth

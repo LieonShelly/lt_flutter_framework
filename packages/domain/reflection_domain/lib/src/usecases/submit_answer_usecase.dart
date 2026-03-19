@@ -1,7 +1,6 @@
 import '../entities/entities.dart';
 import '../repositories/repositories.dart';
 
-/// 提交答案的用例接口
 abstract interface class SubmitAnswerUseCaseType {
   Future<AnswerEntity> execute({
     required String questionId,
@@ -10,7 +9,6 @@ abstract interface class SubmitAnswerUseCaseType {
   });
 }
 
-/// 提交答案的用例实现
 class SubmitAnswerUseCase implements SubmitAnswerUseCaseType {
   final ReflectionRepository _repository;
 
@@ -22,7 +20,6 @@ class SubmitAnswerUseCase implements SubmitAnswerUseCaseType {
     required String content,
     String? iconId,
   }) async {
-    // 业务验证
     if (content.trim().isEmpty) {
       throw ArgumentError('答案内容不能为空');
     }

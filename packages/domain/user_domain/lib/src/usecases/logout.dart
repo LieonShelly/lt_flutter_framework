@@ -1,11 +1,9 @@
 import '../repositories/repositories.dart';
 
-/// 登出的用例接口
 abstract interface class Logout {
   Future<void> call();
 }
 
-/// 登出的用例实现
 class LogoutImpl implements Logout {
   final UserRepository _repository;
 

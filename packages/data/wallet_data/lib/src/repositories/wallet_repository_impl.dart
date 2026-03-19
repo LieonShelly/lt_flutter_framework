@@ -1,7 +1,6 @@
 import 'package:wallet_domain/wallet_domain.dart';
 import '../datasources/datasources.dart';
 
-/// 钱包相关的数据仓储实现
 class WalletRepositoryImpl implements WalletRepository {
   final WalletRemoteDataSource _remoteDataSource;
 

@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-/// 三棵树演示应用
-///
-/// 这个例子展示了Flutter的三棵树（Widget树、Element树、RenderObject树）
-/// 如何协作工作。运行这个例子并观察控制台输出。
+
 void main() {
-  // 开启调试模式，显示rebuild信息
   debugPrintRebuildDirtyWidgets = true;
   runApp(const MyApp());
 }
@@ -110,7 +106,6 @@ class _ThreeTreesDemoState extends State<ThreeTreesDemo> {
   }
 }
 
-/// 用于检查三棵树的按钮
 class TreeInspectorButton extends StatelessWidget {
   const TreeInspectorButton({Key? key}) : super(key: key);
 
@@ -134,12 +129,10 @@ class TreeInspectorButton extends StatelessWidget {
     print('三棵树检查');
     print('=' * 50);
 
-    // 1. Widget（通过context可以访问）
     print('\n📦 Widget信息:');
     print('   类型: ${context.widget.runtimeType}');
     print('   hashCode: ${context.widget.hashCode}');
 
-    // 2. Element（BuildContext就是Element）
     final element = context as Element;
     print('\n🔗 Element信息:');
     print('   类型: ${element.runtimeType}');
@@ -147,7 +140,6 @@ class TreeInspectorButton extends StatelessWidget {
     print('   深度: ${element.depth}');
     print('   是否mounted: ${element.mounted}');
 
-    // 3. RenderObject（如果有）
     final renderObject = context.findRenderObject();
     print('\n🎨 RenderObject信息:');
     if (renderObject != null) {
@@ -164,7 +156,6 @@ class TreeInspectorButton extends StatelessWidget {
       print('   null (这个Widget没有对应的RenderObject)');
     }
 
-    // 4. 遍历Widget树
     print('\n🌳 Widget树结构:');
     _printWidgetTree(context, 0);
 
@@ -175,7 +166,6 @@ class TreeInspectorButton extends StatelessWidget {
     final indent = '  ' * depth;
     print('$indent└─ ${context.widget.runtimeType}');
 
-    // 只遍历前3层，避免输出太多
     if (depth < 3) {
       context.visitChildElements((child) {
         _printWidgetTree(child, depth + 1);
@@ -184,12 +174,10 @@ class TreeInspectorButton extends StatelessWidget {
   }
 }
 
-/// 自定义Widget示例 - 展示Widget的不可变性
 class ImmutableWidgetExample extends StatelessWidget {
   final String title;
   final int value;
 
-  // 所有字段都是final - 不可变
   const ImmutableWidgetExample({
     Key? key,
     required this.title,
@@ -217,7 +205,6 @@ class ImmutableWidgetExample extends StatelessWidget {
   }
 }
 
-/// Key的使用示例
 class KeyExample extends StatefulWidget {
   const KeyExample({Key? key}) : super(key: key);
 
@@ -235,7 +222,7 @@ class _KeyExampleState extends State<KeyExample> {
         const Text('列表项（使用Key）:'),
         ...items.map(
           (item) => ListTile(
-            key: ValueKey(item), // 使用Key确保Element正确复用
+            key: ValueKey(item),
             title: Text(item),
             trailing: IconButton(
               icon: const Icon(Icons.delete),
@@ -250,7 +237,7 @@ class _KeyExampleState extends State<KeyExample> {
         ElevatedButton(
           onPressed: () {
             setState(() {
-              items.shuffle(); // 打乱顺序
+              items.shuffle();
             });
           },
           child: const Text('打乱顺序'),

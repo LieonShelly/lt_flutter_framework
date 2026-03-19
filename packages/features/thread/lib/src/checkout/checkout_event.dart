@@ -7,10 +7,8 @@ sealed class CheckoutEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-// 页面初始化，请求数据的事件
 final class LoadedCheckoutDataEvent extends CheckoutEvent {}
 
-// 点击 Add 的事件
 final class AddPwpItemEvent extends CheckoutEvent {
   final String productId;
 
@@ -20,7 +18,6 @@ final class AddPwpItemEvent extends CheckoutEvent {
   List<Object?> get props => [productId];
 }
 
-// 用户选择了一张互斥的优惠券的事件
 final class SelectVoucherEvent extends CheckoutEvent {
   final bool isMutuallyExclusive;
 

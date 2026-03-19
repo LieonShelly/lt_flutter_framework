@@ -1,12 +1,11 @@
 import 'answer_entity.dart';
 
 class CalendarDayEntity {
-  final String date; // YYYY-MM-DD
+  final String date;
   final List<AnswerEntity> answers;
 
   const CalendarDayEntity({required this.date, required this.answers});
 
-  /// 业务方法：是否有反思记录
   bool get hasReflection => answers.isNotEmpty;
 
   @override
