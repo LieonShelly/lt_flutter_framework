@@ -17,6 +17,7 @@ workspace:
   - packages/domain/reflection_domain
   - packages/domain/user_domain
   - packages/domain/wallet_domain
+  - packages/domain/booking_domain
   
   # Data packages
   - packages/data/reflection_data

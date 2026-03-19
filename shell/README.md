@@ -10,12 +10,19 @@
 
 ## 安装
 
-首先安装脚本依赖：
+首先安装脚本依赖（自动完成，无需手动操作）：
 
 ```bash
-cd shell
-dart pub get
+# 当你运行任何 make 命令时，会自动安装 shell 依赖
+make setup
+make clean
+make codegen
+
+# 或者手动安装 shell 依赖
+make shell-deps
 ```
+
+**注意**：所有 `make` 命令现在都会自动确保 shell 脚本的依赖已安装，无需手动操作。
 
 ## 可用脚本
 

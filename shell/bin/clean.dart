@@ -169,6 +169,11 @@ Future<int> _cleanRoot(String projectRoot) async {
 }
 
 Future<int> _cleanDirectory(String directory) async {
+  // Skip cleaning shell directory to preserve script dependencies
+  if (directory.endsWith('shell')) {
+    return 0;
+  }
+
   var count = 0;
   final dirsToClean = [
     '.dart_tool',
