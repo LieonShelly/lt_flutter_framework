@@ -19,7 +19,7 @@ class MyApp extends ConsumerWidget {
       theme: ThemeData(
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFFFFFDF8),
-        appBarTheme: const AppBarThemeData(
+        appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFFFFFDF8),
           elevation: 0,
           scrolledUnderElevation: 0,

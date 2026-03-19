@@ -1,0 +1,13 @@
+name: reflection_domain
+description: Reflection domain layer with business logic and entities
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  equatable: ^2.0.5
+
+dev_dependencies:
+  test: ^1.24.0

@@ -33,9 +33,21 @@ dependencies:
   lt_network:
     path: ../../packages/core/network
 
-  # Service Packages
-  lt_reflection_service:
-    path: ../../packages/service/lt_reflection_service
+  # Clean Architecture Layers - Domain
+  reflection_domain:
+    path: ../../packages/domain/reflection_domain
+  user_domain:
+    path: ../../packages/domain/user_domain
+  wallet_domain:
+    path: ../../packages/domain/wallet_domain
+
+  # Clean Architecture Layers - Data
+  reflection_data:
+    path: ../../packages/data/reflection_data
+  user_data:
+    path: ../../packages/data/user_data
+  wallet_data:
+    path: ../../packages/data/wallet_data
 
   # Utility Packages
   date_utl:
@@ -43,23 +55,23 @@ dependencies:
   lt_annotation:
     path: ../../packages/utls/lt_annotation
 
-  # Domain Packages
+  # Feature Packages
   add_answer:
-    path: ../../packages/domain/add_answer
+    path: ../../packages/features/add_answer
   answer_detail:
-    path: ../../packages/domain/answer_detail
+    path: ../../packages/features/answer_detail
   calendar:
-    path: ../../packages/domain/calendar
+    path: ../../packages/features/calendar
   copilot:
-    path: ../../packages/domain/copilot
+    path: ../../packages/features/copilot
   feature_core:
-    path: ../../packages/domain/feature_core
+    path: ../../packages/features/feature_core
   thread:
-    path: ../../packages/domain/thread
+    path: ../../packages/features/thread
   today_question:
-    path: ../../packages/domain/today_question
+    path: ../../packages/features/today_question
   user:
-    path: ../../packages/domain/user
+    path: ../../packages/features/user
 
 
 
