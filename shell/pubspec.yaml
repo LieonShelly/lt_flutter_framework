@@ -1,0 +1,12 @@
+name: flutter_scripts
+description: Automation scripts for Flutter project
+version: 1.0.0
+publish_to: 'none'
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  args: ^2.7.0
+  path: ^1.9.1
+  io: ^1.0.5
