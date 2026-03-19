@@ -14,12 +14,10 @@ class CategoryModel {
   factory CategoryModel.fromJson(Map<String, dynamic> json) =>
       _$CategoryModelFromJson(json);
 
-  /// DTO → Entity 转换
   CategoryEntity toEntity() {
     return CategoryEntity(id: id ?? '', name: name, color: color);
   }
 
-  /// Entity → DTO 转换
   factory CategoryModel.fromEntity(CategoryEntity entity) {
     return CategoryModel(id: entity.id, name: entity.name, color: entity.color);
   }

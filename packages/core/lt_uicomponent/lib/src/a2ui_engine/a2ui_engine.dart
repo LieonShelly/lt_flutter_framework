@@ -8,7 +8,6 @@ class A2UIEngine {
   final Map<String, List<String>> _childrenAdjacency = {};
   final String rootId = "root_0";
 
-  //受信任组件目录
   final Map<String, A2UIWidgetBuilder> _componetCatalog = {
     'Column': (props, children) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,

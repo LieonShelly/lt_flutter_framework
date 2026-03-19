@@ -88,8 +88,6 @@ void main() {
     });
 
     test('maintains stability with duplicate values', () {
-      // 虽然我们无法直接测试稳定性（因为是整数）
-      // 但可以确保重复值被正确排序
       final arr = [5, 2, 5, 1, 5, 3];
       countSort(arr);
       expect(arr, [1, 2, 3, 5, 5, 5]);
@@ -149,11 +147,9 @@ void main() {
     test('handles large array with duplicates', () {
       final arr = List.generate(100, (i) => i % 10);
       countSort(arr);
-      // 应该有10个0, 10个1, ..., 10个9
       expect(arr.first, 0);
       expect(arr.last, 9);
       expect(arr.length, 100);
-      // 验证排序正确
       for (int i = 1; i < arr.length; i++) {
         expect(arr[i] >= arr[i - 1], true);
       }

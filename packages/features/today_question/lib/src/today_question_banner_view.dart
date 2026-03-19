@@ -136,7 +136,6 @@ class _TodayQuestionBannerViewState
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Text2
                 Expanded(
                   child: Text(
                     latestQueistion?.title ?? "",

@@ -70,7 +70,6 @@ void main() {
     });
 
     test('maintains stability with duplicate values', () {
-      // 虽然我们用的是int，但可以验证相对顺序
       final arr = [3, 1, 3, 2, 3];
       insertionSort(arr);
       expect(arr, equals([1, 2, 3, 3, 3]));

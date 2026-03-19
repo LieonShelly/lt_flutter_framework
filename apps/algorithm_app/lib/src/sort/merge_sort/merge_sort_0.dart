@@ -1,5 +1,3 @@
-// 分而治之，单个元素的数组默认有序
-// 时间复杂度 O(nlogn) 空间复杂度 O(n)
 void mergeSort(List<int> arr, int left, int right) {
   if (left < right) {
     int mid = left + (right - left) ~/ 2;

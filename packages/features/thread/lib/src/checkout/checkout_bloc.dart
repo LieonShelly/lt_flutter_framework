@@ -7,7 +7,6 @@ abstract interface class GetCheckoutDataUseCase {
 }
 
 class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
-  // usecase 抽象接口
   final GetCheckoutDataUseCase _getCheckoutDataUseCase;
 
   CheckoutBloc({required GetCheckoutDataUseCase getCheckoutDataUseCase})

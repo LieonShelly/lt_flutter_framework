@@ -1,13 +1,11 @@
 import 'package:lt_network/network.dart';
 import '../../models/models.dart';
 
-/// 钱包相关的远程数据源接口
 abstract interface class WalletRemoteDataSource {
   Future<WalletModel> getWallet();
   Future<List<TransactionModel>> getTransactions();
 }
 
-/// 钱包相关的远程数据源实现
 class WalletRemoteDataSourceImpl implements WalletRemoteDataSource {
   final ApiClientType _apiClient;
 

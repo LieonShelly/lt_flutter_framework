@@ -14,7 +14,6 @@ class CalendarDayModel {
   factory CalendarDayModel.fromJson(Map<String, dynamic> json) =>
       _$CalendarDayModelFromJson(json);
 
-  /// DTO → Entity 转换
   CalendarDayEntity toEntity() {
     return CalendarDayEntity(
       date: date,
@@ -22,7 +21,6 @@ class CalendarDayModel {
     );
   }
 
-  /// Entity → DTO 转换
   factory CalendarDayModel.fromEntity(CalendarDayEntity entity) {
     return CalendarDayModel(
       date: entity.date,
@@ -33,7 +31,6 @@ class CalendarDayModel {
   }
 }
 
-// UI 相关的样式类（保留用于向后兼容）
 sealed class CalendarDayItemStyle {
   const CalendarDayItemStyle();
 }

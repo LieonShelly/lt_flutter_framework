@@ -1,7 +1,6 @@
 import 'package:lt_network/network.dart';
 import '../../models/models.dart';
 
-/// 反思相关的远程数据源接口
 abstract interface class ReflectionRemoteDataSource {
   Future<List<CalendarDayModel>> fetchCalendarView({
     required DateTime start,
@@ -20,7 +19,6 @@ abstract interface class ReflectionRemoteDataSource {
   Future<AnswerModel> fetchAnswerDetail(String answerId);
 }
 
-/// 反思相关的远程数据源实现
 class ReflectionRemoteDataSourceImpl implements ReflectionRemoteDataSource {
   final ApiClientType _apiClient;
 

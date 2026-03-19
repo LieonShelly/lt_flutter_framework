@@ -27,7 +27,6 @@ class QuestionModel {
   factory QuestionModel.fromJson(Map<String, dynamic> json) =>
       _$QuestionModelFromJson(json);
 
-  /// DTO → Entity 转换
   QuestionEntity toEntity() {
     return QuestionEntity(
       id: id,
@@ -39,7 +38,6 @@ class QuestionModel {
     );
   }
 
-  /// Entity → DTO 转换
   factory QuestionModel.fromEntity(QuestionEntity entity) {
     return QuestionModel(
       id: entity.id,

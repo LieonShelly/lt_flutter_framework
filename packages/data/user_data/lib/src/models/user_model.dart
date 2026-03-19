@@ -15,12 +15,10 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
 
-  /// DTO → Entity 转换
   UserEntity toEntity() {
     return UserEntity(id: id, name: name, email: email, avatar: avatar);
   }
 
-  /// Entity → DTO 转换
   factory UserModel.fromEntity(UserEntity entity) {
     return UserModel(
       id: entity.id,

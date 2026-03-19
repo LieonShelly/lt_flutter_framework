@@ -157,7 +157,6 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       ],
     );
     return Container(
-      // padding: EdgeInsets.symmetric(horizontal: 20),
       child: column,
     );
   }

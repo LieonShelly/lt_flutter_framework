@@ -18,10 +18,8 @@ class QuestionEntity {
     required this.answers,
   });
 
-  /// 业务方法：是否有答案
   bool get hasAnswers => answers.isNotEmpty;
 
-  /// 业务方法：今天是否已回答
   bool get isAnsweredToday {
     if (answers.isEmpty) return false;
     final today = DateTime.now();
