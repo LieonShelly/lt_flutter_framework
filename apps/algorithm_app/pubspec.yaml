@@ -2,9 +2,10 @@ name: algorithm_app
 description: Algorithm implementations and practice
 version: 1.0.0
 publish_to: none
+resolution: workspace
 
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.8.1
 
 dev_dependencies:
   test: ^1.24.0

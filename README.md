@@ -23,6 +23,7 @@
 - **数据序列化**: Freezed + JSON Serializable
 - **本地存储**: Flutter Secure Storage
 - **代码生成**: Build Runner
+- **依赖管理**: Dart Workspace (统一版本管理)
 
 ---
 
@@ -885,7 +886,21 @@ class AnswerModel with _$AnswerModel {
 
 ## 开发指南
 
-## 开发指南
+### Workspace 依赖管理
+
+本项目使用 Dart Workspace 特性统一管理所有包的依赖版本。
+
+```bash
+# 安装依赖（在根目录运行）
+fvm flutter pub get
+
+# 或使用 Makefile
+make setup
+```
+
+所有子包共享根目录 `pubspec.yaml` 中定义的依赖版本，确保版本一致性。
+
+详细文档请查看 [docs/WORKSPACE_GUIDE.md](docs/WORKSPACE_GUIDE.md)
 
 ### 自动化脚本
 
@@ -1248,7 +1263,10 @@ void main() {
 - [Clean Architecture 重构文档](.kiro/specs/clean-architecture-refactoring/)
 - [Provider 策略文档](.kiro/specs/clean-architecture-refactoring/PROVIDER_STRATEGY_FINAL.md)
 - [模块化架构文档](.kiro/specs/clean-architecture-refactoring/MODULAR_ARCHITECTURE.md)
+- [Workspace 配置指南](docs/WORKSPACE_GUIDE.md)
+- [第三方 SDK 集成指南](.kiro/specs/clean-architecture-refactoring/THIRD_PARTY_SDK_INTEGRATION.md)
 - [共享依赖管理](docs/shared-dependencies.md)
+- [自动化脚本文档](shell/README.md)
 
 ---
 
