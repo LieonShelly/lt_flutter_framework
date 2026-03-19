@@ -1263,9 +1263,7 @@ void main() {
 - [Clean Architecture 重构文档](.kiro/specs/clean-architecture-refactoring/)
 - [Provider 策略文档](.kiro/specs/clean-architecture-refactoring/PROVIDER_STRATEGY_FINAL.md)
 - [模块化架构文档](.kiro/specs/clean-architecture-refactoring/MODULAR_ARCHITECTURE.md)
-- [Workspace 配置指南](docs/WORKSPACE_GUIDE.md)
 - [第三方 SDK 集成指南](.kiro/specs/clean-architecture-refactoring/THIRD_PARTY_SDK_INTEGRATION.md)
-- [共享依赖管理](docs/shared-dependencies.md)
 - [自动化脚本文档](shell/README.md)
 
 ---
