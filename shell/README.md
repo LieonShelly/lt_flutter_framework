@@ -28,16 +28,20 @@ dart pub get
 - 安装根目录依赖
 - 安装所有 packages 依赖（core, domain, data, features, utls）
 - 安装所有 apps 依赖
+- 支持针对单个包进行操作
 
 **使用方法**：
 
 ```bash
-# 从项目根目录运行
+# 安装所有依赖
 dart shell/bin/setup.dart
 
-# 或从 shell 目录运行
-cd shell
-dart bin/setup.dart
+# 安装特定包的依赖
+dart shell/bin/setup.dart --package reflection_data
+dart shell/bin/setup.dart -p lt_app
+
+# 查看帮助
+dart shell/bin/setup.dart --help
 ```
 
 **输出示例**：
@@ -89,16 +93,20 @@ dart bin/setup.dart
 - 删除 `.flutter-plugins` 文件
 - 删除 `.flutter-plugins-dependencies` 文件
 - 删除 `pubspec.lock` 文件
+- 支持针对单个包进行操作
 
 **使用方法**：
 
 ```bash
-# 从项目根目录运行
+# 清理所有包
 dart shell/bin/clean.dart
 
-# 或从 shell 目录运行
-cd shell
-dart bin/clean.dart
+# 清理特定包
+dart shell/bin/clean.dart --package reflection_data
+dart shell/bin/clean.dart -p lt_app
+
+# 查看帮助
+dart shell/bin/clean.dart --help
 ```
 
 **输出示例**：
@@ -134,19 +142,30 @@ dart bin/clean.dart
 - 自动检测包含 build_runner 的包
 - 运行代码生成（Riverpod、Freezed、JSON Serializable 等）
 - 支持 watch 模式
+- 支持针对单个包进行操作
 
 **使用方法**：
 
 ```bash
-# 一次性生成
+# 为所有包生成代码
 dart shell/bin/codegen.dart
+
+# 为特定包生成代码
+dart shell/bin/codegen.dart --package reflection_data
+dart shell/bin/codegen.dart -p lt_app
 
 # Watch 模式（监听文件变化自动生成）
 dart shell/bin/codegen.dart --watch
 dart shell/bin/codegen.dart -w
 
+# 为特定包启用 watch 模式
+dart shell/bin/codegen.dart -p user_data -w
+
 # 不删除冲突文件
 dart shell/bin/codegen.dart --no-delete-conflicting
+
+# 查看帮助
+dart shell/bin/codegen.dart --help
 ```
 
 **输出示例**：
@@ -206,6 +225,22 @@ dart shell/bin/setup.dart
 dart shell/bin/codegen.dart
 ```
 
+### 针对单个包的操作
+
+```bash
+# 清理特定包
+dart shell/bin/clean.dart -p reflection_data
+
+# 安装特定包的依赖
+dart shell/bin/setup.dart -p reflection_data
+
+# 为特定包生成代码
+dart shell/bin/codegen.dart -p reflection_data
+
+# 为特定包启用 watch 模式
+dart shell/bin/codegen.dart -p reflection_data -w
+```
+
 ### 开发模式
 
 ```bash
@@ -219,79 +254,28 @@ fvm flutter run
 
 ## 创建快捷命令（可选）
 
-可以在项目根目录创建 Makefile 或 shell 脚本来简化命令：
+可以在项目根目录使用 Makefile 来简化命令。
 
 ### Makefile
 
-```makefile
-.PHONY: setup clean codegen watch
-
-setup:
-	dart shell/bin/setup.dart
-
-clean:
-	dart shell/bin/clean.dart
-
-codegen:
-	dart shell/bin/codegen.dart
-
-watch:
-	dart shell/bin/codegen.dart --watch
-
-reset: clean setup codegen
-```
-
-使用：
+项目已包含 Makefile，支持以下命令：
 
 ```bash
-make setup
-make clean
-make codegen
-make watch
-make reset
-```
+# 全局操作
+make setup              # 安装所有依赖
+make clean              # 清理所有构建产物
+make codegen            # 为所有包生成代码
+make watch              # 为所有包启用 watch 模式
+make reset              # 清理、安装、生成（完整重置）
 
-### Shell 脚本
+# 针对特定包的操作
+make setup PACKAGE=reflection_data      # 安装特定包的依赖
+make clean PACKAGE=lt_app               # 清理特定包
+make codegen PACKAGE=user_data          # 为特定包生成代码
+make watch PACKAGE=reflection_data      # 为特定包启用 watch 模式
 
-创建 `scripts.sh`：
-
-```bash
-#!/bin/bash
-
-case "$1" in
-  setup)
-    dart shell/bin/setup.dart
-    ;;
-  clean)
-    dart shell/bin/clean.dart
-    ;;
-  codegen)
-    dart shell/bin/codegen.dart
-    ;;
-  watch)
-    dart shell/bin/codegen.dart --watch
-    ;;
-  reset)
-    dart shell/bin/clean.dart
-    dart shell/bin/setup.dart
-    dart shell/bin/codegen.dart
-    ;;
-  *)
-    echo "Usage: $0 {setup|clean|codegen|watch|reset}"
-    exit 1
-    ;;
-esac
-```
-
-使用：
-
-```bash
-chmod +x scripts.sh
-./scripts.sh setup
-./scripts.sh clean
-./scripts.sh codegen
-./scripts.sh watch
-./scripts.sh reset
+# 查看帮助
+make help
 ```
 
 ## 故障排除

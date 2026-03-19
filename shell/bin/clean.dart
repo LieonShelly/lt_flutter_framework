@@ -1,19 +1,81 @@
 #!/usr/bin/env dart
 
 import 'dart:io';
+import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
 void main(List<String> arguments) async {
-  print('🧹 Flutter Project Clean');
-  print('=' * 50);
+  final parser = ArgParser()
+    ..addOption('package', abbr: 'p', help: 'Target specific package name')
+    ..addFlag('help', abbr: 'h', negatable: false, help: 'Show usage help');
 
-  final currentDir = Directory.current.path;
-  final projectRoot = currentDir.endsWith('shell')
-      ? Directory.current.parent.path
-      : currentDir;
+  try {
+    final results = parser.parse(arguments);
 
-  print('📁 Project root: $projectRoot\n');
+    if (results['help'] as bool) {
+      _printHelp(parser);
+      return;
+    }
 
+    final packageName = results['package'] as String?;
+
+    print('🧹 Flutter Project Clean');
+    print('=' * 50);
+
+    final currentDir = Directory.current.path;
+    final projectRoot = currentDir.endsWith('shell')
+        ? Directory.current.parent.path
+        : currentDir;
+
+    print('📁 Project root: $projectRoot');
+    if (packageName != null) {
+      print('🎯 Target package: $packageName');
+    }
+    print('');
+
+    var totalCleaned = 0;
+
+    if (packageName != null) {
+      totalCleaned = await _cleanSinglePackage(projectRoot, packageName);
+    } else {
+      totalCleaned = await _cleanAllPackages(projectRoot);
+    }
+
+    print('\n' + '=' * 50);
+    print('✅ Cleaned $totalCleaned directories');
+    print('=' * 50);
+  } catch (e) {
+    print('❌ Error: $e');
+    print('\nUse --help to see usage information');
+    exit(1);
+  }
+}
+
+void _printHelp(ArgParser parser) {
+  print('Flutter Project Clean Tool');
+  print('');
+  print('Usage: dart clean.dart [options]');
+  print('');
+  print('Options:');
+  print(parser.usage);
+  print('');
+  print('Examples:');
+  print('  dart clean.dart                    # Clean all packages');
+  print('  dart clean.dart -p reflection_data # Clean specific package');
+  print('  dart clean.dart --package lt_app   # Clean specific app');
+}
+
+Future<int> _cleanSinglePackage(String projectRoot, String packageName) async {
+  final packagePath = await _findPackage(projectRoot, packageName);
+  if (packagePath == null) {
+    throw Exception('Package "$packageName" not found');
+  }
+
+  print('🧹 Cleaning $packageName...\n');
+  return await _cleanDirectory(packagePath);
+}
+
+Future<int> _cleanAllPackages(String projectRoot) async {
   final cleanSteps = [
     () => _cleanPackages(projectRoot),
     () => _cleanApps(projectRoot),
@@ -26,9 +88,27 @@ void main(List<String> arguments) async {
     totalCleaned += await step();
   }
 
-  print('\n' + '=' * 50);
-  print('✅ Cleaned $totalCleaned directories');
-  print('=' * 50);
+  return totalCleaned;
+}
+
+Future<String?> _findPackage(String projectRoot, String packageName) async {
+  final searchDirs = [
+    path.join(projectRoot, 'packages', 'core', packageName),
+    path.join(projectRoot, 'packages', 'domain', packageName),
+    path.join(projectRoot, 'packages', 'data', packageName),
+    path.join(projectRoot, 'packages', 'features', packageName),
+    path.join(projectRoot, 'packages', 'utls', packageName),
+    path.join(projectRoot, 'apps', packageName),
+  ];
+
+  for (final dir in searchDirs) {
+    final pubspecFile = File(path.join(dir, 'pubspec.yaml'));
+    if (await pubspecFile.exists()) {
+      return dir;
+    }
+  }
+
+  return null;
 }
 
 Future<int> _cleanPackages(String projectRoot) async {
