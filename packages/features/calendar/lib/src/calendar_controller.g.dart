@@ -42,7 +42,7 @@ final class CalendarControllerProvider
 }
 
 String _$calendarControllerHash() =>
-    r'f94faa695f79a48a4461e996a5aa3623cde87f5f';
+    r'2448f7c93313d35d76e479e369e26aab0282f4bd';
 
 abstract class _$CalendarController extends $Notifier<CalendarState> {
   CalendarState build();

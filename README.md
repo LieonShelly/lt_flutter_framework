@@ -885,6 +885,31 @@ class AnswerModel with _$AnswerModel {
 
 ## 开发指南
 
+## 开发指南
+
+### 自动化脚本
+
+项目提供了一套 Dart 脚本工具来简化日常开发任务，位于 `shell/` 目录。
+
+#### 快速开始
+
+```bash
+# 使用 Makefile（推荐）
+make setup      # 安装所有依赖
+make clean      # 清理构建产物
+make codegen    # 运行代码生成
+make watch      # 监听模式代码生成
+make reset      # 完整重置（清理+安装+生成）
+
+# 或直接使用 Dart 脚本
+dart shell/bin/setup.dart
+dart shell/bin/clean.dart
+dart shell/bin/codegen.dart
+dart shell/bin/codegen.dart --watch
+```
+
+详细文档请查看 [shell/README.md](shell/README.md)
+
 ### 代码生成
 
 ```bash
