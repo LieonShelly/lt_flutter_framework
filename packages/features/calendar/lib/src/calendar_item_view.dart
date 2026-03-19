@@ -310,7 +310,7 @@ class CalendarItemView extends ConsumerWidget with ImageCacheKeyType {
           child: Container(
             padding: EdgeInsets.all(3),
             child: ProcessedIconView(
-              imageUrl: icon.url ?? "",
+              imageUrl: icon.url,
               width: width,
               height: height,
               placeholder: placeholder,

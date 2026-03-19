@@ -138,7 +138,7 @@ class _TodayQuestionBannerViewState
               children: [
                 Expanded(
                   child: Text(
-                    latestQueistion?.title ?? "",
+                    latestQueistion.title,
                     textAlign: TextAlign.left,
                     style: AppTextStyle.vividlyRegular(
                       fontSize: 24,
