@@ -1,19 +1,79 @@
 #!/usr/bin/env dart
 
 import 'dart:io';
+import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
 void main(List<String> arguments) async {
-  print('🚀 Flutter Project Setup');
-  print('=' * 50);
+  final parser = ArgParser()
+    ..addOption('package', abbr: 'p', help: 'Target specific package name')
+    ..addFlag('help', abbr: 'h', negatable: false, help: 'Show usage help');
 
-  final currentDir = Directory.current.path;
-  final projectRoot = currentDir.endsWith('shell')
-      ? Directory.current.parent.path
-      : currentDir;
+  try {
+    final results = parser.parse(arguments);
 
-  print('📁 Project root: $projectRoot\n');
+    if (results['help'] as bool) {
+      _printHelp(parser);
+      return;
+    }
 
+    final packageName = results['package'] as String?;
+
+    print('� Flutter Project Setup');
+    print('=' * 50);
+
+    final currentDir = Directory.current.path;
+    final projectRoot = currentDir.endsWith('shell')
+        ? Directory.current.parent.path
+        : currentDir;
+
+    print('📁 Project root: $projectRoot');
+    if (packageName != null) {
+      print('🎯 Target package: $packageName');
+    }
+    print('');
+
+    if (packageName != null) {
+      await _setupSinglePackage(projectRoot, packageName);
+    } else {
+      await _setupAllPackages(projectRoot);
+    }
+
+    print('\n' + '=' * 50);
+    print('✅ Setup completed successfully!');
+    print('=' * 50);
+  } catch (e) {
+    print('❌ Error: $e');
+    print('\nUse --help to see usage information');
+    exit(1);
+  }
+}
+
+void _printHelp(ArgParser parser) {
+  print('Flutter Project Setup Tool');
+  print('');
+  print('Usage: dart setup.dart [options]');
+  print('');
+  print('Options:');
+  print(parser.usage);
+  print('');
+  print('Examples:');
+  print('  dart setup.dart                    # Setup all packages');
+  print('  dart setup.dart -p reflection_data # Setup specific package');
+  print('  dart setup.dart --package lt_app   # Setup specific app');
+}
+
+Future<void> _setupSinglePackage(String projectRoot, String packageName) async {
+  final packagePath = await _findPackage(projectRoot, packageName);
+  if (packagePath == null) {
+    throw Exception('Package "$packageName" not found');
+  }
+
+  print('📦 Setting up $packageName...\n');
+  await _runFlutterPubGet(packagePath, packageName);
+}
+
+Future<void> _setupAllPackages(String projectRoot) async {
   final setupSteps = [
     () => _setupFvm(projectRoot),
     () => _installRootDependencies(projectRoot),
@@ -29,10 +89,26 @@ void main(List<String> arguments) async {
       exit(1);
     }
   }
+}
 
-  print('\n' + '=' * 50);
-  print('✅ Setup completed successfully!');
-  print('=' * 50);
+Future<String?> _findPackage(String projectRoot, String packageName) async {
+  final searchDirs = [
+    path.join(projectRoot, 'packages', 'core', packageName),
+    path.join(projectRoot, 'packages', 'domain', packageName),
+    path.join(projectRoot, 'packages', 'data', packageName),
+    path.join(projectRoot, 'packages', 'features', packageName),
+    path.join(projectRoot, 'packages', 'utls', packageName),
+    path.join(projectRoot, 'apps', packageName),
+  ];
+
+  for (final dir in searchDirs) {
+    final pubspecFile = File(path.join(dir, 'pubspec.yaml'));
+    if (await pubspecFile.exists()) {
+      return dir;
+    }
+  }
+
+  return null;
 }
 
 Future<void> _setupFvm(String projectRoot) async {
