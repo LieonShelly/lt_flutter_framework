@@ -32,7 +32,7 @@
 ### 整体结构
 
 ```
-ltapp_flutter/
+lt_flutter_framework/
 ├── apps/                          # 应用层
 │   ├── lt_app/                    # 主应用（壳）
 │   └── algorithm_app/             # 算法学习应用
