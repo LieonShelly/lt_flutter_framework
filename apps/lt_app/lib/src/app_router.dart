@@ -4,10 +4,11 @@ import 'package:add_answer/add_answer.dart';
 import 'package:answer_detail/answer_detail.dart';
 import 'package:calendar/calendar.dart';
 import 'package:copilot/copilot.dart';
+import 'package:reflection_domain/reflection_domain.dart';
 import 'home_view.dart';
 import 'package:thread/thread.dart';
 import 'package:user/user.dart';
-import 'package:lt_reflection_service/reflection_service.dart';
+import 'package:reflection_data/reflection_data.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:feature_core/feature_core.dart';
 part 'app_router.g.dart';
@@ -95,7 +96,7 @@ GoRouter router(Ref ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: AppRoutePath.addAnswer,
         pageBuilder: (context, state) {
-          final questions = state.extra as List<QuestionModel>;
+          final questions = state.extra as List<QuestionEntity>;
           final page = AddAnswerPage(key: state.pageKey, questions: questions);
           return MaterialPage(key: state.pageKey, child: page);
         },
