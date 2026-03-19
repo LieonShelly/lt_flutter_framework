@@ -2,6 +2,7 @@ name: today_question
 description: Today Question domain module
 version: 0.1.0
 publish_to: 'none'
+resolution: workspace
 
 environment:
   sdk: ^3.8.1

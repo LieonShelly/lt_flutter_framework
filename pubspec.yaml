@@ -1,0 +1,97 @@
+name: flutter_framework
+description: Flutter monorepo workspace with Clean Architecture
+publish_to: none
+version: 1.0.0
+
+environment:
+  sdk: ^3.8.1
+
+# Workspace 配置
+workspace:
+  # Core packages
+  - packages/core/network
+  - packages/core/lt_uicomponent
+  - packages/core/analysis_defaults
+  
+  # Domain packages
+  - packages/domain/reflection_domain
+  - packages/domain/user_domain
+  - packages/domain/wallet_domain
+  
+  # Data packages
+  - packages/data/reflection_data
+  - packages/data/user_data
+  - packages/data/wallet_data
+  
+  # Feature packages
+  - packages/features/calendar
+  - packages/features/thread
+  - packages/features/today_question
+  - packages/features/add_answer
+  - packages/features/answer_detail
+  - packages/features/copilot
+  - packages/features/user
+  - packages/features/feature_core
+  - packages/features/wallets
+  
+  # Utility packages
+  - packages/utls/date_utl
+  - packages/utls/lt_annotation
+  
+  # Apps
+  - apps/lt_app
+  - apps/algorithm_app
+  
+  # Shell scripts
+  - shell
+
+# Workspace 依赖版本统一管理
+# 所有子包都会使用这里定义的版本
+dependencies:
+  # Flutter SDK
+  flutter:
+    sdk: flutter
+
+  # State Management - Riverpod
+  flutter_riverpod: ^3.1.0
+  riverpod_annotation: ^4.0.0
+
+  # Routing
+  go_router: ^17.0.0
+
+  # Serialization
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.9.0
+
+  # Network
+  dio: ^5.9.0
+  http: ^1.6.0
+
+  # UI Components
+  flutter_svg: ^2.0.9
+  cached_network_image: ^3.4.1
+
+  # Storage
+  flutter_secure_storage: ^10.0.0
+  path_provider: ^2.1.5
+
+  # Utilities
+  intl: ^0.20.2
+  scroll_to_index: ^3.0.1
+  flutter_cache_manager: ^3.4.1
+
+dev_dependencies:
+  # Testing
+  flutter_test:
+    sdk: flutter
+  test: ^1.24.0
+  mockito: ^5.4.4
+
+  # Linting
+  flutter_lints: ^6.0.0
+
+  # Code Generation
+  build_runner: ^2.4.13
+  riverpod_generator: ^4.0.0+1
+  freezed: ^3.2.3
+  json_serializable: ^6.8.0
