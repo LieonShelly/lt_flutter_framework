@@ -15,4 +15,12 @@ abstract class ApiClientType {
     Options? options,
     CancelToken? cancelToken,
   });
+
+  Future<dynamic> delete(
+    String path, {
+    data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  });
 }

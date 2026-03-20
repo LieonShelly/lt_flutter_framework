@@ -1,20 +1,12 @@
-// Copyright 2024 The Flutter team. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+import 'package:booking_data/booking_data.dart';
+import 'package:booking_domain/booking_domain.dart';
+import 'package:common/common.dart';
 
-import '../../../domain/models/continent/continent.dart';
-import '../../../utils/result.dart';
-import '../../services/api/api_client.dart';
-import 'continent_repository.dart';
-
-/// Remote data source for [Continent].
-/// Implements basic local caching.
-/// See: https://docs.flutter.dev/get-started/fwe/local-caching
 class ContinentRepositoryRemote implements ContinentRepository {
-  ContinentRepositoryRemote({required ApiClient apiClient})
+  ContinentRepositoryRemote({required RemoteDatasource apiClient})
     : _apiClient = apiClient;
 
-  final ApiClient _apiClient;
+  final RemoteDatasource _apiClient;
 
   List<Continent>? _cachedData;
 

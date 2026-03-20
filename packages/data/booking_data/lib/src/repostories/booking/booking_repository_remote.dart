@@ -3,16 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-
+import '../../model/model.dart';
 import 'package:booking_domain/booking_domain.dart';
-import 'package:booking_data/booking_data.dart';
 import 'package:common/common.dart';
+import 'package:booking_data/booking_data.dart';
 
 class BookingRepositoryRemote implements BookingRepository {
-  BookingRepositoryRemote({required ApiClient apiClient})
+  BookingRepositoryRemote({required RemoteDatasource apiClient})
     : _apiClient = apiClient;
 
-  final ApiClient _apiClient;
+  final RemoteDatasource _apiClient;
 
   List<Destination>? _cachedDestinations;
 
