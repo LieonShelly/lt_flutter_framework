@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:booking_domain/booking_domain.dart';
+import 'package:booking_data/booking_data.dart';
+import 'package:common/common.dart';
 
-/// Local implementation of ActivityRepository
-/// Uses data from assets folder
 class ActivityRepositoryLocal implements ActivityRepository {
   ActivityRepositoryLocal({required LocalDataService localDataService})
     : _localDataService = localDataService;

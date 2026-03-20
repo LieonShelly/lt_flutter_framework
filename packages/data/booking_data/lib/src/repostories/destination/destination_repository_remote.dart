@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../domain/models/destination/destination.dart';
-import '../../../utils/result.dart';
-import '../../services/api/api_client.dart';
-import 'destination_repository.dart';
+import 'package:booking_data/booking_data.dart';
+import 'package:booking_domain/booking_domain.dart';
+import 'package:common/common.dart';
 
 /// Remote data source for [Destination].
 /// Implements basic local caching.
 /// See: https://docs.flutter.dev/get-started/fwe/local-caching
 class DestinationRepositoryRemote implements DestinationRepository {
-  DestinationRepositoryRemote({required ApiClient apiClient})
+  DestinationRepositoryRemote({required RemoteDatasource apiClient})
     : _apiClient = apiClient;
 
-  final ApiClient _apiClient;
+  final RemoteDatasource _apiClient;
 
   List<Destination>? _cachedData;
 

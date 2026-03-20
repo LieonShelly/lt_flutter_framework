@@ -18,6 +18,8 @@ dependencies:
   booking_domain:
     path: '../../domain/booking_domain'
   shared_preferences: ^2.3.5
+  lt_network:
+    path: '../../core/network'
 
 dev_dependencies:
   build_runner: ^2.4.13

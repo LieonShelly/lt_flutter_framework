@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../domain/models/user/user.dart';
-import '../../../utils/result.dart';
-import '../../services/api/api_client.dart';
-import '../../services/api/model/user/user_api_model.dart';
-import 'user_repository.dart';
+import 'package:booking_data/booking_data.dart';
+import 'package:booking_domain/booking_domain.dart';
+import 'package:common/common.dart';
+import '../../model/model.dart';
 
 class UserRepositoryRemote implements UserRepository {
-  UserRepositoryRemote({required ApiClient apiClient}) : _apiClient = apiClient;
+  UserRepositoryRemote({required RemoteDatasource apiClient})
+    : _apiClient = apiClient;
 
-  final ApiClient _apiClient;
+  final RemoteDatasource _apiClient;
 
   User? _cachedData;
 
