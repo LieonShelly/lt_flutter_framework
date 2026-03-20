@@ -22,6 +22,7 @@ class SvgAsset extends StatelessWidget {
     final fileName = iconName.fileName;
     return SvgPicture.asset(
       'assets/icons/$fileName',
+      package: 'lt_uicomponent',
       width: width,
       height: height,
       colorFilter: color != null

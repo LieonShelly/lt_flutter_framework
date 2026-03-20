@@ -52,7 +52,8 @@ class LocalDataService {
   }
 
   Future<List<Map<String, dynamic>>> _loadStringAsset(String asset) async {
-    final localData = await rootBundle.loadString(asset);
+    final packageAsset = 'packages/booking_data/$asset';
+    final localData = await rootBundle.loadString(packageAsset);
     return (jsonDecode(localData) as List).cast<Map<String, dynamic>>();
   }
 
