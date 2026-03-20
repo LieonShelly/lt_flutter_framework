@@ -114,6 +114,28 @@ class HttpApiClient implements ApiClientType {
     }
   }
 
+  @override
+  Future<dynamic> delete(
+    String path, {
+    data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      final response = await _dio.delete(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+        cancelToken: cancelToken,
+      );
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   AppException _handleError(DioException error) {
     return NetworkException(message: error.message ?? "Unkown Error");
   }
