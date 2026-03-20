@@ -38,6 +38,7 @@ workspace:
   # Utility packages
   - packages/utls/date_utl
   - packages/utls/lt_annotation
+  - packages/utls/common
   
   # Apps
   - apps/lt_app
