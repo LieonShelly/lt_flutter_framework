@@ -5,3 +5,4 @@ export 'src/models/continent/continent.dart';
 export 'src/models/destination/destination.dart';
 export 'src/models/itinerary_config/itinerary_config.dart';
 export 'src/models/user/user.dart';
+export 'src/repostories/repositories.dart';

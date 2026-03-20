@@ -1,8 +1,5 @@
-// Copyright 2024 The Flutter team. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'package:booking_domain/booking_domain.dart';
+import 'package:common/common.dart';
 
 /// Data source with all possible destinations
 abstract class DestinationRepository {
