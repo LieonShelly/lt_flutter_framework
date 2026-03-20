@@ -1,3 +1,7 @@
+import 'package:flutter/material.dart';
+
+import 'package:intl/intl.dart';
+
 class DateUtl {
   static int getDaysInMonth(int year, int month) {
     return DateTime(year, month + 1, 0).day;
@@ -22,5 +26,18 @@ class DateUtl {
 
     final totalSlots = daysInMonth + firstDayOffset;
     return (totalSlots / 7).ceil();
+  }
+
+  static String dateFormatStartEnd(DateTimeRange dateTimeRange) {
+    final start = dateTimeRange.start;
+    final end = dateTimeRange.end;
+    final _dateFormatDayMonth = DateFormat('d MMM');
+    final dayMonthEnd = _dateFormatDayMonth.format(end);
+    if (start.month == end.month) {
+      final dayStart = _dateFormatDayMonth.format(start);
+      return '$dayStart - $dayMonthEnd';
+    }
+    final dayMonthStart = _dateFormatDayMonth.format(start);
+    return '$dayMonthStart - $dayMonthEnd';
   }
 }
