@@ -23,6 +23,7 @@ workspace:
   - packages/data/reflection_data
   - packages/data/user_data
   - packages/data/wallet_data
+  - packages/data/booking_data
   
   # Feature packages
   - packages/features/calendar

@@ -1,0 +1,33 @@
+name: booking_data
+description: booking_data layer with business logic and entities
+version: 1.0.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  equatable: ^2.0.5
+  intl: ^0.20.2
+  freezed_annotation: ^3.1.0
+  common:
+    path: '../../utls/common'
+  booking_domain:
+    path: '../../domain/booking_domain'
+  shared_preferences: ^2.3.5
+
+dev_dependencies:
+  build_runner: ^2.4.13
+  test: ^1.24.0
+  freezed: ^3.2.3
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/activities.json
+    - assets/destinations.json
+    - assets/logo.svg
+    - assets/user.jpg
