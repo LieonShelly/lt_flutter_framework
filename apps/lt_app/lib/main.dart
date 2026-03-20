@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'src/app_router.dart';
+import 'src/di/app_providers.dart';
 
 void main() {
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(
+    ProviderScope(overrides: AppProviders.overrides, child: const MyApp()),
+  );
 }
 
 class MyApp extends ConsumerWidget {
