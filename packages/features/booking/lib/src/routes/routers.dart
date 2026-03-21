@@ -8,8 +8,8 @@ import 'package:provider/provider.dart';
 
 GoRouter router(AuthRepository authRepository) => GoRouter(
   initialLocation: Routes.home,
-  redirect: _redirect,
-  refreshListenable: authRepository,
+  // redirect: _redirect,
+  // refreshListenable: authRepository,
   routes: [
     GoRoute(
       path: Routes.home,
