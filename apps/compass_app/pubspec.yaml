@@ -29,6 +29,9 @@ dependencies:
   lt_uicomponent:
     path: ../../packages/core/lt_uicomponent
 
+  booking:
+    path: ../../packages/features/booking
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

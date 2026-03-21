@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:lt_uicomponent/uicomponent.dart';
 import 'package:booking/booking.dart';
 
@@ -12,6 +13,11 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      localizationsDelegates: [
+        GlobalWidgetsLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        AppLocalizationDelegate(),
+      ],
       home: Scaffold(
         body: Padding(
           padding: const EdgeInsets.only(top: 100),
@@ -27,6 +33,7 @@ class MainApp extends StatelessWidget {
               ErrrorIndicator(title: "title", label: "label", onPressed: () {}),
 
               HomeButton(),
+              AppSearchBar(),
             ],
           ),
         ),
