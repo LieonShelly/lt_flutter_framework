@@ -2,17 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:lt_uicomponent/uicomponent.dart';
 import 'package:booking/booking.dart';
-
-void main() {
-  runApp(const MainApp());
-}
+import 'package:provider/provider.dart';
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       localizationsDelegates: [
         GlobalWidgetsLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -20,28 +17,8 @@ class MainApp extends StatelessWidget {
       ],
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.dark,
-      home: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.only(top: 100),
-          child: Column(
-            children: [
-              Center(child: CustomBackButton(blur: false)),
-              CustomCheckbox(
-                value: true,
-                onChanged: (value) {
-                  print(value!);
-                },
-              ),
-              ErrrorIndicator(title: "title", label: "label", onPressed: () {}),
-
-              HomeButton(),
-              AppSearchBar(),
-              TagChip(tag: "Tag"),
-            ],
-          ),
-        ),
-      ),
+      themeMode: ThemeMode.light,
+      routerConfig: router(context.read()),
     );
   }
 }
