@@ -2,3 +2,4 @@ export 'src/repostories/repositories.dart';
 export 'src/data_source/config/assets.dart';
 export 'src/data_source/local/local_data_service.dart';
 export 'src/data_source/remote/remote_datasource.dart';
+export 'src/shared_preferences_service.dart';

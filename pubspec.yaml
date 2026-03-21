@@ -35,6 +35,7 @@ workspace:
   - packages/features/user
   - packages/features/feature_core
   - packages/features/wallets
+  - packages/features/booking
   
   # Utility packages
   - packages/utls/date_utl
