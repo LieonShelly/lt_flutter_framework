@@ -25,6 +25,7 @@ class HomeHeader extends StatelessWidget {
             ClipOval(
               child: Image.asset(
                 user.picture,
+                package: 'booking_data',
                 width: Dimens.of(context).profilePictureSize,
                 height: Dimens.of(context).profilePictureSize,
               ),
