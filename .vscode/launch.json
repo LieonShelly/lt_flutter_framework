@@ -4,32 +4,13 @@
     // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [ 
-        
-        {
-            "name": "ltapp_flutter-profile",
-            "type": "dart",
-            "request": "launch",
-            "program": "apps/lt_app/lib/main.dart",
-            "flutterMode": "profile"
-        },
-        {
-            "name": "ltapp_flutter",
-            "request": "launch",
-            "type": "dart",
-            "program": "apps/lt_app/lib/main.dart"
-        },
-        {
-            "name": "ltapp_flutter (release mode)",
-            "request": "launch",
-            "type": "dart",
-            "flutterMode": "release"
-        },
          {
             "name": "compass_app_debug",
             "type": "dart",
             "request": "launch",
             "program": "apps/compass_app/lib/main_dev.dart",
-            "flutterMode": "debug"
+            "flutterMode": "debug",
+            "deviceId": "E7303DC2-C507-4CA5-9E18-11FF97D6BA68",
         },
     ]
 }
