@@ -18,6 +18,9 @@ class MainApp extends StatelessWidget {
         GlobalMaterialLocalizations.delegate,
         AppLocalizationDelegate(),
       ],
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.dark,
       home: Scaffold(
         body: Padding(
           padding: const EdgeInsets.only(top: 100),
@@ -34,6 +37,7 @@ class MainApp extends StatelessWidget {
 
               HomeButton(),
               AppSearchBar(),
+              TagChip(tag: "Tag"),
             ],
           ),
         ),
