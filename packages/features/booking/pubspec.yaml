@@ -1,7 +1,7 @@
-name: compass_app
-description: "A new Flutter project."
-publish_to: 'none'
+name: booking
+description: Add Answer domain module
 version: 0.1.0
+publish_to: 'none'
 resolution: workspace
 
 environment:
@@ -26,8 +26,6 @@ dependencies:
     path: ../../packages/data/booking_data
   booking_domain:
     path: ../../packages/domain/booking_domain
-  lt_uicomponent:
-    path: ../../packages/core/lt_uicomponent
 
 dev_dependencies:
   flutter_test:
@@ -45,3 +43,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+

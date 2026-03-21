@@ -1,0 +1,56 @@
+import 'package:flutter/material.dart';
+import 'package:lt_uicomponent/uicomponent.dart';
+
+class ErrrorIndicator extends StatelessWidget {
+  final String title;
+  final String label;
+  final VoidCallback onPressed;
+
+  const ErrrorIndicator({
+    super.key,
+    required this.title,
+    required this.label,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        IntrinsicWidth(
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Center(
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: Theme.of(context).colorScheme.onError,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onError,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        FilledButton(
+          onPressed: onPressed,
+          style: const ButtonStyle(
+            backgroundColor: WidgetStatePropertyAll(AppColors.red1),
+            foregroundColor: WidgetStatePropertyAll(Colors.white),
+          ),
+          child: Text(label),
+        ),
+      ],
+    );
+  }
+}

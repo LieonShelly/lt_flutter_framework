@@ -6,3 +6,5 @@ export 'src/models/destination/destination.dart';
 export 'src/models/itinerary_config/itinerary_config.dart';
 export 'src/models/user/user.dart';
 export 'src/repostories/repositories.dart';
+export 'src/usecases/booking/booking_create_use_case.dart';
+export 'src/usecases/booking/booking_share_use_case.dart';
