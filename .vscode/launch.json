@@ -23,6 +23,13 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
-        }
+        },
+         {
+            "name": "compass_app_debug",
+            "type": "dart",
+            "request": "launch",
+            "program": "apps/compass_app/lib/main_dev.dart",
+            "flutterMode": "debug"
+        },
     ]
 }
