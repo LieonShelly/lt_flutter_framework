@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
               return const Center(child: CircularProgressIndicator());
             }
             if (widget.viewmodel.load.error) {
-              return ErrrorIndicator(
+              return ErrorIndicator(
                 title: Applocalization.of(context).errorWhileLoadingHome,
                 label: Applocalization.of(context).tryAgain,
                 onPressed: widget.viewmodel.load.execute,

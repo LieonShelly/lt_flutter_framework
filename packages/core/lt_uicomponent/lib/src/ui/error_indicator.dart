@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lt_uicomponent/uicomponent.dart';
 
-class ErrrorIndicator extends StatelessWidget {
+class ErrorIndicator extends StatelessWidget {
   final String title;
   final String label;
   final VoidCallback onPressed;
 
-  const ErrrorIndicator({
+  const ErrorIndicator({
     super.key,
     required this.title,
     required this.label,

@@ -1,5 +1,6 @@
 import 'package:booking/src/routes/routes.dart';
 import 'package:booking/src/search_bar.dart';
+import 'package:booking/src/search_form/search_form_continent.dart';
 import 'package:booking/src/search_form/search_form_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -33,6 +34,7 @@ class SearchFormScreen extends StatelessWidget {
                 child: const AppSearchBar(),
               ),
             ),
+            SearchFormContinent(viewModel: viewModel),
           ],
         ),
       ),
