@@ -11,7 +11,7 @@ class SearchFormViewModel extends ChangeNotifier {
   String? _selectedContinent;
   DateTimeRange? _dateTimeRange;
   int _guests = 0;
-
+  String number = "";
   bool get valid =>
       _guests > 0 && _selectedContinent != null && _dateTimeRange != null;
   List<Continent> get continents => _continents;
@@ -26,6 +26,7 @@ class SearchFormViewModel extends ChangeNotifier {
 
   set dateRange(DateTimeRange? dateRange) {
     _dateTimeRange = dateRange;
+    number = dataRange!.toString();
     notifyListeners();
   }
 

@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton.extended(
         heroTag: null,
         key: const ValueKey(bookingButtonKey),
-        onPressed: () => context.go(Routes.search),
+        onPressed: () => context.push(Routes.search),
         label: Text(Applocalization.of(context).bookNewTrip),
         icon: const Icon(Icons.add_location_outlined),
       ),
