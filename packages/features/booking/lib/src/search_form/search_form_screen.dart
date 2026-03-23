@@ -3,6 +3,7 @@ import 'package:booking/src/search_bar.dart';
 import 'package:booking/src/search_form/search_form_continent.dart';
 import 'package:booking/src/search_form/search_form_date.dart';
 import 'package:booking/src/search_form/search_form_guests.dart';
+import 'package:booking/src/search_form/search_form_submit.dart';
 import 'package:booking/src/search_form/search_form_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -39,6 +40,7 @@ class SearchFormScreen extends StatelessWidget {
             SearchFormContinent(viewModel: viewModel),
             SearchFormDate(viewModel: viewModel),
             SearchFormGuests(viewModel: viewModel),
+            SearchFormSubmit(viewModel: viewModel),
           ],
         ),
       ),
