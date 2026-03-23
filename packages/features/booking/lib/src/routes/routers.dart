@@ -1,6 +1,8 @@
 import 'package:booking/booking.dart';
 import 'package:booking/src/home/home_screen.dart';
 import 'package:booking/src/home/home_viewmodel.dart';
+import 'package:booking/src/search_form/search_form_screen.dart';
+import 'package:booking/src/search_form/search_form_viewmodel.dart';
 import 'package:booking_domain/booking_domain.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +22,18 @@ GoRouter router(AuthRepository authRepository) => GoRouter(
         );
         return HomeScreen(viewmodel: viewModel);
       },
+      routes: [
+        GoRoute(
+          path: Routes.searchRelative,
+          builder: (context, state) {
+            final viewModel = SearchFormViewModel(
+              continentRepository: context.read(),
+              itineraryConfigRepository: context.read(),
+            );
+            return SearchFormScreen(viewModel: viewModel);
+          },
+        ),
+      ],
     ),
   ],
 );
