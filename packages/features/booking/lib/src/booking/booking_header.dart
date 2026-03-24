@@ -1,3 +1,4 @@
+import 'package:booking/booking.dart';
 import 'package:booking_domain/booking_domain.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,26 @@ class BookingHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [_Top(booking: booking)],
+      children: [
+        _Top(booking: booking),
+        Padding(
+          padding: Dimens.of(context).edgeInsetsScreenHorizontal,
+          child: Text(
+            booking.destination.knownFor,
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ),
+        const SizedBox(height: Dimens.paddingVertical),
+        _Tags(booking: booking),
+        const SizedBox(height: Dimens.paddingVertical),
+        Padding(
+          padding: Dimens.of(context).edgeInsetsScreenHorizontal,
+          child: Text(
+            Applocalization.of(context).yourChosenActivities,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -29,7 +49,19 @@ class _Top extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 260,
-      child: Stack(fit: StackFit.expand, children: []),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          _HeaderImage(booking: booking),
+          const _Gradient(),
+          _Headline(booking: booking),
+          Positioned(
+            right: Dimens.of(context).paddingScreenHorizontal,
+            top: Dimens.of(context).paddingScreenVertical,
+            child: const SafeArea(top: true, child: HomeButton(blur: true)),
+          ),
+        ],
+      ),
     );
   }
 }
