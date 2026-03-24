@@ -1,4 +1,6 @@
 import 'package:booking/booking.dart';
+import 'package:booking/src/booking/booking_screen.dart';
+import 'package:booking/src/booking/booking_viewmodel.dart';
 import 'package:booking/src/home/home_screen.dart';
 import 'package:booking/src/home/home_viewmodel.dart';
 import 'package:booking/src/search_form/search_form_screen.dart';
@@ -32,6 +34,35 @@ GoRouter router(AuthRepository authRepository) => GoRouter(
             );
             return SearchFormScreen(viewModel: viewModel);
           },
+        ),
+        GoRoute(
+          path: Routes.bookingRelative,
+          builder: (context, state) {
+            final viewModel = BookingViewModel(
+              creatingBookingUseCase: context.read(),
+              shareBookingUseCase: context.read(),
+              itineraryConfigRepository: context.read(),
+              bookingRepository: context.read(),
+            );
+            viewModel.createBooking.execute();
+            return BookingScreen(viewModel: viewModel);
+          },
+          routes: [
+            GoRoute(
+              path: ':id',
+              builder: (context, state) {
+                final id = int.parse(state.pathParameters['id']!);
+                final viewModel = BookingViewModel(
+                  creatingBookingUseCase: context.read(),
+                  shareBookingUseCase: context.read(),
+                  itineraryConfigRepository: context.read(),
+                  bookingRepository: context.read(),
+                );
+                viewModel.loadingBooking.execute(id);
+                return BookingScreen(viewModel: viewModel);
+              },
+            ),
+          ],
         ),
       ],
     ),
