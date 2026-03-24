@@ -83,6 +83,7 @@ class _Tags extends StatelessWidget {
       child: Wrap(
         spacing: 6,
         runSpacing: 6,
+        direction: Axis.horizontal,
         children: booking.destination.tags
             .map(
               (tag) => TagChip(
