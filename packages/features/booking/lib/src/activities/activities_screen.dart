@@ -1,9 +1,12 @@
 import 'package:booking/booking.dart';
+import 'package:booking/src/activities/activities_header.dart';
+import 'package:booking/src/activities/activities_title.dart';
 import 'package:booking/src/activities/activities_viewmodel.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lt_uicomponent/uicomponent.dart';
+import 'activity_time_of_day.dart';
 
 const String confirmButtonKey = 'confirm-button';
 
@@ -52,7 +55,16 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             if (widget.viewModel.loadActivities.completed) {
               return child!;
             }
-            return Column(children: [_BottomArea(viewModel: widget.viewModel)]);
+            return Column(
+              children: [
+                const SliverToBoxAdapter(child: ActivitiesHeader()),
+                ActivitiesTitle(
+                  viewModel: widget.viewModel,
+                  activityTimeOfDay: ActivityTimeOfDay.daytime,
+                ),
+                _BottomArea(viewModel: widget.viewModel),
+              ],
+            );
           },
         ),
       ),

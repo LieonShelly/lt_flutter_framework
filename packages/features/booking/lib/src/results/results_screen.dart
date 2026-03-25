@@ -145,14 +145,16 @@ class _Grid extends StatelessWidget {
         childAspectRatio: 182 / 222,
       ),
       delegate: SliverChildBuilderDelegate((context, index) {
-        final destination = viewModel.destinations[index];
+        if (index < viewModel.destinations.length) {
+          final destination = viewModel.destinations[index];
 
-        return ResultCard(
-          destination: destination,
-          onTap: () {
-            viewModel.updateItineraryConfig.execute(destination.ref);
-          },
-        );
+          return ResultCard(
+            destination: destination,
+            onTap: () {
+              viewModel.updateItineraryConfig.execute(destination.ref);
+            },
+          );
+        }
       }),
     );
   }
