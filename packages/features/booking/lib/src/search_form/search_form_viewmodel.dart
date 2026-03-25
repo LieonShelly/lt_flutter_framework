@@ -50,7 +50,7 @@ class SearchFormViewModel extends ChangeNotifier {
     required ItineraryConfigRepository itineraryConfigRepository,
   }) : _continentRepository = continentRepository,
        _itineraryConfigRepository = itineraryConfigRepository {
-    updateItineraryConfig = Command0(_loadItineraryConfig);
+    updateItineraryConfig = Command0(_updateItineraryConfig);
     load = Command0(_load)..execute();
   }
 

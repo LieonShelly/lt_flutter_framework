@@ -1,7 +1,6 @@
 import 'package:booking/booking.dart';
 import 'package:booking/src/results/result_card.dart';
 import 'package:booking/src/results/results_viewmodel.dart';
-import 'package:booking/src/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lt_uicomponent/uicomponent.dart';
@@ -37,7 +36,57 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox();
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) context.go(Routes.search);
+      },
+      child: Scaffold(
+        body: ListenableBuilder(
+          listenable: widget.viewModel.search,
+          builder: (context, child) {
+            if (widget.viewModel.search.completed) {
+              return child!;
+            }
+            return Column(
+              children: [
+                _AppSearchBar(widget: widget),
+                if (widget.viewModel.search.running)
+                  const Expanded(
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                if (widget.viewModel.search.error)
+                  Expanded(
+                    child: Center(
+                      child: ErrorIndicator(
+                        title: Applocalization.of(
+                          context,
+                        ).errorWhileLoadingDestinations,
+                        label: Applocalization.of(context).tryAgain,
+                        onPressed: widget.viewModel.search.execute,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+          child: ListenableBuilder(
+            listenable: widget.viewModel,
+            builder: (context, child) {
+              return Padding(
+                padding: Dimens.of(context).edgeInsetsScreenHorizontal,
+                child: CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(child: _AppSearchBar(widget: widget)),
+                    _Grid(viewModel: widget.viewModel),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 
   void _onReuslt() {
@@ -84,7 +133,7 @@ class _AppSearchBar extends StatelessWidget {
 class _Grid extends StatelessWidget {
   final ResultsViewModel viewModel;
 
-  const _Grid({super.key, required this.viewModel});
+  const _Grid({required this.viewModel});
 
   @override
   Widget build(BuildContext context) {
