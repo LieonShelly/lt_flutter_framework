@@ -3,6 +3,8 @@ import 'package:booking/src/booking/booking_screen.dart';
 import 'package:booking/src/booking/booking_viewmodel.dart';
 import 'package:booking/src/home/home_screen.dart';
 import 'package:booking/src/home/home_viewmodel.dart';
+import 'package:booking/src/results/results_screen.dart';
+import 'package:booking/src/results/results_viewmodel.dart';
 import 'package:booking/src/search_form/search_form_screen.dart';
 import 'package:booking/src/search_form/search_form_viewmodel.dart';
 import 'package:booking_domain/booking_domain.dart';
@@ -17,6 +19,7 @@ GoRouter router(AuthRepository authRepository) => GoRouter(
   routes: [
     GoRoute(
       path: Routes.home,
+      redirect: _redirect,
       builder: (context, state) {
         final viewModel = HomeViewmodel(
           bookingRepository: context.read(),
@@ -63,6 +66,14 @@ GoRouter router(AuthRepository authRepository) => GoRouter(
               },
             ),
           ],
+        ),
+
+        GoRoute(
+          path: Routes.resultsRelative,
+          builder: (context, state) {
+            final viewModel = ResultsViewModel(context.read(), context.read());
+            return ResultsScreen(viewModel: viewModel);
+          },
         ),
       ],
     ),
