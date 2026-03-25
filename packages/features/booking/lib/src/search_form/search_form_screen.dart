@@ -1,5 +1,5 @@
 import 'package:booking/src/routes/routes.dart';
-import 'package:booking/src/search_bar.dart';
+import 'package:booking/src/search_form/search_bar.dart';
 import 'package:booking/src/search_form/search_form_continent.dart';
 import 'package:booking/src/search_form/search_form_date.dart';
 import 'package:booking/src/search_form/search_form_guests.dart';

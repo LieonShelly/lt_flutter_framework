@@ -4,7 +4,7 @@ import 'package:common/common.dart';
 import 'package:booking_domain/booking_domain.dart' as booking_domain;
 import 'package:booking_domain/booking_domain.dart';
 
-class ActivitiesViewModels extends ChangeNotifier {
+class ActivitiesViewModel extends ChangeNotifier {
   final _log = Logger('ActivitiesViewModel');
   final ActivityRepository _activityRepository;
   final ItineraryConfigRepository _itineraryConfigRepository;
@@ -17,7 +17,7 @@ class ActivitiesViewModels extends ChangeNotifier {
   late final Command0 loadActivities;
   late final Command0 saveActivities;
 
-  ActivitiesViewModels({
+  ActivitiesViewModel({
     required ActivityRepository activityRepository,
     required ItineraryConfigRepository itineraryConfigRepository,
   }) : _activityRepository = activityRepository,

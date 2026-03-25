@@ -1,4 +1,6 @@
 import 'package:booking/booking.dart';
+import 'package:booking/src/activities/activities_screen.dart';
+import 'package:booking/src/activities/activities_viewmodel.dart';
 import 'package:booking/src/booking/booking_screen.dart';
 import 'package:booking/src/booking/booking_viewmodel.dart';
 import 'package:booking/src/home/home_screen.dart';
@@ -73,6 +75,17 @@ GoRouter router(AuthRepository authRepository) => GoRouter(
           builder: (context, state) {
             final viewModel = ResultsViewModel(context.read(), context.read());
             return ResultsScreen(viewModel: viewModel);
+          },
+        ),
+
+        GoRoute(
+          path: Routes.activitiesRelative,
+          builder: (context, state) {
+            final viewModel = ActivitiesViewModel(
+              activityRepository: context.read(),
+              itineraryConfigRepository: context.read(),
+            );
+            return ActivitiesScreen(viewModel: viewModel);
           },
         ),
       ],
