@@ -1,5 +1,6 @@
 import 'package:booking/booking.dart';
 import 'package:booking/src/activities/activities_header.dart';
+import 'package:booking/src/activities/activities_list.dart';
 import 'package:booking/src/activities/activities_title.dart';
 import 'package:booking/src/activities/activities_viewmodel.dart';
 import 'package:flutter/widgets.dart';
@@ -57,15 +58,60 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             }
             return Column(
               children: [
-                const SliverToBoxAdapter(child: ActivitiesHeader()),
-                ActivitiesTitle(
-                  viewModel: widget.viewModel,
-                  activityTimeOfDay: ActivityTimeOfDay.daytime,
-                ),
-                _BottomArea(viewModel: widget.viewModel),
+                const ActivitiesHeader(),
+                if (widget.viewModel.loadActivities.running)
+                  const Expanded(
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                if (widget.viewModel.loadActivities.error)
+                  Expanded(
+                    child: Center(
+                      child: ErrorIndicator(
+                        title: Applocalization.of(
+                          context,
+                        ).errorWhileLoadingActivities,
+                        label: Applocalization.of(context).tryAgain,
+                        onPressed: widget.viewModel.loadActivities.execute,
+                      ),
+                    ),
+                  ),
               ],
             );
           },
+          child: ListenableBuilder(
+            listenable: widget.viewModel,
+            builder: (context, child) {
+              return Column(
+                children: [
+                  Expanded(
+                    child: CustomScrollView(
+                      slivers: [
+                        const SliverToBoxAdapter(child: ActivitiesHeader()),
+                        ActivitiesTitle(
+                          viewModel: widget.viewModel,
+                          activityTimeOfDay: ActivityTimeOfDay.daytime,
+                        ),
+                        ActivitiesList(
+                          viewModel: widget.viewModel,
+                          activityTimeOfDay: ActivityTimeOfDay.daytime,
+                        ),
+                        ActivitiesTitle(
+                          viewModel: widget.viewModel,
+                          activityTimeOfDay: ActivityTimeOfDay.evening,
+                        ),
+                        ActivitiesList(
+                          viewModel: widget.viewModel,
+                          activityTimeOfDay: ActivityTimeOfDay.evening,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  _BottomArea(viewModel: widget.viewModel),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

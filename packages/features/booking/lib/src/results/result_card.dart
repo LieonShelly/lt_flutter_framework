@@ -49,13 +49,13 @@ class ResultCard extends StatelessWidget {
                       .map((e) => TagChip(tag: e))
                       .toList(),
                 ),
-                Positioned.fill(
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(onTap: onTap),
-                  ),
-                ),
               ],
+            ),
+          ),
+          Positioned.fill(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(onTap: onTap),
             ),
           ),
         ],
@@ -68,7 +68,7 @@ final _cardTitleStyle = GoogleFonts.rubik(
   textStyle: const TextStyle(
     fontWeight: FontWeight.w800,
     fontSize: 15.0,
-    color: Colors.white,
+    color: Colors.red,
     letterSpacing: 1,
     shadows: [
       // Helps to read the text a bit better
