@@ -1,4 +1,3 @@
-export 'src/models/activity/activity.dart';
 export 'src/models/booking/booking.dart';
 export 'src/models/booking/booking_summary.dart';
 export 'src/models/continent/continent.dart';
@@ -8,3 +7,4 @@ export 'src/models/user/user.dart';
 export 'src/repostories/repositories.dart';
 export 'src/usecases/booking/booking_create_use_case.dart';
 export 'src/usecases/booking/booking_share_use_case.dart';
+export 'src/models/activity/activity.dart';
