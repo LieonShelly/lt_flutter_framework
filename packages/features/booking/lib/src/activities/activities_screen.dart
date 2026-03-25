@@ -3,7 +3,6 @@ import 'package:booking/src/activities/activities_header.dart';
 import 'package:booking/src/activities/activities_list.dart';
 import 'package:booking/src/activities/activities_title.dart';
 import 'package:booking/src/activities/activities_viewmodel.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lt_uicomponent/uicomponent.dart';

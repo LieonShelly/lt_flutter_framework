@@ -39,7 +39,7 @@ class BookingViewModel extends ChangeNotifier {
         final result = await _createUseCase.createFrom(itineraryConfig.value);
         switch (result) {
           case Ok<Booking>():
-            _booking == result.value;
+            _booking = result.value;
             notifyListeners();
             return Result.ok(null);
           case Error<Booking>():
