@@ -1,40 +1,75 @@
-# Tech Stack & Build System
+# Tech Stack
 
-## Flutter & Dart
-- Flutter 3.35.7 (managed via FVM — `.fvmrc`)
-- Dart SDK ^3.8.1
-- Dart Workspace for monorepo dependency resolution (`resolution: workspace` in each package's pubspec)
-- Root `pubspec.yaml` defines shared dependency versions for all packages
+## Core
 
-## Key Libraries
-- **State Management**: Riverpod (`flutter_riverpod` + `riverpod_annotation`) for lt_app; `provider` for compass_app
-- **Routing**: GoRouter
-- **Networking**: Dio (wrapped in `lt_network` core package)
-- **Serialization**: Freezed + JSON Serializable (code-generated)
-- **Storage**: Flutter Secure Storage
-- **Logging**: `logging` package
-- **Result type**: Custom `Result<T>` from `common` utility package (Ok/Error pattern matching)
-- **Custom annotations**: `lt_annotation` package with `@ltDeserialization` for code generation
+- Language: Dart (SDK ^3.8.1)
+- Framework: Flutter 3.35.7 (managed via FVM)
+- Monorepo: Dart Workspace (root `pubspec.yaml` defines all workspace members and shared dependency versions)
 
-## Code Generation
-Freezed, Riverpod Generator, and JSON Serializable all require `build_runner`. Generated files follow the pattern:
-- `*.freezed.dart`
-- `*.g.dart`
+## State Management & DI
 
-Never edit generated files. They are re-created by `build_runner`.
+The project uses two patterns depending on the app:
+
+- `lt_app`: Riverpod (`flutter_riverpod` + `riverpod_annotation` + `riverpod_generator`)
+- `compass_app`: Provider package + ChangeNotifier-based ViewModels with a custom `Command` pattern (see `packages/utls/common/lib/src/command.dart`)
+
+## Routing
+
+- GoRouter (`go_router: ^17.0.0`)
+
+## Networking
+
+- Dio (`dio: ^5.9.0`) — primary HTTP client in `lt_app`
+- http package — used in `compass_app`
+- Custom `ApiClient` abstraction in `packages/core/network`
+
+## Serialization & Code Generation
+
+- Freezed (`freezed_annotation` + `freezed`) — immutable data classes
+- JSON Serializable (`json_annotation` + `json_serializable`)
+- Build Runner (`build_runner: ^2.4.13`) — code generation orchestrator
+- Custom annotation: `lt_annotation` package with `@ltDeserialization`
+
+## Error Handling
+
+- Sealed `Result<T>` type (`Ok<T>` / `Error<T>`) in `packages/utls/common`
+- `Command` pattern wraps async operations with running/error/completed states and `ChangeNotifier` integration
+
+## UI
+
+- Material 3 (`useMaterial3: true`)
+- Custom component library: `packages/core/lt_uicomponent`
+- flutter_svg, cached_network_image
+
+## Storage
+
+- flutter_secure_storage (token storage)
+- path_provider, flutter_cache_manager
+
+## Testing
+
+- flutter_test, test (^1.24.0)
+- mockito (^5.4.4) — used in `lt_app`
+- mocktail (^1.0.4) — used in `compass_app`
+- mocktail_image_network
+
+## Linting
+
+- flutter_lints (^6.0.0)
+- Shared analysis defaults: `packages/core/analysis_defaults`
 
 ## Common Commands
 
-All commands run from the project root:
+All commands run from the project root. Use FVM (`fvm flutter ...`) or the Makefile.
 
 ```bash
-# Setup (installs FVM, all deps)
+# Full setup (install shell deps + all package deps)
 make setup
 
 # Clean all build artifacts
 make clean
 
-# Run code generation (Freezed, Riverpod, JSON Serializable)
+# Run code generation (Freezed, JSON, Riverpod)
 make codegen
 
 # Code generation in watch mode
@@ -45,26 +80,16 @@ make reset
 
 # Target a specific package
 make setup PACKAGE=reflection_data
-make codegen PACKAGE=booking_data
+make codegen PACKAGE=lt_app
 
-# Run an app
-cd apps/compass_app && fvm flutter run
-cd apps/lt_app && fvm flutter run
-
-# Run tests for a package
-cd packages/domain/booking_domain && fvm flutter test
+# Manual flutter commands (use fvm)
+fvm flutter pub get
+fvm flutter test
+fvm flutter run
 
 # Run build_runner directly in a package
-cd packages/data/reflection_data && fvm flutter pub run build_runner build --delete-conflicting-outputs
+fvm flutter pub run build_runner build --delete-conflicting-outputs
+
+# Run tests for a specific package
+cd packages/data/reflection_data && fvm flutter test
 ```
-
-## Linting
-- `flutter_lints` package used across the project
-- Shared analysis options in `packages/core/analysis_defaults/lib/flutter.yaml`
-- Per-app `analysis_options.yaml` files include the shared config
-
-## Testing
-- `flutter_test` and `test` for unit/widget tests
-- `mockito` for mocking in lt_app packages
-- `mocktail` for mocking in compass_app/booking packages
-- `integration_test` SDK for integration tests

@@ -1,11 +1,13 @@
 # Product Overview
 
-Flutter-based enterprise "super app" framework using Clean Architecture and a Dart Workspace monorepo.
+"lt_flutter framework" is a Flutter-based super app built as a monorepo. It combines multiple product domains:
 
-The project contains multiple apps sharing a common set of modular packages:
+- Reflection: Daily journaling with questions, answers, calendar views, and AI copilot assistance
+- User: Authentication, user profiles, login/logout
+- Wallet: Digital wallet with transaction history (includes Web3/crypto via web3dart)
+- Booking: Travel booking with search, itinerary configuration, activities, and sharing (based on Flutter's Compass App sample)
+- Algorithms: A standalone learning app for sorting algorithms
 
-- **lt_app**: The primary app — a personal reflection/journaling tool with features for daily questions, threaded answers, calendar views, an AI copilot, user profiles, and a crypto wallet.
-- **compass_app**: A travel booking app with destination search, itinerary configuration, and booking management. Uses the `provider` package for DI (unlike lt_app which uses Riverpod).
-- **algorithm_app**: A standalone algorithm learning/practice app (sorting algorithms).
+The primary app is `lt_app`. The `compass_app` is a secondary app focused on the booking/travel domain. `algorithm_app` is an independent educational tool.
 
-The codebase is primarily documented in Chinese (comments, README, commit messages). Code identifiers and API names are in English.
+The project language context is bilingual — code comments and documentation are often in Chinese (Simplified), while code identifiers are in English.

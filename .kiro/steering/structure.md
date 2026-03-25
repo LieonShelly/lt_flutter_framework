@@ -1,105 +1,101 @@
-# Project Structure & Architecture
+# Project Structure
 
-## Monorepo Layout
-
-```
-├── apps/                        # Application entry points (shells)
-│   ├── lt_app/                  # Main reflection/journaling app (Riverpod)
-│   ├── compass_app/             # Travel booking app (Provider)
-│   └── algorithm_app/           # Algorithm learning app
-│
-├── packages/
-│   ├── core/                    # Infrastructure layer (lowest level)
-│   │   ├── network/             # Dio-based API client, interceptors, token management
-│   │   ├── lt_uicomponent/      # Shared UI components, theme, fonts, icons
-│   │   ├── analysis_defaults/   # Shared lint rules
-│   │   └── storage/             # Local secure storage (placeholder)
-│   │
-│   ├── domain/                  # Business logic layer (pure Dart, no Flutter dependency)
-│   │   ├── reflection_domain/   # Questions, answers, calendar entities & use cases
-│   │   ├── user_domain/         # User entity & use cases
-│   │   ├── wallet_domain/       # Wallet & transaction entities & use cases
-│   │   └── booking_domain/      # Booking, destination, activity entities & use cases
-│   │
-│   ├── data/                    # Data access layer (implements domain interfaces)
-│   │   ├── reflection_data/     # Reflection API models, datasources, repository impls
-│   │   ├── user_data/           # User data access
-│   │   ├── wallet_data/         # Wallet data access
-│   │   └── booking_data/        # Booking data access (local JSON + remote)
-│   │
-│   ├── features/                # Presentation layer (UI + state management)
-│   │   ├── booking/             # Booking feature (screens, viewmodels, routes)
-│   │   ├── calendar/            # Calendar feature
-│   │   ├── thread/              # Question thread list
-│   │   ├── today_question/      # Daily question
-│   │   ├── add_answer/          # Answer submission
-│   │   ├── answer_detail/       # Answer detail view
-│   │   ├── copilot/             # AI assistant
-│   │   ├── user/                # User profile
-│   │   ├── wallets/             # Wallet feature
-│   │   └── feature_core/        # Shared feature utilities (tab bar, etc.)
-│   │
-│   └── utls/                    # Utility packages
-│       ├── common/              # Result type, Command pattern, shared utilities
-│       ├── date_utl/            # Date formatting helpers
-│       └── lt_annotation/       # Custom code generation annotations
-│
-├── shell/                       # Dart CLI scripts for build automation
-│   └── bin/                     # setup.dart, clean.dart, codegen.dart
-│
-└── Makefile                     # Convenience commands wrapping shell scripts
-```
-
-## Clean Architecture Dependency Rules
-
-Dependencies flow strictly inward — outer layers depend on inner layers, never the reverse.
+This is a Dart Workspace monorepo following Clean Architecture with strict unidirectional dependency flow:
 
 ```
 Apps → Features → Domain ← Data → Core
 ```
 
-1. **Domain** is pure Dart. It defines entities, repository interfaces (`abstract class`), and use cases. It has zero Flutter or framework dependencies.
-2. **Data** implements domain repository interfaces. Contains API models (DTOs with Freezed), datasources (remote/local), and repository implementations. Depends on Domain + Core.
-3. **Features** contain UI (pages/widgets), state management (controllers/viewmodels), and routes. Each feature creates only the UseCase providers it needs. Depends on Domain + Data.
-4. **Apps** are thin shells: `main.dart`, DI wiring, router config, and `ProviderScope`/`MultiProvider`.
-5. **Core** provides infrastructure: network client, storage, UI components. No business logic.
+Domain is the innermost layer — pure Dart, no Flutter dependency. Data implements Domain interfaces. Features depend on both Domain and Data. Apps aggregate Features.
 
-## Package Internal Structure Conventions
+## Top-Level Layout
 
-### Domain package (`packages/domain/{name}_domain/`)
 ```
-lib/src/
-  entities/          # or models/ — pure Dart business objects
-  repositories/      # or repostories/ — abstract interface classes
-  usecases/          # one class per use case, single `call()` method
-lib/{name}_domain.dart  # barrel export file
+├── apps/                    # Runnable applications
+│   ├── lt_app/              # Main app (Riverpod-based)
+│   ├── compass_app/         # Booking/travel app (Provider-based)
+│   └── algorithm_app/       # Sorting algorithm learning app
+│
+├── packages/
+│   ├── core/                # Infrastructure layer
+│   │   ├── network/         # API client, interceptors, exceptions
+│   │   ├── lt_uicomponent/  # Shared UI components, theme, icons
+│   │   ├── analysis_defaults/ # Shared lint rules
+│   │   └── storage/         # Local/secure storage
+│   │
+│   ├── domain/              # Business logic layer (pure Dart)
+│   │   ├── reflection_domain/
+│   │   ├── user_domain/
+│   │   ├── wallet_domain/
+│   │   └── booking_domain/
+│   │
+│   ├── data/                # Data access layer
+│   │   ├── reflection_data/
+│   │   ├── user_data/
+│   │   ├── wallet_data/
+│   │   └── booking_data/
+│   │
+│   ├── features/            # Presentation layer
+│   │   ├── booking/         # Travel booking feature
+│   │   ├── calendar/        # Calendar views
+│   │   ├── thread/          # Question thread list
+│   │   ├── today_question/  # Daily question
+│   │   ├── add_answer/      # Answer submission
+│   │   ├── answer_detail/   # Answer detail view
+│   │   ├── copilot/         # AI assistant
+│   │   ├── user/            # User profile/auth
+│   │   ├── wallets/         # Wallet UI
+│   │   └── feature_core/    # Shared feature utilities
+│   │
+│   └── utls/                # Shared utilities
+│       ├── common/          # Result type, Command pattern
+│       ├── date_utl/        # Date helpers
+│       └── lt_annotation/   # Custom annotations
+│
+├── shell/                   # Dart CLI scripts for build automation
+├── docs/                    # Documentation
+├── Makefile                 # Build commands entry point
+└── pubspec.yaml             # Workspace root (shared dependency versions)
 ```
 
-### Data package (`packages/data/{name}_data/`)
+## Package Internal Structure
+
+### Domain packages
 ```
-lib/src/
-  models/            # or model/ — Freezed DTOs with toEntity()/fromEntity()
-  datasources/       # or data_source/ — remote and local data sources
-  repositories/      # or repostories/ — concrete implementations of domain interfaces
-  providers/         # Riverpod providers for repositories & datasources (lt_app style)
-lib/{name}_data.dart    # barrel export file
+{name}_domain/lib/src/
+├── entities/          # Pure Dart business objects
+├── repositories/      # Abstract repository interfaces
+└── usecases/          # Single-responsibility business operations
 ```
 
-### Feature package (`packages/features/{name}/`)
+### Data packages
 ```
-lib/src/
-  {screen_name}/     # screen folder with screen.dart, viewmodel.dart
-  routes/            # GoRouter route definitions
-  localization/      # i18n (if needed)
-  providers/         # UseCase providers (created per-feature, not globally)
-lib/{name}.dart         # barrel export file
+{name}_data/lib/src/
+├── models/            # DTOs with Freezed, JSON serialization, toEntity()/fromEntity()
+├── datasources/       # Remote/local data source interfaces + implementations
+│   └── remote/
+├── repositories/      # Repository interface implementations
+└── providers/         # Riverpod providers for repositories and data sources
 ```
 
-## Key Patterns
-- Each package has a single barrel export file at `lib/{package_name}.dart`
-- Repository interfaces use `abstract class` (some use `abstract interface class`)
-- Use cases take repository via constructor injection
-- Result type uses sealed class pattern: `Result.ok(value)` / `Result.error(exception)` with `switch` pattern matching
-- ViewModels extend `ChangeNotifier` (compass_app) or use Riverpod `@riverpod` annotations (lt_app)
-- Command pattern (`Command0`, `Command1`) wraps async operations in viewmodels
-- Note: the folder name `repostories` (typo for "repositories") exists in some packages — maintain consistency with existing naming when editing those packages
+### Feature packages
+```
+{name}/lib/src/
+├── {screen_name}/
+│   ├── {screen}_screen.dart      # UI widget
+│   ├── {screen}_viewmodel.dart   # ViewModel (ChangeNotifier) or Controller (Riverpod)
+│   └── {screen}_*.dart           # Sub-widgets
+├── routes/            # GoRouter route definitions
+└── providers/         # UseCase providers (created per-feature, on demand)
+```
+
+## Key Conventions
+
+- Each domain has a paired `{name}_domain` and `{name}_data` package
+- Domain packages export via a barrel file: `lib/{name}_domain.dart`
+- Data models include `toEntity()` and `fromEntity()` conversion methods
+- UseCases follow the callable class pattern with a `call()` method
+- UseCase providers are created in the feature that needs them, not in the data layer
+- Repository interfaces use `abstract interface class`
+- The `compass_app` booking feature uses `ChangeNotifier` + `Command` pattern; `lt_app` features use Riverpod annotations
+- Each package uses `resolution: workspace` in its pubspec.yaml
