@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'package:booking_domain/booking_domain.dart';
-import 'package:booking_data/booking_data.dart';
 import 'package:common/common.dart';
 
 /// In-memory implementation of [ItineraryConfigRepository].
