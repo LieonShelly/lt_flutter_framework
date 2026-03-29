@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shop/shop.dart';
 import 'package:shop/src/constants/constants.dart';
 import 'package:shop/src/pages/onboarding_content.dart';
+import 'package:lt_uicomponent/uicomponent.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -53,7 +55,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   void initState() {
-    _pageController = PageController();
+    _pageController = PageController(initialPage: 0);
     super.initState();
   }
 
@@ -98,6 +100,47 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         : _onboardData[index].image,
                   ),
                 ),
+              ),
+              Row(
+                children: [
+                  ...List.generate(
+                    _onboardData.length,
+                    (index) => Padding(
+                      padding: const EdgeInsets.only(right: defaultPadding / 4),
+                      child: DotIndicator(
+                        isActive: index == _pageIndex,
+                        activeColor: Color(0xFF7B61FF),
+                      ),
+                    ),
+                  ),
+
+                  const Spacer(),
+                  SizedBox(
+                    height: 60,
+                    width: 60,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_pageIndex < _onboardData.length - 1) {
+                          _pageController.nextPage(
+                            duration: defaultDuration,
+                            curve: Curves.ease,
+                          );
+                        } else {
+                          Navigator.pushNamed(context, logInScreenRoute);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(shape: CircleBorder()),
+                      child: SvgPicture.asset(
+                        "assets/icons/Arrow - Right.svg",
+                        package: 'shop',
+                        colorFilter: const ColorFilter.mode(
+                          Colors.white,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
