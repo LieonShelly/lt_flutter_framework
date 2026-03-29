@@ -36,6 +36,7 @@ workspace:
   - packages/features/feature_core
   - packages/features/wallets
   - packages/features/booking
+  - packages/features/shop
   
   # Utility packages
   - packages/utls/date_utl
@@ -46,6 +47,7 @@ workspace:
   - apps/lt_app
   - apps/algorithm_app
   - apps/compass_app
+  - apps/shop_app
   
   # Shell scripts
   - shell
@@ -85,6 +87,8 @@ dependencies:
   intl: ^0.20.2
   scroll_to_index: ^3.0.1
   flutter_cache_manager: ^3.4.1
+
+  form_field_validator: ^1.1.0
 
 dev_dependencies:
   # Testing

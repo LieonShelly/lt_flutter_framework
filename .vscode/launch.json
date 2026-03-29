@@ -12,5 +12,13 @@
             "flutterMode": "debug",
             "deviceId": "E7303DC2-C507-4CA5-9E18-11FF97D6BA68",
         },
+          {
+            "name": "Shop-UI",
+            "type": "dart",
+            "request": "launch",
+            "program": "apps/shop_app/lib/main.dart",
+            "flutterMode": "debug",
+            "deviceId": "E7303DC2-C507-4CA5-9E18-11FF97D6BA68",
+        }
     ]
 }
