@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shop/shop.dart';
 import 'package:shop/src/constants/constants.dart';
-import 'package:shop/src/pages/onboarding_content.dart';
+import 'package:shop/src/pages/onboarding/onboarding_content.dart';
 import 'package:lt_uicomponent/uicomponent.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -74,7 +74,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     Navigator.pushNamed(context, logInScreenRoute);
                   },
                   child: Text(
-                    "Skip",
+                    "Skip1",
                     style: TextStyle(
                       color: Theme.of(context).textTheme.bodyLarge!.color,
                     ),

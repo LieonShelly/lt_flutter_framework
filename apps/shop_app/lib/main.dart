@@ -15,7 +15,7 @@ class MainApp extends StatelessWidget {
       theme: AppTheme.lightTheme(context),
       onGenerateRoute: generateRoute,
       themeMode: ThemeMode.light,
-      initialRoute: onbordingScreenRoute,
+      initialRoute: logInScreenRoute,
     );
   }
 }
