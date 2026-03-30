@@ -15,7 +15,7 @@ class NetworkImageWithLoader extends StatelessWidget {
       child: CachedNetworkImage(
         fit: BoxFit.cover,
         imageUrl: url,
-        placeholder: (context, url) => Skeleton(),
+        placeholder: (context, url) => Skeleton(radius: radius),
         errorWidget: (context, url, error) => const Icon(Icons.error),
       ),
     );

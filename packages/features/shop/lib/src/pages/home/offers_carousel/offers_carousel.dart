@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lt_uicomponent/uicomponent.dart';
 import 'package:shop/src/constants/constants.dart';
 import 'package:shop/src/pages/home/offers_carousel/banner_style_1.dart';
+import 'package:shop/src/pages/home/offers_carousel/banner_style_2.dart';
 
 class OffersCarousel extends StatefulWidget {
   const OffersCarousel({super.key});
@@ -18,7 +19,8 @@ class _OffersCarouselState extends State<OffersCarousel> {
   late Timer _timer;
   List offers = [
     BannerStyle1(text: "New items with \nFree shipping", press: () {}),
-    Container(height: 50, color: Colors.green),
+
+    BannerStyle2(title: "Black \nfriday", subTitle: "Collection", press: () {}),
     Container(height: 50, color: Colors.blue),
   ];
 

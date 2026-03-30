@@ -4,7 +4,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shop/shop.dart';
 import 'package:shop/src/constants/constants.dart';
-import 'package:shop/src/pages/home/home_screen.dart';
+import 'package:shop/src/pages/home/offers_carousel/home_screen.dart';
 
 class EntryPoint extends StatefulWidget {
   const EntryPoint({super.key});
