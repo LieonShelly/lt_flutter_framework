@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shop/src/components/network_image_with_loader.dart';
 import 'package:shop/src/constants/constants.dart';
 import 'package:shop/src/pages/home/popular_products/product_card.dart';
 import 'package:shop/src/pages/home/popular_products/product_model.dart';
