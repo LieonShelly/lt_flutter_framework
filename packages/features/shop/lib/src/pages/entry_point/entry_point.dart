@@ -4,15 +4,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shop/shop.dart';
 import 'package:shop/src/constants/constants.dart';
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox();
-  }
-}
+import 'package:shop/src/pages/home/home_screen.dart';
 
 class EntryPoint extends StatefulWidget {
   const EntryPoint({super.key});

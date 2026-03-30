@@ -12,11 +12,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-    
+
   animations: ^2.0.11
   form_field_validator: ^1.1.0
   flutter_svg: ^2.2.4
-
+  cached_network_image: ^3.4.1
   lt_uicomponent:
     path: ../../core/lt_uicomponent
 
