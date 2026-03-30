@@ -1,4 +1,3 @@
-import 'package:feature_core/src/providers/processed_icon_image_provider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lt_uicomponent/uicomponent.dart';
@@ -38,11 +37,7 @@ class ProcessedIconView extends ConsumerWidget with ImageCacheKeyType {
         errorBuilder: (_, _, _) => _buildPlaceholder(),
         frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
           if (wasSynchronouslyLoaded || frame != null) return child;
-          return SizedBox(
-            width: width,
-            height: height ?? 100,
-            child: placeholder,
-          );
+          return _buildPlaceholder();
         },
       ),
     );
