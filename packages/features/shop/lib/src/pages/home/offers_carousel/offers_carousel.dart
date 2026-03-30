@@ -5,6 +5,8 @@ import 'package:lt_uicomponent/uicomponent.dart';
 import 'package:shop/src/constants/constants.dart';
 import 'package:shop/src/pages/home/offers_carousel/banner_style_1.dart';
 import 'package:shop/src/pages/home/offers_carousel/banner_style_2.dart';
+import 'package:shop/src/pages/home/offers_carousel/banner_style_3.dart';
+import 'package:shop/src/pages/home/offers_carousel/banner_style_4.dart';
 
 class OffersCarousel extends StatefulWidget {
   const OffersCarousel({super.key});
@@ -19,26 +21,26 @@ class _OffersCarouselState extends State<OffersCarousel> {
   late Timer _timer;
   List offers = [
     BannerStyle1(text: "New items with \nFree shipping", press: () {}),
-
     BannerStyle2(title: "Black \nfriday", subTitle: "Collection", press: () {}),
-    Container(height: 50, color: Colors.blue),
+    BannerStyle3(title: "Grab \nyours now", press: () {}),
+    BannerStyle4(title: "SUMMER \nSALE", press: () {}),
   ];
 
   @override
   void initState() {
     _pageController = PageController(initialPage: 0);
-    // _timer = Timer.periodic(const Duration(seconds: 4), (Timer timer) {
-    //   if (_selectedIndex < offers.length - 1) {
-    //     _selectedIndex++;
-    //   } else {
-    //     _selectedIndex = 0;
-    //   }
-    //   _pageController.animateToPage(
-    //     _selectedIndex,
-    //     duration: const Duration(milliseconds: 340),
-    //     curve: Curves.easeInOut,
-    //   );
-    // });
+    _timer = Timer.periodic(const Duration(seconds: 4), (Timer timer) {
+      if (_selectedIndex < offers.length - 1) {
+        _selectedIndex++;
+      } else {
+        _selectedIndex = 0;
+      }
+      _pageController.animateToPage(
+        _selectedIndex,
+        duration: const Duration(milliseconds: 340),
+        curve: Curves.easeInOut,
+      );
+    });
     super.initState();
   }
 
@@ -72,7 +74,7 @@ class _OffersCarouselState extends State<OffersCarousel> {
               child: Row(
                 children: List.generate(offers.length, (index) {
                   return Padding(
-                    padding: const EdgeInsets.only(left: defaultPadding),
+                    padding: const EdgeInsets.only(left: defaultPadding / 2),
                     child: DotIndicator(
                       isActive: index == _selectedIndex,
                       activeColor: Colors.white70,
