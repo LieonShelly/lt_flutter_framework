@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shop/src/pages/home/categories/categories.dart';
 import 'package:shop/src/pages/home/offers_carousel/offers_carousel.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,7 +17,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
-          slivers: [SliverToBoxAdapter(child: OffersCarousel())],
+          slivers: [
+            SliverToBoxAdapter(child: OffersCarousel()),
+            SliverToBoxAdapter(child: Categories()),
+          ],
         ),
       ),
     );
