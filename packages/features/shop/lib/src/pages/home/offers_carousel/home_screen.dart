@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shop/src/pages/home/categories/categories.dart';
 import 'package:shop/src/pages/home/offers_carousel/offers_carousel.dart';
+import 'package:shop/src/pages/home/popular_products/popular_products.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
           slivers: [
             SliverToBoxAdapter(child: OffersCarousel()),
             SliverToBoxAdapter(child: Categories()),
+            SliverToBoxAdapter(child: PopularProducts()),
           ],
         ),
       ),
