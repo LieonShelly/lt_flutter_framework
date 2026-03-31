@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:lt_uicomponent/uicomponent.dart';
 import 'package:flutter/material.dart';
 import 'package:shop/src/constants/constants.dart';
 import 'package:shop/src/pages/home/offers_carousel/bannerm.dart';
@@ -48,17 +48,46 @@ class _BannerWithCounterState extends State<BannerWithCounter> {
       image: widget.image,
       press: widget.press,
       children: [
-        Align(
-          child: Text(
-            widget.text,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontFamily: grandisExtendedFont,
-              fontSize: 24,
-              fontWeight: FontWeight.w500,
-              color: Colors.white,
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              widget.text,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: grandisExtendedFont,
+                fontSize: 24,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
             ),
-          ),
+            const SizedBox(height: defaultPadding),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                BlurContainer(
+                  text: _duration.inHours.toString().padLeft(2, "0"),
+                ),
+                const SizedBox(width: defaultPadding / 4),
+                BlurContainer(
+                  text: _duration.inMinutes
+                      .remainder(60)
+                      .toString()
+                      .padLeft(2, "0"),
+                ),
+
+                const SizedBox(width: defaultPadding / 4),
+
+                BlurContainer(
+                  text: _duration.inSeconds
+                      .remainder(60)
+                      .toString()
+                      .padLeft(2, "0"),
+                ),
+              ],
+            ),
+          ],
         ),
       ],
     );

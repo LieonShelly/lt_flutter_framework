@@ -7,3 +7,4 @@ export 'scroll_behavior.dart';
 export 'tag_chip.dart';
 export 'dot_indicator.dart';
 export 'skeleton.dart';
+export 'blur_container.dart';
