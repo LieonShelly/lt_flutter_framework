@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SliverToBoxAdapter(child: Categories()),
             const SliverToBoxAdapter(child: PopularProducts()),
             const SliverPadding(
-              padding: EdgeInsets.symmetric(vertical: defaultPadding * 0),
+              padding: EdgeInsets.symmetric(vertical: defaultPadding),
               sliver: SliverToBoxAdapter(child: FlashScale()),
             ),
             const SliverToBoxAdapter(child: BestSeller()),

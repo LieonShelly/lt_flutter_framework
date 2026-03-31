@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shop/src/constants/constants.dart';
-import 'package:shop/src/pages/home/popular_products/product_card.dart';
+import 'package:shop/src/components/product_card.dart';
 import 'package:shop/src/pages/home/popular_products/product_model.dart';
+import 'package:shop/src/routers/route_constants.dart';
 
 class PopularProducts extends StatelessWidget {
   const PopularProducts({super.key});
@@ -40,7 +41,9 @@ class PopularProducts extends StatelessWidget {
                   brandName: product.brandName,
                   title: product.title,
                   price: product.price,
-                  press: () {},
+                  press: () {
+                    Navigator.pushNamed(context, productDetailsScreenRoute);
+                  },
                 ),
               );
             },

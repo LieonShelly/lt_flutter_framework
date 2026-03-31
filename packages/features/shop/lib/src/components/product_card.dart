@@ -23,7 +23,7 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final product = this;
     return OutlinedButton(
-      onPressed: () {},
+      onPressed: press,
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(140, 220),
         maximumSize: const Size(140, 220),

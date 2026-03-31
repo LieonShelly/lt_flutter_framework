@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shop/shop.dart';
 import 'package:shop/src/pages/auth/login_screen.dart';
 import 'package:shop/src/pages/entry_point/entry_point.dart';
+import 'package:shop/src/pages/product/product_detail_sceen.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
@@ -11,6 +12,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (context) => const LoginScreen());
     case entryPointScreenRoute:
       return MaterialPageRoute(builder: (context) => const EntryPoint());
+    case productDetailsScreenRoute:
+      return MaterialPageRoute(
+        builder: (context) => const ProductDetailSceen(),
+      );
     default:
       return MaterialPageRoute(builder: (context) => const OnboardingScreen());
   }

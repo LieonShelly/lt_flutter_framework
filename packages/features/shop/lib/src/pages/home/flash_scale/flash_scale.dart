@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shop/src/constants/constants.dart';
 import 'package:shop/src/pages/home/flash_scale/banner_with_counter.dart';
-import 'package:shop/src/pages/home/popular_products/product_card.dart';
+import 'package:shop/src/components/product_card.dart';
 import 'package:shop/src/pages/home/popular_products/product_model.dart';
 
 class FlashScale extends StatelessWidget {
