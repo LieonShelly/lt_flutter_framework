@@ -19,6 +19,7 @@ dependencies:
   cached_network_image: ^3.4.1
   lt_uicomponent:
     path: ../../core/lt_uicomponent
+  flutter_rating_bar: ^4.0.1
 
 dev_dependencies:
   flutter_test:

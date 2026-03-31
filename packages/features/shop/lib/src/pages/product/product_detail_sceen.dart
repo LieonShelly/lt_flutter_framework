@@ -7,6 +7,7 @@ import 'package:shop/src/components/product_list_title.dart';
 import 'package:shop/src/constants/constants.dart';
 import 'package:shop/src/pages/product/product_images.dart';
 import 'package:shop/src/pages/product/product_info.dart';
+import 'package:shop/src/pages/product/review_card.dart';
 
 class ProductDetailSceen extends StatelessWidget {
   final bool isProductAvailable;
@@ -58,12 +59,14 @@ class ProductDetailSceen extends StatelessWidget {
               isShowBottomBorader: true,
               press: () {},
             ),
+            ReviewCard(),
             ProductListTitle(
               svgSrc: "assets/icons/Chat.svg",
               title: "Reviews",
               isShowBottomBorader: true,
               press: () {},
             ),
+
             SliverPadding(
               padding: const EdgeInsets.all(defaultPadding),
               sliver: SliverToBoxAdapter(
