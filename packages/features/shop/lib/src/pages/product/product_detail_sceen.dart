@@ -4,6 +4,7 @@ import 'package:shop/src/components/cart_button.dart';
 import 'package:shop/src/components/notify_me_card.dart';
 import 'package:shop/src/constants/constants.dart';
 import 'package:shop/src/pages/product/product_images.dart';
+import 'package:shop/src/pages/product/product_info.dart';
 
 class ProductDetailSceen extends StatelessWidget {
   final bool isProductAvailable;
@@ -36,6 +37,7 @@ class ProductDetailSceen extends StatelessWidget {
             ProductImages(
               images: [productDemoImg1, productDemoImg2, productDemoImg3],
             ),
+            const ProductInfo(),
           ],
         ),
       ),
