@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shop/src/pages/home/offers_carousel/banner_style_2.dart';
-import 'package:shop/src/pages/home/offers_carousel/banner_style_3.dart';
-import 'package:shop/src/pages/home/offers_carousel/bannerm.dart';
 
 class BannerSstyle1 extends StatelessWidget {
   const BannerSstyle1({
