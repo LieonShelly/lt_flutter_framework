@@ -1,13 +1,14 @@
 # Product Overview
 
-"lt_flutter framework" is a Flutter-based super app built as a monorepo. It combines multiple product domains:
+Flutter Super App monorepo containing multiple applications built with Clean Architecture.
 
-- Reflection: Daily journaling with questions, answers, calendar views, and AI copilot assistance
-- User: Authentication, user profiles, login/logout
-- Wallet: Digital wallet with transaction history (includes Web3/crypto via web3dart)
-- Booking: Travel booking with search, itinerary configuration, activities, and sharing (based on Flutter's Compass App sample)
-- Algorithms: A standalone learning app for sorting algorithms
+## Applications
 
-The primary app is `lt_app`. The `compass_app` is a secondary app focused on the booking/travel domain. `algorithm_app` is an independent educational tool.
+- **lt_app** — "Little Thing", the primary app. A personal reflection/journaling app with features for daily questions, answers, calendar views, AI copilot, user profiles, and a wallet system.
+- **compass_app** — A travel booking app with destination search, activity browsing, itinerary building, and booking management. Supports both local (dev) and remote data sources.
+- **shop_app** — An e-commerce app with product browsing, onboarding, authentication, and shopping flows.
+- **algorithm_app** — A standalone learning app demonstrating sorting algorithms (bubble, merge, quick, heap, insertion, selection, counting sort).
 
-The project language context is bilingual — code comments and documentation are often in Chinese (Simplified), while code identifiers are in English.
+## Language
+
+Project documentation and code comments are primarily in Chinese (Simplified). The README and inline docs use Chinese. Code identifiers (class names, variables, methods) are in English.
