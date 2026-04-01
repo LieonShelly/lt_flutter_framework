@@ -27,7 +27,7 @@ class CartButton extends StatelessWidget {
               borderRadius: BorderRadiusGeometry.circular(defaultBorderRadious),
             ),
             child: InkWell(
-              onTap: () {},
+              onTap: press,
               child: Row(
                 children: [
                   Expanded(

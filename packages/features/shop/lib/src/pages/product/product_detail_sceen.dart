@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:shop/src/components/cart_button.dart';
+import 'package:shop/src/components/custom_modal_bottom_sheet.dart';
 import 'package:shop/src/components/notify_me_card.dart';
 import 'package:shop/src/components/product_card.dart';
 import 'package:shop/src/components/product_list_title.dart';
 import 'package:shop/src/constants/constants.dart';
+import 'package:shop/src/pages/product/product_buy_now_screen.dart';
 import 'package:shop/src/pages/product/product_images.dart';
 import 'package:shop/src/pages/product/product_info.dart';
 import 'package:shop/src/pages/product/review_card.dart';
@@ -18,7 +20,16 @@ class ProductDetailSceen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: isProductAvailable
-          ? CartButton(price: 140, press: () {})
+          ? CartButton(
+              price: 140,
+              press: () {
+                customModalBottomSheet(
+                  context,
+                  height: MediaQuery.of(context).size.height * 0.9,
+                  child: const ProductBuyNowScreen(),
+                );
+              },
+            )
           : NotifyMeCard(),
       body: SafeArea(
         child: CustomScrollView(
