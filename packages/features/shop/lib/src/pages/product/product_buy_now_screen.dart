@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shop/src/components/cart_button.dart';
 import 'package:shop/src/components/network_image_with_loader.dart';
+import 'package:shop/src/components/product_list_title.dart';
 import 'package:shop/src/constants/constants.dart';
 
 class ProductBuyNowScreen extends StatefulWidget {
@@ -173,15 +174,13 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
                   ),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: defaultPadding,
-                    vertical: defaultPadding,
-                  ),
+                  padding: const EdgeInsets.only(left: 0, right: 0),
                   sliver: SliverToBoxAdapter(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: defaultPadding,
                       children: [
+                        const SizedBox(height: defaultPadding),
                         Padding(
                           padding: const EdgeInsets.only(left: defaultPadding),
                           child: Text(
@@ -203,6 +202,74 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
                         ),
                       ],
                     ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: defaultPadding,
+                    vertical: defaultPadding,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: defaultPadding,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 0),
+                          child: Text(
+                            'Select Size',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                        ),
+
+                        SelectedSize(
+                          sizes: ["S", "M", "L", "XL", "XL"],
+                          selectedIndex: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(vertical: defaultPadding),
+                  sliver: ProductListTitle(
+                    svgSrc: 'assets/icons/Sizeguid.svg',
+                    title: "Size guide",
+                    isShowBottomBorader: true,
+                    press: () {},
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: defaultPadding,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: defaultPadding,
+                      children: [
+                        Text(
+                          'Store pickup availability',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        Text(
+                          'Select a size to check store availability and In-Store pickup options.',
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 0,
+                    vertical: defaultPadding,
+                  ),
+                  sliver: ProductListTitle(
+                    title: "Check stores",
+                    svgSrc: "assets/icons/Stores.svg",
+                    isShowBottomBorader: true,
+                    press: () {},
                   ),
                 ),
               ],
@@ -283,6 +350,50 @@ class SelectedColor extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class SelectedSize extends StatelessWidget {
+  final List<String> sizes;
+  final int selectedIndex;
+
+  const SelectedSize({
+    super.key,
+    required this.sizes,
+    required this.selectedIndex,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Row(
+        spacing: defaultPadding,
+        children: List.generate(sizes.length, (index) {
+          return SizedBox(
+            width: 40,
+            height: 40,
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.all(0),
+                shape: CircleBorder(),
+                side: selectedIndex == index
+                    ? const BorderSide(color: primaryColor)
+                    : null,
+              ),
+              onPressed: () {},
+              child: Text(
+                sizes[index].toUpperCase(),
+                style: TextStyle(
+                  color: selectedIndex == index
+                      ? purpleColor
+                      : Theme.of(context).textTheme.bodyLarge!.color,
+                ),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
