@@ -28,7 +28,8 @@ dependencies:
     path: ../../packages/domain/booking_domain
   lt_uicomponent:
     path: ../../packages/core/lt_uicomponent
-
+  lt_network:
+    path: ../../packages/core/network
   booking:
     path: ../../packages/features/booking
 
