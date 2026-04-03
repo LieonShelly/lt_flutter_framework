@@ -24,6 +24,7 @@ import UIKit
                         }
                         return
                     }
+                    // 有一个致命的性能瓶颈：深拷贝（Deep Copy）。图像数据深拷贝
                     if let processedImage = MetalImageProcessor.shared.processSync(uiimage, thickness: 4) {
                         if let pngData = processedImage.pngData() {
                             DispatchQueue.main.async {
