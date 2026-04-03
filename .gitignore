@@ -47,6 +47,3 @@ app.*.map.json
 
 # FVM Version Cache
 .fvm/
-
-docs/road_map.md
-docs/flutter_questions.md

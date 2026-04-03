@@ -1,0 +1,11 @@
+# Dart 语言特性与进阶 (Dart Language)
+- Null Safety 原理：Dart 的健全空安全（Sound Null Safety）在运行时如何保证性能？
+- Mixin 机制：Mixin 与接口、继承的区别是什么？多重 Mixin 的执行顺序如何判定？
+- Extension Methods：在框架设计中，如何利用扩展方法增强代码可读性？
+- Dart 编译模式：JIT 与 AOT 的应用场景及其对开发/生产环境的影响。
+- 宏 (Macros)：Dart 最新的宏功能（自省编程）对 Model 解析（如 JsonSerializable）的影响。
+- 闭包与作用域：Dart 闭包捕获变量的原理及潜在风险。
+- 运算符重载：在什么业务场景下会用到 operator == 的重写？
+- Dynamic vs Object vs Var：从类型检查和性能角度分析三者的不同。
+- Generators：sync* 和 async* 的使用场景及内部 Iterator 实现。
+- Future 与 Stream 转换：如何将多个 Future 结果聚合成 Stream？
