@@ -17,6 +17,7 @@ class MyApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
+      checkerboardOffscreenLayers: true,
       routerConfig: router,
       title: 'Little Thing',
       theme: ThemeData(
