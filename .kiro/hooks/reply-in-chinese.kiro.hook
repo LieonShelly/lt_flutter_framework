@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "用中文回答",
+  "description": "每次提交提示时，提醒 agent 使用中文回答问题",
+  "version": "1",
+  "when": {
+    "type": "promptSubmit"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "请使用中文回答用户的问题。所有解释、说明和总结都应该用中文书写，代码标识符和命令保持英文即可。"
+  }
+}
