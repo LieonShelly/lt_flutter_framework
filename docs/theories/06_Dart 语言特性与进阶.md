@@ -605,3 +605,57 @@
         ```
 
 - Future 与 Stream 转换：如何将多个 Future 结果聚合成 Stream？
+    - 将多个 Future 聚合成 Stream，在 Dart 中通常有三大核心策略。我会根据业务对**“顺序”和“速度”**的不同要求来选择：
+    - 策略一：竞速发射，谁快先出谁 (极速首屏策略)
+        - 核心 API：Stream.fromFutures(Iterable<Future<T>>)
+        - 业务场景：首页并发请求多个毫无关联的模块（如 Banner、推荐列表、热点新闻）。UI 希望“不管顺序，哪个接口先返回，就先渲染哪个”。
+        - 底层机制：所有的 Future 会在传入的一瞬间同时并发执行。Stream 会按照 Future 完成的先后顺序（而不是数组里的排列顺序）发射数据。
+        ```Dart
+        Stream<String> fetchConcurrentData() {
+        final futures = [
+            api.fetchSlowData(), // 耗时 3 秒
+            api.fetchFastData(), // 耗时 1 秒
+            api.fetchMediumData(), // 耗时 2 秒
+        ];
+        // 所有的请求已经同时发出！
+        // UI 层收到数据的顺序将是：Fast(1s) -> Medium(2s) -> Slow(3s)
+        return Stream.fromFutures(futures);
+        }
+        ```
+    - 策略二：严格串行，排队执行与发射 (依赖链策略)
+        - 核心 API：async* 生成器配合 for 循环与 await
+            - 业务场景：有严格前置依赖的请求。比如：先拉取用户 Token，拿到 Token 后拉取配置，拿到配置后再拉取列表。必须严格按顺序一个一个来。
+            - 底层机制：利用生成器的状态机机制，遇到 await 就挂起。上一个 Future 不完成，下一个 Future 根本不会开始执行。
+        ```Dart
+        Stream<String> fetchSequentialData(List<Future<String> Function()> tasks) async* {
+            for (var task in tasks) {
+                // ⚠️ 重点：此时任务才真正开始执行
+                // 上一个没跑完，下一个绝对不会触发
+                final result = await task(); 
+                yield result; // 执行完一个，向外发射一个
+            }
+        }
+        ```
+    - 策略三：并发执行，但按原始顺序发射 (RxDart 降维打击)
+        - 核心 API：Rx.concat 或原生的 Stream.fromIterable 魔法
+        - 业务场景：我希望所有的网络请求立刻并发发出去（节省总时长），但是在 UI 渲染时，我希望它们严格按照我规定的顺序到达（比如必须先出 Header 数据，再出 Body 数据，即使 Body 的接口跑得更快）。
+        - 底层机制：如果你不引入第三方库，用原生 Dart 很容易在这里写出极其复杂的内存缓存逻辑。而在真实的大型工程中，资深开发者会直接祭出 RxDart。
+        ```Dart
+        // 需要引入 rxdart 包
+        import 'package:rxdart/rxdart.dart';
+
+        Stream<String> fetchConcurrentButOrdered() {
+            // 1. 瞬间并发所有请求
+            final f1 = api.fetchSlowHeader(); // 3s
+            final f2 = api.fetchFastBody();   // 1s
+
+            // 2. 将单个 Future 转为单值 Stream
+            final s1 = Stream.fromFuture(f1);
+            final s2 = Stream.fromFuture(f2);
+
+            // 3. Concat：严格按照 s1 -> s2 的顺序发射。
+            // 虽然 f2 在 1 秒后就完成了，但 s2 会被底层缓存阻塞，
+            // 直到 s1 (3秒后) 发射完毕，s2 才会紧接着发射。
+            return Rx.concat([s1, s2]);
+        }
+        ```
