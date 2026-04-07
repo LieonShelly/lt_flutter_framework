@@ -1,7 +1,7 @@
 import 'dart:io';
 
 class NetworkConfig {
-  static const bool enableProxy = true;
+  static const bool enableProxy = false;
   static const String proxyHost = '127.0.0.1';
   static const String proxyPort = '8888';
 

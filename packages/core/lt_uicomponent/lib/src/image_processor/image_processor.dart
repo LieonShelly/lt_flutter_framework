@@ -1,4 +1,7 @@
-import 'package:flutter/services.dart';
+import 'dart:isolate';
+import 'dart:typed_data';
+
+import 'ffi_bridge.dart';
 
 class IconParams {
   final String iconId;
@@ -17,24 +20,11 @@ class IconParams {
 }
 
 class ImageProcessor {
-  static const MethodChannel _channel = MethodChannel(
-    "com.ltapp.image_processor",
-  );
-
   static Future<Uint8List?> processIcon(Uint8List imageBytes) async {
     try {
-      final dynamic result = await _channel.invokeListMethod('processIcon', {
-        'imageData': imageBytes,
-      });
-      if (result == null) return null;
-      if (result is Uint8List) {
-        return result;
-      } else if (result is List) {
-        return Uint8List.fromList(result.cast<int>());
-      }
-      return null;
-    } on PlatformException catch (e) {
-      print("Failed to process image: '${e.message}'");
+      return await Isolate.run(() => FfiBridge.processIcon(imageBytes));
+    } catch (e) {
+      print("Failed to process image: '$e'");
       return null;
     }
   }

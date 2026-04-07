@@ -16,6 +16,7 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		F8F00C012F84B81900B668FA /* ImageProcessorBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8F00C002F84B81900B668FA /* ImageProcessorBridge.swift */; };
 		F8F122D22F28B724008DB4AB /* MetalImageProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8F122D12F28B724008DB4AB /* MetalImageProcessor.swift */; };
 		F8F122D42F28B736008DB4AB /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = F8F122D32F28B736008DB4AB /* Shaders.metal */; };
 /* End PBXBuildFile section */
@@ -69,6 +70,7 @@
 		B3347A7A5A95A9E3561C4F9B /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
 		F8061FCD2F6A5BAC0061FDA8 /* RunnerDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RunnerDebug.entitlements; sourceTree = "<group>"; };
 		F84219CB2F6A56F800D75C3F /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
+		F8F00C002F84B81900B668FA /* ImageProcessorBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcessorBridge.swift; sourceTree = "<group>"; };
 		F8F122D12F28B724008DB4AB /* MetalImageProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalImageProcessor.swift; sourceTree = "<group>"; };
 		F8F122D32F28B736008DB4AB /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -149,6 +151,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				F8F00C002F84B81900B668FA /* ImageProcessorBridge.swift */,
 				F8061FCD2F6A5BAC0061FDA8 /* RunnerDebug.entitlements */,
 				F84219CB2F6A56F800D75C3F /* Runner.entitlements */,
 				F8F122D12F28B724008DB4AB /* MetalImageProcessor.swift */,
@@ -388,6 +391,7 @@
 			files = (
 				F8F122D42F28B736008DB4AB /* Shaders.metal in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+				F8F00C012F84B81900B668FA /* ImageProcessorBridge.swift in Sources */,
 				F8F122D22F28B724008DB4AB /* MetalImageProcessor.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 			);

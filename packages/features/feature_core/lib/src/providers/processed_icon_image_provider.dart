@@ -54,7 +54,6 @@ class ProcessedIconImageProvider
       final tempPath = _cachedTempPath ?? await _initTempPath();
       final processedFilePath = '${tempPath}/processed_icon+${key.iconId}.png';
       final processedFile = File(processedFilePath);
-
       Uint8List bytes;
       if (await processedFile.exists()) {
         bytes = await processedFile.readAsBytes();
