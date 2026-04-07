@@ -1,6 +1,5 @@
 import 'dart:isolate';
 import 'dart:typed_data';
-
 import 'ffi_bridge.dart';
 
 class IconParams {
