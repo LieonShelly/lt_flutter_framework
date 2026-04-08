@@ -315,6 +315,7 @@ class CalendarItemView extends ConsumerWidget with ImageCacheKeyType {
               height: height,
               placeholder: placeholder,
               herTag: answert?.id ?? "",
+              thickness: 2,
             ),
           ),
         );

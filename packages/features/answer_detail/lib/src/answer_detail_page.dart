@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lt_uicomponent/uicomponent.dart';
-import 'package:reflection_data/reflection_data.dart';
+import 'package:reflection_domain/reflection_domain.dart';
 import 'package:feature_core/feature_core.dart';
 
 class AnswerDetailPage extends ConsumerStatefulWidget with ImageCacheKeyType {
-  final AnswerModel answer;
+  final AnswerEntity answer;
   const AnswerDetailPage({super.key, required this.answer});
 
   @override
@@ -129,7 +129,7 @@ class _AnswerDetailPageState extends ConsumerState<AnswerDetailPage>
   }
 
   Widget _buildHeader() {
-    final date = DateTime.parse(widget.answer.createdYmd);
+    final date = widget.answer.createdAt;
     final fromat = DateFormat.MMMd('en_US');
     final dateStr = fromat.format(date);
     return SizedBox(
@@ -144,24 +144,26 @@ class _AnswerDetailPageState extends ConsumerState<AnswerDetailPage>
   }
 
   Widget _buildIconView(BuildContext context) {
-    final icon = ProcessedIconView(
-      imageUrl: widget.answer.icon?.url ?? "",
-      width: double.infinity,
-      height: 300,
-      placeholder: const SizedBox(height: 100),
-      herTag: 'answer_icon_${widget.answer.id}',
-      onImageLoaded: () {
-        if (!_hasTiggeredAnimation) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (context.mounted) {
-              _isImageReady = true;
-              Future.delayed(const Duration(milliseconds: 500), () {
-                _checkAndStartAnimation();
-              });
-            }
-          });
-        }
-      },
+    final icon = AspectRatio(
+      aspectRatio: 1,
+      child: ProcessedIconView(
+        imageUrl: widget.answer.icon?.url ?? "",
+        placeholder: const SizedBox(height: 100),
+        herTag: 'answer_icon_${widget.answer.id}',
+        thickness: 0,
+        onImageLoaded: () {
+          if (!_hasTiggeredAnimation) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) {
+                _isImageReady = true;
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  _checkAndStartAnimation();
+                });
+              }
+            });
+          }
+        },
+      ),
     );
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 48, vertical: 50),

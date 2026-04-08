@@ -3,7 +3,7 @@ import '../network_core/token_storage.dart';
 class MockTokenStorage implements TokenStorage {
   @override
   Future<String?> getAccessToken() async {
-    return r"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbWdyam1tN20wMDAwcHBweHZoZXhuMm1tIiwiYXBwbGVJZCI6IjAwMTc3NC5mYjZiNjFiMjk5MmU0NjgzOGJlZTM0ZTc4MWE2YTExNC4xMDIxIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc3NTUzMzQ2MSwiZXhwIjoxNzc1NjE5ODYxfQ.T-oRV97D_vA6GwilL-W408lEYkh96ddIhwPoUwzZPJI";
+    return r" eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbWdyam1tN20wMDAwcHBweHZoZXhuMm1tIiwiYXBwbGVJZCI6IjAwMTc3NC5mYjZiNjFiMjk5MmU0NjgzOGJlZTM0ZTc4MWE2YTExNC4xMDIxIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc3NTYyMDkwNSwiZXhwIjoxNzc1NzA3MzA1fQ.lPxBy7YMz5o2YrtTrxUFCmzsNSccLd1KbjjqRnL2bP0";
   }
 
   @override

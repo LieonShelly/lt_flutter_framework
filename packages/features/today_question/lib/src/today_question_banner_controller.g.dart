@@ -15,7 +15,10 @@ final todayQuestionBannerControllerProvider =
 
 final class TodayQuestionBannerControllerProvider
     extends
-        $NotifierProvider<TodayQuestionBannerController, TodayQuestionState> {
+        $AsyncNotifierProvider<
+          TodayQuestionBannerController,
+          List<QuestionEntity>
+        > {
   TodayQuestionBannerControllerProvider._()
     : super(
         from: null,
@@ -33,31 +36,28 @@ final class TodayQuestionBannerControllerProvider
   @$internal
   @override
   TodayQuestionBannerController create() => TodayQuestionBannerController();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(TodayQuestionState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<TodayQuestionState>(value),
-    );
-  }
 }
 
 String _$todayQuestionBannerControllerHash() =>
-    r'aa35d34de50d9e6ffbc676520302e3dc842ace9d';
+    r'55c1bf51b1210626ae0d1017a848e2077ca8ff0b';
 
 abstract class _$TodayQuestionBannerController
-    extends $Notifier<TodayQuestionState> {
-  TodayQuestionState build();
+    extends $AsyncNotifier<List<QuestionEntity>> {
+  FutureOr<List<QuestionEntity>> build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<TodayQuestionState, TodayQuestionState>;
+    final ref =
+        this.ref
+            as $Ref<AsyncValue<List<QuestionEntity>>, List<QuestionEntity>>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<TodayQuestionState, TodayQuestionState>,
-              TodayQuestionState,
+              AnyNotifier<
+                AsyncValue<List<QuestionEntity>>,
+                List<QuestionEntity>
+              >,
+              AsyncValue<List<QuestionEntity>>,
               Object?,
               Object?
             >;

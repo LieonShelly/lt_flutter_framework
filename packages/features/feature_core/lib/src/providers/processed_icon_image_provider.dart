@@ -12,11 +12,14 @@ class ProcessedIconImageProvider
     extends ImageProvider<ProcessedIconImageProvider> {
   final String iconId;
   final String imageUrl;
+  final int thickness;
+
   static String? _cachedTempPath;
 
   const ProcessedIconImageProvider({
     required this.iconId,
     required this.imageUrl,
+    required this.thickness,
   });
 
   @override
@@ -52,7 +55,9 @@ class ProcessedIconImageProvider
   ) async {
     try {
       final tempPath = _cachedTempPath ?? await _initTempPath();
-      final processedFilePath = '${tempPath}/processed_icon+${key.iconId}.png';
+      final processedFilePath =
+          '${tempPath}/processed_icon+${key.iconId}+thicness${thickness}.png';
+      debugPrint(processedFilePath);
       final processedFile = File(processedFilePath);
       Uint8List bytes;
       if (await processedFile.exists()) {
@@ -63,7 +68,10 @@ class ProcessedIconImageProvider
           key: key.iconId,
         );
         final originalBytes = await file.readAsBytes();
-        final processedBytes = await ImageProcessor.processIcon(originalBytes);
+        final processedBytes = await ImageProcessor.processIcon(
+          originalBytes,
+          thickness,
+        );
         if (processedBytes == null || processedBytes.isEmpty) {
           throw Exception('Failed to process icon: ${key.iconId}');
         }

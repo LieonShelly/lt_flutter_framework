@@ -8,6 +8,7 @@ typedef ProcessIconNative =
     Int32 Function(
       Pointer<Uint8> inputData,
       Int32 inputLength,
+      Int32 thickness,
       Pointer<Pointer<Uint8>> outputData,
       Pointer<Int32> outputLength,
     );
@@ -15,6 +16,7 @@ typedef ProcessIconDart =
     int Function(
       Pointer<Uint8> inputData,
       int inputLength,
+      int thickness,
       Pointer<Pointer<Uint8>> outputData,
       Pointer<Int32> outputLength,
     );
@@ -36,7 +38,7 @@ class FfiBridge {
       );
 
   /// 调用原生 process_icon，返回处理后的 PNG 数据，失败返回 null。
-  static Uint8List? processIcon(Uint8List imageBytes) {
+  static Uint8List? processIcon(Uint8List imageBytes, int thickness) {
     Pointer<Uint8> inputPtr = nullptr;
     Pointer<Pointer<Uint8>> outPtrPtr = nullptr;
     Pointer<Int32> outLenPtr = nullptr;
@@ -54,6 +56,7 @@ class FfiBridge {
       final status = _processIcon(
         inputPtr,
         imageBytes.length,
+        thickness,
         outPtrPtr,
         outLenPtr,
       );

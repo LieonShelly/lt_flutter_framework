@@ -53,7 +53,7 @@ class ReflectionRemoteDataSourceImpl implements ReflectionRemoteDataSource {
 
   @override
   Future<List<QuestionModel>> fetchTodayQuestions() async {
-    final response = await _apiClient.get('/api/qod');
+    final response = await _apiClient.get('/api/questions-of-the-day');
     final data = response['data'];
     if (data is List) {
       return await ComputeTransformer.decodeList(data, QuestionModel.fromJson);

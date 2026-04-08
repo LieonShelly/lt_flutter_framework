@@ -8,6 +8,7 @@ import UIKit
 func processIcon(
     _ inputData: UnsafePointer<UInt8>,
     _ inputLength: Int32,
+    _ thickness: Int32,
     _ outputData: UnsafeMutablePointer<UnsafeMutablePointer<UInt8>?>,
     _ outputLength: UnsafeMutablePointer<Int32>
 ) -> Int32 {
@@ -24,7 +25,7 @@ func processIcon(
     }
 
     // Call MetalImageProcessor
-    guard let processedImage = MetalImageProcessor.shared.processSync(uiImage, thickness: 4) else {
+    guard let processedImage = MetalImageProcessor.shared.processSync(uiImage, thickness: thickness) else {
         return 2 // Metal processing failure
     }
 

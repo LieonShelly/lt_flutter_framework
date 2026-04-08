@@ -10,6 +10,7 @@ class ProcessedIconView extends ConsumerWidget with ImageCacheKeyType {
   final Widget placeholder;
   final String herTag;
   final VoidCallback? onImageLoaded;
+  final int thickness;
 
   const ProcessedIconView({
     super.key,
@@ -18,6 +19,7 @@ class ProcessedIconView extends ConsumerWidget with ImageCacheKeyType {
     this.height,
     required this.placeholder,
     required this.herTag,
+    required this.thickness,
     this.onImageLoaded,
   });
 
@@ -30,13 +32,17 @@ class ProcessedIconView extends ConsumerWidget with ImageCacheKeyType {
         image: ProcessedIconImageProvider(
           iconId: cacheKey(imageUrl),
           imageUrl: imageUrl,
+          thickness: thickness,
         ),
         width: width,
         height: height,
         fit: BoxFit.contain,
         errorBuilder: (_, _, _) => _buildPlaceholder(),
         frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-          if (wasSynchronouslyLoaded || frame != null) return child;
+          if (wasSynchronouslyLoaded || frame != null) {
+            onImageLoaded?.call();
+            return child;
+          }
           return _buildPlaceholder();
         },
       ),

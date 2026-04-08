@@ -3,37 +3,11 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import './providers/today_question_providers.dart';
 part 'today_question_banner_controller.g.dart';
 
-class TodayQuestionState {
-  final AsyncValue<List<QuestionEntity>> todayQuestions;
-
-  TodayQuestionState({this.todayQuestions = const AsyncValue.loading()});
-
-  TodayQuestionState copyWith({
-    AsyncValue<List<QuestionEntity>>? todayQuestions,
-  }) {
-    return TodayQuestionState(
-      todayQuestions: todayQuestions ?? this.todayQuestions,
-    );
-  }
-}
-
 @riverpod
 class TodayQuestionBannerController extends _$TodayQuestionBannerController {
   @override
-  TodayQuestionState build() {
-    _fetchTodayQuestions();
-    return TodayQuestionState();
-  }
-
-  Future<void> _fetchTodayQuestions() async {
+  Future<List<QuestionEntity>> build() async {
     final usecase = ref.read(fethTodayQuestionUseCaseProvider);
-    try {
-      final list = await usecase.execute();
-      if (!ref.mounted) return;
-      state = state.copyWith(todayQuestions: AsyncValue.data(list));
-    } catch (e, stack) {
-      if (!ref.mounted) return;
-      state = state.copyWith(todayQuestions: AsyncValue.error(e, stack));
-    }
+    return await usecase.execute();
   }
 }

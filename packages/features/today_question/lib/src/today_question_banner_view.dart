@@ -53,14 +53,12 @@ class _TodayQuestionBannerViewState
 
   @override
   Widget build(BuildContext context) {
-    final todayQuestions = ref.watch(
-      todayQuestionBannerControllerProvider.select(
-        (state) => state.todayQuestions.value,
-      ),
+    final asyncState = ref.watch(todayQuestionBannerControllerProvider);
+    final latestQueistion = asyncState.whenOrNull(
+      data: (questions) => questions.lastOrNull,
     );
-    final latestQueistion = todayQuestions?.last;
     if (latestQueistion == null) {
-      return SizedBox();
+      return Container(color: Colors.red, height: 30);
     }
     final cross = SvgAsset(IconName.smallCross, width: 20, height: 20);
     final gradient = Container(
@@ -96,10 +94,7 @@ class _TodayQuestionBannerViewState
     );
     final btn = GestureDetector(
       onTap: () {
-        final questions = ref
-            .read(todayQuestionBannerControllerProvider)
-            .todayQuestions
-            .value;
+        final questions = ref.read(todayQuestionBannerControllerProvider).value;
         if (questions != null) {
           context.push(AppRoutePath.addAnswer, extra: questions);
         }

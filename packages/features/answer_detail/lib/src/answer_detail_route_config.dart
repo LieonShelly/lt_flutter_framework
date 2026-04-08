@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:feature_core/feature_core.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reflection_data/reflection_data.dart';
+import 'package:reflection_domain/reflection_domain.dart';
 import 'answer_detail_page.dart';
 
 class AnswerDetailRouteConfig extends FeatureRouteConfig {
@@ -15,7 +16,7 @@ class AnswerDetailRouteConfig extends FeatureRouteConfig {
       parentNavigatorKey: rootNavigatorKey,
       path: AppRoutePath.answerDetail,
       pageBuilder: (context, state) {
-        final answer = state.extra as AnswerModel;
+        final answer = state.extra as AnswerEntity;
         return CustomTransitionPage(
           key: state.pageKey,
           child: AnswerDetailPage(answer: answer),
