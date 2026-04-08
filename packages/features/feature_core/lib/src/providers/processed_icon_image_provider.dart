@@ -41,12 +41,14 @@ class ProcessedIconImageProvider
   }
 
   @override
-  int get hashCode => iconId.hashCode;
+  int get hashCode => Object.hash(iconId, thickness);
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is ProcessedIconImageProvider && other.iconId == iconId;
+    return other is ProcessedIconImageProvider &&
+        other.iconId == iconId &&
+        other.thickness == thickness;
   }
 
   Future<ui.Codec> _loadAsync(
@@ -57,7 +59,6 @@ class ProcessedIconImageProvider
       final tempPath = _cachedTempPath ?? await _initTempPath();
       final processedFilePath =
           '${tempPath}/processed_icon+${key.iconId}+thicness${thickness}.png';
-      debugPrint(processedFilePath);
       final processedFile = File(processedFilePath);
       Uint8List bytes;
       if (await processedFile.exists()) {

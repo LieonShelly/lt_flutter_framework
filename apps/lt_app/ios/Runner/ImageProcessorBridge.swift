@@ -8,7 +8,7 @@ import UIKit
 func processIcon(
     _ inputData: UnsafePointer<UInt8>,
     _ inputLength: Int32,
-    _ thickness: Int32,
+    _ thickness: Int,
     _ outputData: UnsafeMutablePointer<UnsafeMutablePointer<UInt8>?>,
     _ outputLength: UnsafeMutablePointer<Int32>
 ) -> Int32 {
