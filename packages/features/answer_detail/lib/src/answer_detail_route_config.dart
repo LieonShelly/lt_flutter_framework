@@ -1,3 +1,4 @@
+import 'package:answer_detail/src/metal_overlay_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:feature_core/feature_core.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +21,28 @@ class AnswerDetailRouteConfig extends FeatureRouteConfig {
         return CustomTransitionPage(
           key: state.pageKey,
           child: AnswerDetailPage(answer: answer),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position:
+                  Tween<Offset>(
+                    begin: const Offset(0, 1),
+                    end: Offset.zero,
+                  ).animate(
+                    CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+                  ),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+
+    GoRoute(
+      path: AppRoutePath.iconEditor,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: MetalOverlayEditor(initialIamgeName: 'initialIamgeName'),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return SlideTransition(
               position:

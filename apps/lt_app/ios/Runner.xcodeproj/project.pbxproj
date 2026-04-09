@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 70;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -76,7 +76,17 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		F8E62F8F2F87A70F0010ACB5 /* Source */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Source; sourceTree = "<group>"; };
+		F8E62F8F2F87A70F0010ACB5 /* ColorOverlayRenderer */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = ColorOverlayRenderer;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -155,7 +165,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
-				F8E62F8F2F87A70F0010ACB5 /* Source */,
+				F8E62F8F2F87A70F0010ACB5 /* ColorOverlayRenderer */,
 				F8F00C002F84B81900B668FA /* ImageProcessorBridge.swift */,
 				F8061FCD2F6A5BAC0061FDA8 /* RunnerDebug.entitlements */,
 				F84219CB2F6A56F800D75C3F /* Runner.entitlements */,
@@ -222,7 +232,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				F8E62F8F2F87A70F0010ACB5 /* Source */,
+				F8E62F8F2F87A70F0010ACB5 /* ColorOverlayRenderer */,
 			);
 			name = Runner;
 			productName = Runner;
@@ -336,13 +346,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

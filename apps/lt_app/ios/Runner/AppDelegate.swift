@@ -8,6 +8,9 @@ import UIKit
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         GeneratedPluginRegistrant.register(with: self)
+        let registrar = self.registrar(forPlugin: "MetalOverlayPlugin")!
+        let factory = MetalOverlayViewFactory(messenger: registrar.messenger())
+        registrar.register(factory, withId: "plugin.metal_overlay_view")
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
 }

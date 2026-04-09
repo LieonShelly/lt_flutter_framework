@@ -6,4 +6,5 @@ class AppRoutePath {
   static const answerDetail = "/answer_detail";
   static const addAnswer = "/add_answer";
   static const chat = "/chat";
+  static const iconEditor = "/iconEditor";
 }

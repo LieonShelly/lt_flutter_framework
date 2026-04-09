@@ -165,9 +165,15 @@ class _AnswerDetailPageState extends ConsumerState<AnswerDetailPage>
         },
       ),
     );
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 48, vertical: 50),
-      child: icon,
+
+    return InkWell(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 48, vertical: 50),
+        child: icon,
+      ),
+      onTap: () {
+        context.go(AppRoutePath.iconEditor);
+      },
     );
   }
 
