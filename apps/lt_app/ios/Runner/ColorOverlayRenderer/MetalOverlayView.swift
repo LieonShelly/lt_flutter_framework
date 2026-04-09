@@ -13,6 +13,7 @@ import UIKit
 class MetalOverlayView: NSObject, FlutterPlatformView, MTKViewDelegate {
     private var mtkView: MTKView
     private var channel: FlutterMethodChannel
+    private let renderer: ColorOverlayRenderer
     
     init(
         frame: CGRect,
@@ -28,14 +29,14 @@ class MetalOverlayView: NSObject, FlutterPlatformView, MTKViewDelegate {
         mtkView.clearColor = MTLClearColor(red: 1, green: 1, blue: 1, alpha: 1)
         mtkView.isOpaque = false
         self.channel = FlutterMethodChannel(name: "color_overlayer_\(viewId)", binaryMessenger: messenger)
+        renderer = ColorOverlayRenderer()
         super.init()
         mtkView.delegate = self
-        ColorOverlayRenderer.shared.mtkView = self.mtkView
+        renderer.mtkView = self.mtkView
         if let params = args as? [String: Any], let imageName = params["imageName"] as? String {
             let image = UIImage(resource: .dripper)
-            ColorOverlayRenderer.shared.prepareForRealtimeRendering(image: image)
-            // 设置默认颜色以触发首次绘制
-            ColorOverlayRenderer.shared.overlayColor = UIColor.red
+            renderer.prepareForRealtimeRendering(image: image)
+            renderer.overlayColor = UIColor.red
         }
         
         setupMethodCallHandler()
@@ -45,15 +46,21 @@ class MetalOverlayView: NSObject, FlutterPlatformView, MTKViewDelegate {
         return mtkView
     }
     
+    deinit {
+        channel.setMethodCallHandler(nil)
+        mtkView.delegate = nil
+        renderer.cleanupRealtimeCache()
+    }
+    
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
     
     func draw(in view: MTKView) {
-        ColorOverlayRenderer.shared.renderToView()
+        renderer.renderToView()
     }
     
     private func setupMethodCallHandler() {
         channel.setMethodCallHandler {[weak self] (call, result) in
-            if call.method == "updateColor" {
+            if let self, call.method == "updateColor" {
                 if let rgba = call.arguments as? [NSNumber], rgba.count == 4 {
                     let color = UIColor(
                         red: CGFloat(rgba[0].doubleValue),
@@ -61,7 +68,7 @@ class MetalOverlayView: NSObject, FlutterPlatformView, MTKViewDelegate {
                         blue: CGFloat(rgba[2].doubleValue),
                         alpha: CGFloat(rgba[3].doubleValue)
                     )
-                    ColorOverlayRenderer.shared.overlayColor = color
+                    self.renderer.overlayColor = color
                 }
                 result(nil)
             } else {

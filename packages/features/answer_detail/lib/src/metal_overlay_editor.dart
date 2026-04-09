@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lt_uicomponent/uicomponent.dart';
 
 class MetalOverlayEditor extends StatefulWidget {
   final String initialIamgeName;
@@ -81,6 +83,7 @@ class _MetalOverlayEditorState extends State<MetalOverlayEditor> {
                   },
                 ),
               ),
+              _buildBottomView(context),
             ],
           ),
         ),
@@ -96,5 +99,28 @@ class _MetalOverlayEditorState extends State<MetalOverlayEditor> {
     if (_channel != null) {
       _channel!.invokeMethod('updateColor', [_red, _green, _blue, _alpha]);
     }
+  }
+
+  Widget _buildBottomView(BuildContext context) {
+    final container = Container(
+      width: 48,
+      height: 48,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Color(0xEBEBEBEB),
+      ),
+      child: SvgAsset(IconName.close, width: 16, height: 16),
+    );
+    final padding = Padding(
+      padding: EdgeInsets.only(bottom: 40),
+      child: container,
+    );
+    return GestureDetector(
+      onTap: () {
+        context.pop();
+      },
+      child: padding,
+    );
   }
 }

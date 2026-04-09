@@ -172,7 +172,7 @@ class _AnswerDetailPageState extends ConsumerState<AnswerDetailPage>
         child: icon,
       ),
       onTap: () {
-        context.go(AppRoutePath.iconEditor);
+        context.push(AppRoutePath.iconEditor);
       },
     );
   }
