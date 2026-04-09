@@ -1,3 +1,4 @@
+import 'package:answer_detail/src/external_texture_editor.dart';
 import 'package:answer_detail/src/metal_overlay_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:feature_core/feature_core.dart';
@@ -43,7 +44,7 @@ class AnswerDetailRouteConfig extends FeatureRouteConfig {
         final imagePath = state.extra as String;
         return CustomTransitionPage(
           key: state.pageKey,
-          child: MetalOverlayEditor(imagePath: imagePath),
+          child: ExternalTextureEditor(imagePath: imagePath),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return SlideTransition(
               position:

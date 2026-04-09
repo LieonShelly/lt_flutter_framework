@@ -11,7 +11,48 @@ import UIKit
         let registrar = self.registrar(forPlugin: "MetalOverlayPlugin")!
         let factory = MetalOverlayViewFactory(messenger: registrar.messenger())
         registrar.register(factory, withId: "plugin.metal_overlay_view")
+        registerExternalTexure()
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+    
+    var externalTexture: MetalExternalTexture?
+    var channel: FlutterMethodChannel?
+    
+    func registerExternalTexure() {
+        let registry = self.registrar(forPlugin: "MetalTexturePlugin")!.textures()
+        let controller = window?.rootViewController as! FlutterViewController
+        let device = MTLCreateSystemDefaultDevice()!
+        externalTexture = MetalExternalTexture(registry: registry, device: device)
+        OverlayExternalTextureRenderer.shared.externalTexture = externalTexture
+        channel = FlutterMethodChannel(name: "metal_texture_channel", binaryMessenger: controller.binaryMessenger)
+        channel?.setMethodCallHandler({ [weak self] (call, result) in
+            guard let self = self else { return }
+            
+            if call.method == "initializeTexture" {
+                result(self.externalTexture?.textureId)
+                
+                if let params = call.arguments as? [String: Any],
+                    let imagePath = params["imagePath"] as? String,
+                    let image = UIImage(contentsOfFile: imagePath) {
+                    OverlayExternalTextureRenderer.shared.prepareForRealtimeRendering(image: image)
+                    OverlayExternalTextureRenderer.shared.overlayColor = UIColor.red
+                    OverlayExternalTextureRenderer.shared.renderToExternalTexture()
+                }
+                
+            } else if call.method == "updateColor" {
+                if let rgba = call.arguments as? [NSNumber], rgba.count == 4 {
+                    let color = UIColor(
+                        red: CGFloat(rgba[0].doubleValue),
+                        green: CGFloat(rgba[1].doubleValue),
+                        blue: CGFloat(rgba[2].doubleValue),
+                        alpha: CGFloat(rgba[3].doubleValue)
+                    )
+                    OverlayExternalTextureRenderer.shared.overlayColor = color
+                    OverlayExternalTextureRenderer.shared.renderToExternalTexture()
+                    result(nil)
+                }
+            }
+        })
     }
 }
     
