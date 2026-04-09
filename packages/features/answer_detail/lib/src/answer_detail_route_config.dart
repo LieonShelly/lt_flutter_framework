@@ -40,9 +40,10 @@ class AnswerDetailRouteConfig extends FeatureRouteConfig {
     GoRoute(
       path: AppRoutePath.iconEditor,
       pageBuilder: (context, state) {
+        final imagePath = state.extra as String;
         return CustomTransitionPage(
           key: state.pageKey,
-          child: MetalOverlayEditor(initialIamgeName: 'initialIamgeName'),
+          child: MetalOverlayEditor(imagePath: imagePath),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return SlideTransition(
               position:

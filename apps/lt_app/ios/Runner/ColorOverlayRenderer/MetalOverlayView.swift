@@ -33,8 +33,7 @@ class MetalOverlayView: NSObject, FlutterPlatformView, MTKViewDelegate {
         super.init()
         mtkView.delegate = self
         renderer.mtkView = self.mtkView
-        if let params = args as? [String: Any], let imageName = params["imageName"] as? String {
-            let image = UIImage(resource: .dripper)
+        if let params = args as? [String: Any], let imagePath = params["imagePath"] as? String, let image = UIImage(contentsOfFile: imagePath) {
             renderer.prepareForRealtimeRendering(image: image)
             renderer.overlayColor = UIColor.red
         }

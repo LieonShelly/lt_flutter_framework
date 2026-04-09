@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:lt_uicomponent/uicomponent.dart';
 
 class MetalOverlayEditor extends StatefulWidget {
-  final String initialIamgeName;
-  const MetalOverlayEditor({required this.initialIamgeName, super.key});
+  final String imagePath;
+  const MetalOverlayEditor({required this.imagePath, super.key});
 
   @override
   State<StatefulWidget> createState() => _MetalOverlayEditorState();
@@ -21,9 +21,7 @@ class _MetalOverlayEditorState extends State<MetalOverlayEditor> {
   @override
   Widget build(BuildContext context) {
     const String viewType = "plugin.metal_overlay_view";
-    final Map<String, dynamic> creationParams = {
-      'imageName': widget.initialIamgeName,
-    };
+    final Map<String, dynamic> creationParams = {'imagePath': widget.imagePath};
     return Column(
       children: [
         Expanded(

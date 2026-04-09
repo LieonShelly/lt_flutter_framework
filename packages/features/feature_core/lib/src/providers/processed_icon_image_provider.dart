@@ -91,4 +91,19 @@ class ProcessedIconImageProvider
     _cachedTempPath = dir.path;
     return dir.path;
   }
+
+  /// 获取处理后的图标缓存文件路径
+  static Future<String?> getCachedFilePath({
+    required String imageUrl,
+    required int thickness,
+  }) async {
+    final cacheKey = ImageCacheKey().cacheKey(imageUrl);
+    final tempPath = _cachedTempPath ?? await _initTempPath();
+    final path = '$tempPath/processed_icon+$cacheKey+thicness$thickness.png';
+    final file = File(path);
+    if (await file.exists()) {
+      return path;
+    }
+    return null;
+  }
 }

@@ -171,8 +171,14 @@ class _AnswerDetailPageState extends ConsumerState<AnswerDetailPage>
         padding: EdgeInsets.symmetric(horizontal: 48, vertical: 50),
         child: icon,
       ),
-      onTap: () {
-        context.push(AppRoutePath.iconEditor);
+      onTap: () async {
+        final path = await ProcessedIconImageProvider.getCachedFilePath(
+          imageUrl: widget.answer.icon?.url ?? "",
+          thickness: 0,
+        );
+        if (path != null && context.mounted) {
+          context.push(AppRoutePath.iconEditor, extra: path);
+        }
       },
     );
   }
