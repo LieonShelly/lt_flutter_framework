@@ -1,11 +1,8 @@
-import 'package:answer_detail/src/external_texture_editor.dart';
-import 'package:answer_detail/src/metal_overlay_editor.dart';
+import 'package:answer_detail/answer_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:feature_core/feature_core.dart';
 import 'package:go_router/go_router.dart';
-import 'package:reflection_data/reflection_data.dart';
 import 'package:reflection_domain/reflection_domain.dart';
-import 'answer_detail_page.dart';
 
 class AnswerDetailRouteConfig extends FeatureRouteConfig {
   final GlobalKey<NavigatorState> rootNavigatorKey;
@@ -39,6 +36,7 @@ class AnswerDetailRouteConfig extends FeatureRouteConfig {
     ),
 
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: AppRoutePath.iconEditor,
       pageBuilder: (context, state) {
         final imagePath = state.extra as String;

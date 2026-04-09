@@ -18,6 +18,30 @@ class QuestionEntity {
     required this.answers,
   });
 
+  Map<String, dynamic> toJson({bool includeAnswers = true}) => {
+    'id': id,
+    'title': title,
+    'category': category.toJson(),
+    'pinned': pinned,
+    'subCategory': subCategory?.toJson(),
+    if (includeAnswers) 'answers': answers.map((a) => a.toJson()).toList(),
+  };
+
+  factory QuestionEntity.fromJson(Map<String, dynamic> json) => QuestionEntity(
+    id: json['id'] as String,
+    title: json['title'] as String,
+    category: CategoryEntity.fromJson(json['category'] as Map<String, dynamic>),
+    pinned: json['pinned'] as bool,
+    subCategory: json['subCategory'] != null
+        ? CategoryEntity.fromJson(json['subCategory'] as Map<String, dynamic>)
+        : null,
+    answers:
+        (json['answers'] as List<dynamic>?)
+            ?.map((e) => AnswerEntity.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        [],
+  );
+
   bool get hasAnswers => answers.isNotEmpty;
 
   bool get isAnsweredToday {

@@ -3,11 +3,15 @@ class CategoryEntity {
   final String name;
   final String? color;
 
-  const CategoryEntity({
-    required this.id,
-    required this.name,
-    this.color,
-  });
+  const CategoryEntity({required this.id, required this.name, this.color});
+
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'color': color};
+
+  factory CategoryEntity.fromJson(Map<String, dynamic> json) => CategoryEntity(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    color: json['color'] as String?,
+  );
 
   @override
   bool operator ==(Object other) =>

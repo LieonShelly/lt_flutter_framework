@@ -16,6 +16,26 @@ class AnswerEntity {
     this.icon,
   });
 
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'content': content,
+    'createdAt': createdAt.toIso8601String(),
+    'question': question?.toJson(includeAnswers: false),
+    'icon': icon?.toJson(),
+  };
+
+  factory AnswerEntity.fromJson(Map<String, dynamic> json) => AnswerEntity(
+    id: json['id'] as String,
+    content: json['content'] as String,
+    createdAt: DateTime.parse(json['createdAt'] as String),
+    question: json['question'] != null
+        ? QuestionEntity.fromJson(json['question'] as Map<String, dynamic>)
+        : null,
+    icon: json['icon'] != null
+        ? IconEntity.fromJson(json['icon'] as Map<String, dynamic>)
+        : null,
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

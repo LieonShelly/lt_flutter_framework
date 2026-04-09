@@ -4,6 +4,13 @@ class IconEntity {
 
   const IconEntity({required this.status, required this.url});
 
+  Map<String, dynamic> toJson() => {'status': status.name, 'url': url};
+
+  factory IconEntity.fromJson(Map<String, dynamic> json) => IconEntity(
+    status: IconStatus.fromString((json['status'] as String?)?.toUpperCase()),
+    url: json['url'] as String,
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
