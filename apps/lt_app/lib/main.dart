@@ -17,6 +17,7 @@ class MyApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
+      showPerformanceOverlay: true, // 开启屏幕顶部的 CPU/GPU 实时柱状图
       checkerboardOffscreenLayers: true,
       routerConfig: router,
       title: 'Little Thing',
