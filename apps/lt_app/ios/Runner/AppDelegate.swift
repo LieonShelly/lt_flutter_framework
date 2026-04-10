@@ -12,6 +12,7 @@ import UIKit
         let factory = MetalOverlayViewFactory(messenger: registrar.messenger())
         registrar.register(factory, withId: "plugin.metal_overlay_view")
         registerExternalTexure()
+        registerBinnaryChannel()
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
     
@@ -53,6 +54,25 @@ import UIKit
                 }
             }
         })
+    }
+    
+    func registerBinnaryChannel() {
+        let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
+        let binnaryChannel = FlutterBasicMessageChannel(
+            name: "binnary_channel",
+            binaryMessenger: controller.binaryMessenger,
+            codec: FlutterBinaryCodec.sharedInstance()
+        )
+        binnaryChannel.setMessageHandler { messsage, reply in
+            if let data = messsage as? Data {
+                // TODO: 处理图像数据
+                let reponseBytes: [UInt8] = [1]
+                let responseData = Data(reponseBytes)
+                reply(responseData)
+            } else {
+                reply(nil)
+            }
+        }
     }
 }
     
