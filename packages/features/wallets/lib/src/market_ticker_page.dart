@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:wallet_data/wallet_data.dart';
@@ -92,16 +91,18 @@ class _TickerItemState extends State<_TickerItem> {
   }
 
   void _tryCompute() {
-    final cacheKey =
-        '${widget.ticker.symbol}_${widget.ticker.price.toStringAsFixed(4)}';
+    final symbol = widget.ticker.symbol;
+    final cacheKey = '${symbol}_${widget.ticker.price.toStringAsFixed(4)}';
 
-    // ✅ 优化5：命中缓存直接用，不重复计算
+    // ✅ 命中缓存直接用
     if (widget.computeCache.containsKey(cacheKey)) {
       _computedValue = widget.computeCache[cacheKey];
       return;
     }
 
-    // ✅ 优化6：耗时计算放到 isolate，不阻塞主线程
+    // ✅ 清理该 symbol 的旧缓存，只保留最新 price
+    widget.computeCache.removeWhere((key, _) => key.startsWith('${symbol}_'));
+
     if (!_computing) {
       _computing = true;
       compute(_heavyCompute, widget.ticker.price).then((result) {
