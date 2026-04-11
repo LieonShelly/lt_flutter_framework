@@ -58,7 +58,7 @@ class _TodayQuestionBannerViewState
       data: (questions) => questions.lastOrNull,
     );
     if (latestQueistion == null) {
-      return Container(color: Colors.red, height: 30);
+      return SizedBox.shrink();
     }
     final cross = SvgAsset(IconName.smallCross, width: 20, height: 20);
     final gradient = Container(

@@ -1,3 +1,2 @@
-library wallet;
-
-export 'src/balance_page.dart';
+export 'src/market_ticker_page.dart';
+export 'src/wallets_route_config.dart';

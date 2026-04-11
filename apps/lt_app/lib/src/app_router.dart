@@ -9,6 +9,7 @@ import 'package:thread/thread.dart';
 import 'package:user/user.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:feature_core/feature_core.dart';
+import 'package:wallets/wallet.dart';
 
 part 'app_router.g.dart';
 
@@ -22,12 +23,12 @@ GoRouter router(Ref ref) {
   final userRoutes = UserRouteConfig();
   final answerDetailRoutes = AnswerDetailRouteConfig(_rootNavigatorKey);
   final addAnswerRoutes = AddAnswerRouteConfig(_rootNavigatorKey);
-
+  final wallet = WalletsRouteConfig();
   final shellBranches = <StatefulShellBranch>[
-    ...calendarRoutes.shellBranches ?? [],
-    ...threadRoutes.shellBranches ?? [],
-    ...copilotRoutes.shellBranches ?? [],
-    ...userRoutes.shellBranches ?? [],
+    ...calendarRoutes.shellBranches,
+    ...threadRoutes.shellBranches,
+    ...copilotRoutes.shellBranches,
+    ...userRoutes.shellBranches,
   ];
 
   final topLevelRoutes = <RouteBase>[
@@ -37,6 +38,7 @@ GoRouter router(Ref ref) {
     ...userRoutes.routes,
     ...answerDetailRoutes.routes,
     ...addAnswerRoutes.routes,
+    ...wallet.routes,
   ];
 
   return GoRouter(

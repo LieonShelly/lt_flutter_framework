@@ -14,6 +14,10 @@ class UserHomePage extends ConsumerStatefulWidget {
 }
 
 class _UserHomePageState extends ConsumerState<UserHomePage> {
+  final List<UserRouteEntity> list = [
+    UserRouteEntity(name: 'Chat', routePath: AppRoutePath.chat),
+    UserRouteEntity(name: 'Market', routePath: AppRoutePath.market),
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,10 +41,11 @@ class _UserHomePageState extends ConsumerState<UserHomePage> {
   Widget _buildListView() {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: 1,
+      itemCount: list.length,
       itemBuilder: (context, index) {
-        return _buildItem("Chat", () {
-          context.push(AppRoutePath.chat);
+        final elemet = list.elementAt(index);
+        return _buildItem(elemet.name, () {
+          context.push(elemet.routePath);
         });
       },
     );
@@ -50,14 +55,32 @@ class _UserHomePageState extends ConsumerState<UserHomePage> {
     final containter = Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.grey,
-        borderRadius: BorderRadius.circular(20),
+        border: BoxBorder.all(color: AppColors.black1),
+        borderRadius: BorderRadius.all(Radius.circular(16)),
       ),
       child: Text(
         title,
-        style: TextStyle(color: Colors.black87, fontSize: 16.0),
+        style: AppTextStyle.feltTipSeniorRegular(fontSize: 23),
       ),
     );
-    return GestureDetector(onTap: action, child: containter);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: action,
+          borderRadius: BorderRadius.circular(16),
+          child: containter,
+        ),
+      ),
+    );
   }
+}
+
+class UserRouteEntity {
+  final String name;
+  final String routePath;
+
+  UserRouteEntity({required this.name, required this.routePath});
 }

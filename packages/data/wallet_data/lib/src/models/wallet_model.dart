@@ -67,3 +67,24 @@ class TransactionModel {
     );
   }
 }
+
+// ticker_model.dart
+class TickerModel {
+  final String symbol;
+  final double price;
+  final String timestamp;
+
+  TickerModel({
+    required this.symbol,
+    required this.price,
+    required this.timestamp,
+  });
+
+  factory TickerModel.fromJson(Map<String, dynamic> json) {
+    return TickerModel(
+      symbol: json['symbol'] ?? '',
+      price: (json['price'] ?? 0).toDouble(),
+      timestamp: json['timestamp'] ?? '',
+    );
+  }
+}

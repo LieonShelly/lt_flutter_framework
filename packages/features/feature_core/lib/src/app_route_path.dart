@@ -7,4 +7,5 @@ class AppRoutePath {
   static const addAnswer = "/add_answer";
   static const chat = "/chat";
   static const iconEditor = "/iconEditor";
+  static const market = '/market';
 }

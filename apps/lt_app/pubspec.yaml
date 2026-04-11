@@ -73,7 +73,8 @@ dependencies:
     path: ../../packages/features/today_question
   user:
     path: ../../packages/features/user
-
+  wallets:
+    path: ../../packages/features/wallets
 
 
 dev_dependencies:
@@ -85,8 +86,8 @@ dev_dependencies:
   freezed: ^3.2.3
   json_serializable: ^6.7.1
 
-# flutter:
-#   uses-material-design: true
+flutter:
+  uses-material-design: true
 #   assets:
 #     - assets/icons/
 #   fonts:
