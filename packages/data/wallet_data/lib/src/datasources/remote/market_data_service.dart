@@ -5,16 +5,14 @@ import 'package:wallet_data/wallet_data.dart';
 
 class MarketDataService {
   WebSocketChannel? _channel;
+  Timer? _throttleTimer;
+  List<TickerModel>? _latestTickers;
 
   final StreamController<List<TickerModel>> _tickerController =
       StreamController<List<TickerModel>>.broadcast();
   Stream<List<TickerModel>> get tickerStream => _tickerController.stream;
 
   void connect() {
-    // ⚠️ 避坑指南：
-    // iOS 模拟器可以使用 ws://127.0.0.1:8000/ws 或 localhost
-    // Android 模拟器必须使用 ws://10.0.2.2:8000/ws
-    // 真机测试需替换为电脑的局域网 IP，如 ws://192.168.1.100:8000/ws
     final uri = Uri.parse('ws://127.0.0.1:8000/ws');
 
     try {
@@ -24,7 +22,16 @@ class MarketDataService {
         (message) {
           final List<dynamic> dataList = jsonDecode(message);
           final tickers = dataList.map((e) => TickerModel.fromJson(e)).toList();
-          _tickerController.add(tickers);
+
+          // ✅ 优化1：节流 — 缓存最新数据，每 200ms 才推送一次给 UI
+          _latestTickers = tickers;
+          _throttleTimer ??= Timer(const Duration(milliseconds: 200), () {
+            if (_latestTickers != null) {
+              _tickerController.add(_latestTickers!);
+              _latestTickers = null;
+            }
+            _throttleTimer = null;
+          });
         },
         onError: (error) {
           print('WebSocket 发生错误: $error');
@@ -45,6 +52,7 @@ class MarketDataService {
   }
 
   void dispose() {
+    _throttleTimer?.cancel();
     _channel?.sink.close();
     _tickerController.close();
   }

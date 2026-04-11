@@ -1,4 +1,6 @@
-// market_ticker_page.dart
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:wallet_data/wallet_data.dart';
 
@@ -9,16 +11,28 @@ class MarketTickerPage extends StatefulWidget {
 
 class _MarketTickerPageState extends State<MarketTickerPage> {
   late final MarketDataService _dataService;
+  List<TickerModel> _tickers = [];
+  // ✅ 优化2：缓存耗时计算结果，只在价格变化时重新计算
+  final Map<String, double> _computeCache = {};
+  StreamSubscription<List<TickerModel>>? _subscription;
 
   @override
   void initState() {
     super.initState();
     _dataService = MarketDataService();
     _dataService.connect();
+
+    // ✅ 优化3：手动监听 stream，用 setState 精确控制刷新
+    _subscription = _dataService.tickerStream.listen((tickers) {
+      setState(() {
+        _tickers = tickers;
+      });
+    });
   }
 
   @override
   void dispose() {
+    _subscription?.cancel();
     _dataService.dispose();
     super.dispose();
   }
@@ -26,97 +40,126 @@ class _MarketTickerPageState extends State<MarketTickerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('卡顿复现：实时行情')),
-      body: StreamBuilder<List<TickerModel>>(
-        // 🔴 灾难源头：包裹了整个列表
-        stream: _dataService.tickerStream,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
-          }
+      appBar: AppBar(title: Text('优化后：实时行情')),
+      body: _tickers.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: _tickers.length,
+              itemBuilder: (context, index) {
+                final ticker = _tickers[index];
+                return _TickerItem(
+                  key: ValueKey(ticker.symbol),
+                  ticker: ticker,
+                  computeCache: _computeCache,
+                );
+              },
+            ),
+    );
+  }
+}
 
-          final tickers = snapshot.data!;
+// ✅ 优化4：独立的 StatefulWidget，配合 ValueKey 只重建数据变化的 item
+class _TickerItem extends StatefulWidget {
+  final TickerModel ticker;
+  final Map<String, double> computeCache;
 
-          return ListView.builder(
-            itemCount: tickers.length,
-            itemBuilder: (context, index) {
-              final ticker = tickers[index];
+  const _TickerItem({
+    super.key,
+    required this.ticker,
+    required this.computeCache,
+  });
 
-              // 🔴 模拟耗时操作：在 build 中做同步计算，阻塞主线程
-              // 每个 item 都会执行，50 个 item × 每秒 10 次推送 = 每秒 500 次重计算
-              double dummy = 0;
-              for (int i = 0; i < 2000000; i++) {
-                dummy += (ticker.price * i).hashCode % 7;
-              }
+  @override
+  State<_TickerItem> createState() => _TickerItemState();
+}
 
-              return Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                child: ClipRRect(
-                  borderRadius: BorderRadiusGeometry.all(Radius.circular(8)),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // 🔴 每次 rebuild 都创建新的 BoxDecoration + 渐变 + 阴影
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [
-                              Color((dummy.toInt() & 0x00FFFFFF) | 0xFF000000),
-                              Colors.blue,
-                            ],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 8,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            ticker.symbol.split('_').last,
-                            style: TextStyle(color: Colors.white, fontSize: 12),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              ticker.symbol,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              '计算值: ${dummy.toStringAsFixed(2)}',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Text(
-                        '\$${ticker.price.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          color: Colors.green,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
+class _TickerItemState extends State<_TickerItem> {
+  double? _computedValue;
+  bool _computing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _tryCompute();
+  }
+
+  @override
+  void didUpdateWidget(covariant _TickerItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.ticker.price != widget.ticker.price) {
+      _tryCompute();
+    }
+  }
+
+  void _tryCompute() {
+    final cacheKey =
+        '${widget.ticker.symbol}_${widget.ticker.price.toStringAsFixed(4)}';
+
+    // ✅ 优化5：命中缓存直接用，不重复计算
+    if (widget.computeCache.containsKey(cacheKey)) {
+      _computedValue = widget.computeCache[cacheKey];
+      return;
+    }
+
+    // ✅ 优化6：耗时计算放到 isolate，不阻塞主线程
+    if (!_computing) {
+      _computing = true;
+      compute(_heavyCompute, widget.ticker.price).then((result) {
+        if (mounted) {
+          widget.computeCache[cacheKey] = result;
+          setState(() {
+            _computedValue = result;
+            _computing = false;
+          });
+        }
+      });
+    }
+  }
+
+  // 在 isolate 中执行的耗时计算
+  static double _heavyCompute(double price) {
+    double dummy = 0;
+    for (int i = 0; i < 2000000; i++) {
+      dummy += (price * i).hashCode % 7;
+    }
+    return dummy;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ticker = widget.ticker;
+    final dummy = _computedValue ?? 0;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Row(
+        children: [
+          CircleAvatar(child: Text(ticker.symbol.split('_').last)),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  ticker.symbol,
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-              );
-            },
-          );
-        },
+                Text(
+                  '计算值: ${dummy.toStringAsFixed(2)}',
+                  style: TextStyle(fontSize: 10, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            '\$${ticker.price.toStringAsFixed(2)}',
+            style: TextStyle(
+              color: Colors.green,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }
