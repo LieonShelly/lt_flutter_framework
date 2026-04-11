@@ -6,9 +6,9 @@ import 'package:wallet_data/wallet_data.dart';
 class MarketDataService {
   WebSocketChannel? _channel;
 
-  final StreamController<TickerModel> _tickerController =
-      StreamController<TickerModel>.broadcast();
-  Stream<TickerModel> get tickerStream => _tickerController.stream;
+  final StreamController<List<TickerModel>> _tickerController =
+      StreamController<List<TickerModel>>.broadcast();
+  Stream<List<TickerModel>> get tickerStream => _tickerController.stream;
 
   void connect() {
     // ⚠️ 避坑指南：
@@ -22,9 +22,9 @@ class MarketDataService {
 
       _channel!.stream.listen(
         (message) {
-          final Map<String, dynamic> data = jsonDecode(message);
-          final ticker = TickerModel.fromJson(data);
-          _tickerController.add(ticker);
+          final List<dynamic> dataList = jsonDecode(message);
+          final tickers = dataList.map((e) => TickerModel.fromJson(e)).toList();
+          _tickerController.add(tickers);
         },
         onError: (error) {
           print('WebSocket 发生错误: $error');
