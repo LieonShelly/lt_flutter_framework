@@ -1,4 +1,4 @@
-.PHONY: setup clean codegen watch reset help shell-deps
+.PHONY: setup clean codegen watch reset help shell-deps xcframework
 
 PACKAGE ?=
 
@@ -14,6 +14,7 @@ help:
 	@echo "  make reset              - Clean, setup, and codegen (full reset)"
 	@echo "  make shell-deps         - Install shell script dependencies"
 	@echo "  make help               - Show this help message"
+	@echo "  make xcframework MODULE=name - Build XCFramework for a Flutter module"
 	@echo ""
 	@echo "Package-specific operations:"
 	@echo "  make setup PACKAGE=name    - Setup specific package"
@@ -25,6 +26,7 @@ help:
 	@echo "  make setup PACKAGE=reflection_data"
 	@echo "  make codegen PACKAGE=lt_app"
 	@echo "  make watch PACKAGE=user_data"
+	@echo "  make xcframework MODULE=answer_detail_module"
 
 # Install shell script dependencies
 shell-deps:
@@ -74,3 +76,15 @@ reset:
 	@dart shell/bin/codegen.dart
 	@echo ""
 	@echo "✅ Full reset completed!"
+
+MODULE ?=
+
+xcframework: shell-deps
+ifndef MODULE
+	@echo "❌ 缺少 MODULE 参数"
+	@echo "用法: make xcframework MODULE=<module_name>"
+	@echo "示例: make xcframework MODULE=answer_detail_module"
+	@exit 1
+else
+	@dart shell/bin/build_xcframework.dart --module $(MODULE)
+endif

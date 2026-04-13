@@ -50,6 +50,14 @@ class _MarketTickerPageState extends State<MarketTickerPage> {
                   key: ValueKey(ticker.symbol),
                   ticker: ticker,
                   computeCache: _computeCache,
+                  ontap: () {
+                    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("${ticker.symbol} - ${ticker.price}"),
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -61,11 +69,13 @@ class _MarketTickerPageState extends State<MarketTickerPage> {
 class _TickerItem extends StatefulWidget {
   final TickerModel ticker;
   final Map<String, double> computeCache;
+  final VoidCallback ontap;
 
   const _TickerItem({
     super.key,
     required this.ticker,
     required this.computeCache,
+    required this.ontap,
   });
 
   @override
@@ -131,36 +141,41 @@ class _TickerItemState extends State<_TickerItem> {
     final ticker = widget.ticker;
     final dummy = _computedValue ?? 0;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Row(
-        children: [
-          CircleAvatar(child: Text(ticker.symbol.split('_').last)),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  ticker.symbol,
-                  style: TextStyle(fontWeight: FontWeight.bold),
+    return RepaintBoundary(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        child: InkWell(
+          onTap: widget.ontap,
+          child: Row(
+            children: [
+              CircleAvatar(child: Text(ticker.symbol.split('_').last)),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ticker.symbol,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      '计算值: ${dummy.toStringAsFixed(2)}',
+                      style: TextStyle(fontSize: 10, color: Colors.grey),
+                    ),
+                  ],
                 ),
-                Text(
-                  '计算值: ${dummy.toStringAsFixed(2)}',
-                  style: TextStyle(fontSize: 10, color: Colors.grey),
+              ),
+              Text(
+                '\$${ticker.price.toStringAsFixed(2)}',
+                style: TextStyle(
+                  color: Colors.green,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Text(
-            '\$${ticker.price.toStringAsFixed(2)}',
-            style: TextStyle(
-              color: Colors.green,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

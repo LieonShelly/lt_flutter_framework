@@ -48,6 +48,7 @@ workspace:
   - apps/algorithm_app
   - apps/compass_app
   - apps/shop_app
+  - apps/answer_detail_module
   
   # Shell scripts
   - shell
