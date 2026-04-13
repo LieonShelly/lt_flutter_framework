@@ -10,14 +10,17 @@ class AnswerModel {
   final String id;
   final String content;
   @LtJsonKey('created_ymd')
-  final String createdYmd;
+  final String? createdYmd;
+  @LtJsonKey('created_tms')
+  final String? createdTms;
   final QuestionModel? question;
   final IconModel? icon;
 
   AnswerModel({
     required this.id,
     required this.content,
-    required this.createdYmd,
+    this.createdYmd,
+    this.createdTms,
     this.question,
     this.icon,
   });
@@ -29,7 +32,8 @@ class AnswerModel {
     return AnswerEntity(
       id: id,
       content: content,
-      createdAt: DateTime.parse(createdYmd),
+      createTms: createdTms != null ? DateTime.parse(createdTms!) : null,
+      createYmd: createdYmd != null ? DateTime.parse(createdYmd!) : null,
       question: question?.toEntity(),
       icon: icon?.toEntity(),
     );
@@ -39,7 +43,12 @@ class AnswerModel {
     return AnswerModel(
       id: entity.id,
       content: entity.content,
-      createdYmd: entity.createdAt.toIso8601String().split('T')[0],
+      createdYmd: entity.createYmd != null
+          ? entity.createYmd!.toIso8601String().split('T')[0]
+          : null,
+      createdTms: entity.createTms != null
+          ? entity.createTms!.toIso8601String().split('T')[0]
+          : null,
       question: entity.question != null
           ? QuestionModel.fromEntity(entity.question!)
           : null,

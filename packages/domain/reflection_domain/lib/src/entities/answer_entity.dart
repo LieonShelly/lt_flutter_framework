@@ -4,14 +4,16 @@ import 'icon_entity.dart';
 class AnswerEntity {
   final String id;
   final String content;
-  final DateTime createdAt;
+  final DateTime? createTms;
+  final DateTime? createYmd;
   final QuestionEntity? question;
   final IconEntity? icon;
 
   const AnswerEntity({
     required this.id,
     required this.content,
-    required this.createdAt,
+    this.createTms,
+    this.createYmd,
     this.question,
     this.icon,
   });
@@ -19,7 +21,8 @@ class AnswerEntity {
   Map<String, dynamic> toJson() => {
     'id': id,
     'content': content,
-    'createdAt': createdAt.toIso8601String(),
+    'createTms': createTms?.toIso8601String(),
+    "createYmd": createYmd?.toIso8601String(),
     'question': question?.toJson(includeAnswers: false),
     'icon': icon?.toJson(),
   };
@@ -27,7 +30,8 @@ class AnswerEntity {
   factory AnswerEntity.fromJson(Map<String, dynamic> json) => AnswerEntity(
     id: json['id'] as String,
     content: json['content'] as String,
-    createdAt: DateTime.parse(json['createdAt'] as String),
+    createTms: DateTime.parse(json['createTms'] as String),
+    createYmd: DateTime.parse(json['createYmd'] as String),
     question: json['question'] != null
         ? QuestionEntity.fromJson(json['question'] as Map<String, dynamic>)
         : null,
@@ -43,8 +47,10 @@ class AnswerEntity {
           runtimeType == other.runtimeType &&
           id == other.id &&
           content == other.content &&
-          createdAt == other.createdAt;
+          createTms == other.createTms &&
+          createYmd == other.createYmd;
 
   @override
-  int get hashCode => id.hashCode ^ content.hashCode ^ createdAt.hashCode;
+  int get hashCode =>
+      id.hashCode ^ content.hashCode ^ createTms.hashCode ^ createYmd.hashCode;
 }

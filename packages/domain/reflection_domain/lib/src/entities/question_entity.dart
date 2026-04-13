@@ -47,7 +47,7 @@ class QuestionEntity {
   bool get isAnsweredToday {
     if (answers.isEmpty) return false;
     final today = DateTime.now();
-    return answers.any((a) => _isSameDay(a.createdAt, today));
+    return answers.any((a) => _isSameDay(a.createYmd!, today));
   }
 
   bool _isSameDay(DateTime a, DateTime b) {
