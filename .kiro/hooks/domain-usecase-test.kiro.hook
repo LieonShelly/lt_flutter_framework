@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Domain UseCase 单元测试",
+  "description": "当用户提交的消息涉及为 domain 层 UseCase 编写单元测试时，自动加载 domain-usecase-test skill 指引生成基于 Mocktail 的测试代码",
+  "version": "1",
+  "when": {
+    "type": "promptSubmit"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "检查用户消息是否涉及为 domain 层 UseCase 编写单元测试（关键词：UseCase 测试、单元测试、usecase test、domain test）。如果是，请激活 domain-usecase-test skill 并严格按照其中的步骤执行：读取 UseCase 源码及其依赖的 Repository 和 Entity 定义，确保 mocktail 依赖就绪，然后生成覆盖正常路径、业务逻辑、异常分支、边界条件和接口契约的完整测试文件，最后运行测试确保全部通过。"
+  }
+}
