@@ -56,11 +56,15 @@ class _AnswerDetailModuleAppState extends State<AnswerDetailModuleApp> {
 
     // 只监听 iOS 端主动推送，不再主动请求
     channel.setMethodCallHandler((call) async {
-      debugPrint('=== Flutter received method call: ${call.method} ===');
       if (call.method == 'setAnswerData') {
-        final json = _castMap(call.arguments);
-        final answer = AnswerEntity.fromJson(json);
-        _router.go('/answer_detail', extra: answer);
+        try {
+          final json = _castMap(call.arguments);
+          final answer = AnswerEntity.fromJson(json);
+          _router.go('/answer_detail', extra: answer);
+        } catch (e, stackTrace) {
+          debugPrint('=== ERROR in setAnswerData: $e ===');
+          debugPrint('=== $stackTrace ===');
+        }
       }
     });
   }

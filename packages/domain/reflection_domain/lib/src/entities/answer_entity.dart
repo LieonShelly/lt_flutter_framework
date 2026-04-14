@@ -30,8 +30,12 @@ class AnswerEntity {
   factory AnswerEntity.fromJson(Map<String, dynamic> json) => AnswerEntity(
     id: json['id'] as String,
     content: json['content'] as String,
-    createTms: DateTime.parse(json['createTms'] as String),
-    createYmd: DateTime.parse(json['createYmd'] as String),
+    createTms: json['createTms'] != null
+        ? DateTime.parse(json['createTms'] as String)
+        : null,
+    createYmd: json['createYmd'] != null
+        ? DateTime.parse(json['createYmd'] as String)
+        : null,
     question: json['question'] != null
         ? QuestionEntity.fromJson(json['question'] as Map<String, dynamic>)
         : null,
