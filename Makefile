@@ -1,4 +1,4 @@
-.PHONY: setup clean codegen watch reset help shell-deps xcframework
+.PHONY: setup clean codegen watch reset help shell-deps xcframework test
 
 PACKAGE ?=
 
@@ -11,6 +11,7 @@ help:
 	@echo "  make clean              - Clean all build artifacts"
 	@echo "  make codegen            - Run code generation"
 	@echo "  make watch              - Run code generation in watch mode"
+	@echo "  make test               - Run tests for all packages"
 	@echo "  make reset              - Clean, setup, and codegen (full reset)"
 	@echo "  make shell-deps         - Install shell script dependencies"
 	@echo "  make help               - Show this help message"
@@ -21,6 +22,7 @@ help:
 	@echo "  make clean PACKAGE=name    - Clean specific package"
 	@echo "  make codegen PACKAGE=name  - Generate code for specific package"
 	@echo "  make watch PACKAGE=name    - Watch mode for specific package"
+	@echo "  make test PACKAGE=name     - Run tests for specific package"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make setup PACKAGE=reflection_data"
@@ -60,6 +62,13 @@ ifdef PACKAGE
 	@dart shell/bin/codegen.dart --package $(PACKAGE) --watch
 else
 	@dart shell/bin/codegen.dart --watch
+endif
+
+test: shell-deps
+ifdef PACKAGE
+	@dart shell/bin/test.dart --package $(PACKAGE)
+else
+	@dart shell/bin/test.dart
 endif
 
 reset:

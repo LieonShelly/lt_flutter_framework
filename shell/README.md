@@ -301,6 +301,64 @@ dart shell/bin/build_xcframework.dart --help
 ==================================================
 ```
 
+### 5. test.dart - 运行单元测试
+
+运行项目中的单元测试，支持指定单个包或运行所有包的测试。
+
+**功能**：
+- 自动扫描所有包含 `test/` 目录且有 `_test.dart` 文件的包
+- 自动判断纯 Dart 包（`fvm dart test`）和 Flutter 包（`fvm flutter test`）
+- 运行测试并汇总结果
+- 支持针对单个包进行操作
+
+**参数**：
+
+| 参数 | 缩写 | 说明 |
+|------|------|------|
+| `--package` | `-p` | 指定目标包名 |
+| `--help` | `-h` | 显示帮助信息 |
+
+**使用方法**：
+
+```bash
+# 运行所有包的测试
+dart shell/bin/test.dart
+
+# 运行特定包的测试
+dart shell/bin/test.dart --package reflection_domain
+dart shell/bin/test.dart -p reflection_data
+
+# 查看帮助
+dart shell/bin/test.dart --help
+```
+
+**输出示例**：
+
+```
+🧪 Flutter Project Test
+==================================================
+📁 Project root: /path/to/project
+
+🧪 Discovering packages with tests...
+
+Found 5 packages with tests
+
+  📦 packages/domain/reflection_domain
+     ✓ All tests passed
+
+  📦 packages/data/reflection_data
+     ✓ All tests passed
+
+  📦 apps/algorithm_app
+     ✓ All tests passed
+
+📊 Results: 3 passed, 0 failed, 3 total
+
+==================================================
+✅ Test completed!
+==================================================
+```
+
 ## 常见工作流
 
 ### 首次克隆项目
@@ -344,6 +402,9 @@ dart shell/bin/codegen.dart -p reflection_data
 
 # 为特定包启用 watch 模式
 dart shell/bin/codegen.dart -p reflection_data -w
+
+# 运行特定包的测试
+dart shell/bin/test.dart -p reflection_domain
 ```
 
 ### 开发模式
@@ -378,6 +439,7 @@ make setup              # 安装所有依赖（FVM + 所有包）
 make clean              # 清理所有构建产物
 make codegen            # 为所有包运行代码生成
 make watch              # 为所有包启用 watch 模式代码生成
+make test               # 运行所有包的单元测试
 make reset              # 完整重置（clean → setup → codegen）
 make shell-deps         # 仅安装 shell 脚本依赖
 make help               # 显示帮助信息
@@ -390,6 +452,7 @@ make setup PACKAGE=reflection_data      # 安装特定包的依赖
 make clean PACKAGE=lt_app               # 清理特定包
 make codegen PACKAGE=user_data          # 为特定包生成代码
 make watch PACKAGE=reflection_data      # 为特定包启用 watch 模式
+make test PACKAGE=reflection_domain     # 运行特定包的测试
 ```
 
 ### XCFramework 构建
@@ -442,7 +505,6 @@ dart shell/bin/setup.dart
 
 可以在 `shell/bin/` 目录下添加更多自动化脚本，例如：
 
-- `test.dart` - 运行所有测试
 - `analyze.dart` - 运行代码分析
 - `format.dart` - 格式化代码
 - `deploy.dart` - 部署脚本
