@@ -1,4 +1,4 @@
-.PHONY: setup clean codegen watch reset help shell-deps xcframework test
+.PHONY: setup clean codegen watch reset help shell-deps xcframework test coverage
 
 PACKAGE ?=
 
@@ -69,6 +69,13 @@ ifdef PACKAGE
 	@dart shell/bin/test.dart --package $(PACKAGE)
 else
 	@dart shell/bin/test.dart
+endif
+
+coverage: shell-deps
+ifdef PACKAGE
+	@dart shell/bin/test.dart --package $(PACKAGE) --coverage
+else
+	@dart shell/bin/test.dart --coverage
 endif
 
 reset:

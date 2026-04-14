@@ -11,7 +11,7 @@ void main(List<String> arguments) async {
       'coverage',
       abbr: 'c',
       negatable: false,
-      help: 'Collect coverage and generate HTML report',
+      help: 'Collect coverage and generate report',
     )
     ..addFlag('help', abbr: 'h', negatable: false, help: 'Show usage help');
 
@@ -107,7 +107,6 @@ Future<void> _testAllPackages(String projectRoot, bool coverage) async {
 
   final targetDirs = <_TestTarget>[];
 
-  // 扫描 packages 目录
   final packagesDir = Directory(path.join(projectRoot, 'packages'));
   if (await packagesDir.exists()) {
     final categories = ['core', 'domain', 'data', 'features', 'utls'];
@@ -128,7 +127,6 @@ Future<void> _testAllPackages(String projectRoot, bool coverage) async {
     }
   }
 
-  // 扫描 apps 目录
   final appsDir = Directory(path.join(projectRoot, 'apps'));
   if (await appsDir.exists()) {
     await for (final entity in appsDir.list()) {
@@ -182,40 +180,30 @@ Future<bool> _runTests(
 ) async {
   print('  📦 $displayName');
 
-  // 判断是纯 Dart 包还是 Flutter 包
   final isDartOnly = await _isDartOnlyPackage(directory);
 
   final List<String> args;
   if (isDartOnly) {
     args = ['dart', 'test'];
-    if (coverage) {
-      args.add('--coverage=coverage');
-    }
+    if (coverage) args.add('--coverage=coverage');
   } else {
     args = ['flutter', 'test'];
-    if (coverage) {
-      args.add('--coverage');
-    }
+    if (coverage) args.add('--coverage');
   }
 
   final result = await Process.run('fvm', args, workingDirectory: directory);
 
   if (result.exitCode == 0) {
     print('     ✓ All tests passed');
-    if (coverage) {
-      print('     📊 Coverage data collected');
-    }
+    if (coverage) print('     📊 Coverage data collected');
     print('');
     return true;
   } else {
     print('     ❌ Tests failed');
     final stderr = (result.stderr as String).trim();
     final stdout = (result.stdout as String).trim();
-    if (stderr.isNotEmpty) {
-      print('     $stderr');
-    }
+    if (stderr.isNotEmpty) print('     $stderr');
     if (stdout.isNotEmpty) {
-      // 只打印最后几行摘要
       final lines = stdout.split('\n');
       final summaryLines = lines.length > 10
           ? lines.sublist(lines.length - 10)
@@ -234,58 +222,83 @@ Future<void> _generateCoverageReport(
   String displayName,
 ) async {
   final lcovFile = File(path.join(directory, 'coverage', 'lcov.info'));
+
+  // 纯 Dart 包的 dart test --coverage 生成 .vm.json 文件，
+  // 需要用 format_coverage 转换为 lcov 格式
   if (!await lcovFile.exists()) {
-    print('     ⚠️  No lcov.info found, skipping report generation');
+    final coverageDir = Directory(path.join(directory, 'coverage'));
+    if (!await coverageDir.exists()) {
+      print('     ⚠️  No coverage data found');
+      return;
+    }
+
+    print('     🔄 Converting coverage data to lcov format...');
+    final formatResult = await Process.run('fvm', [
+      'dart',
+      'run',
+      'coverage:format_coverage',
+      '--lcov',
+      '--in=${coverageDir.path}',
+      '--out=${lcovFile.path}',
+      '--report-on=lib/',
+      '--package=$directory',
+    ], workingDirectory: directory);
+
+    if (formatResult.exitCode != 0) {
+      print('     ⚠️  Failed to convert coverage data');
+      final stderr = (formatResult.stderr as String).trim();
+      if (stderr.isNotEmpty) print('        $stderr');
+      return;
+    }
+  }
+
+  if (!await lcovFile.exists()) {
+    print('     ⚠️  No lcov.info generated');
     return;
   }
 
-  // 检查 genhtml 是否可用
+  // 打印文本覆盖率摘要
+  await _printTextCoverageSummary(lcovFile);
+
+  // 如果有 genhtml，生成 HTML 报告
   final whichResult = await Process.run('which', ['genhtml']);
-  if (whichResult.exitCode != 0) {
-    print('     ⚠️  genhtml not found. Install lcov to generate HTML reports:');
-    print('        brew install lcov');
-    print('     📄 Raw coverage data: ${lcovFile.path}');
-    return;
-  }
-
-  final htmlDir = path.join(directory, 'coverage', 'html');
-
-  final result = await Process.run('genhtml', [
-    lcovFile.path,
-    '-o',
-    htmlDir,
-    '--quiet',
-  ]);
-
-  if (result.exitCode == 0) {
-    // 从 genhtml 输出中提取覆盖率摘要
-    final output = result.stdout as String;
-    final linesMatch = RegExp(r'lines\.*:\s*([\d.]+)%').firstMatch(output);
-    final functionsMatch = RegExp(
-      r'functions\.*:\s*([\d.]+)%',
-    ).firstMatch(output);
-
-    final linesCov = linesMatch?.group(1) ?? '?';
-    final funcCov = functionsMatch?.group(1) ?? '?';
-
-    print('     📊 Coverage: $linesCov% lines, $funcCov% functions');
-    print('     📄 Report: $htmlDir/index.html');
+  if (whichResult.exitCode == 0) {
+    final htmlDir = path.join(directory, 'coverage', 'html');
+    await Process.run('genhtml', [lcovFile.path, '-o', htmlDir, '--quiet']);
+    print('     📄 HTML report: $htmlDir/index.html');
   } else {
-    print('     ⚠️  Failed to generate HTML report');
-    print('     📄 Raw coverage data: ${lcovFile.path}');
+    print('     💡 Install lcov for HTML reports: brew install lcov');
   }
 }
 
-/// 判断是否为纯 Dart 包（不依赖 Flutter SDK）
+Future<void> _printTextCoverageSummary(File lcovFile) async {
+  final content = await lcovFile.readAsString();
+  final lines = content.split('\n');
+
+  var totalLines = 0;
+  var hitLines = 0;
+
+  for (final line in lines) {
+    if (line.startsWith('LF:')) {
+      totalLines += int.parse(line.substring(3));
+    } else if (line.startsWith('LH:')) {
+      hitLines += int.parse(line.substring(3));
+    }
+  }
+
+  if (totalLines > 0) {
+    final percentage = (hitLines / totalLines * 100).toStringAsFixed(1);
+    print('     � Coverage: $percentage% ($hitLines/$totalLines lines)');
+  }
+}
+
 Future<bool> _isDartOnlyPackage(String directory) async {
   final pubspecFile = File(path.join(directory, 'pubspec.yaml'));
   if (!await pubspecFile.exists()) return true;
-
   final content = await pubspecFile.readAsString();
   return !content.contains('sdk: flutter');
 }
 
-/// 检查 test 目录下是否有 _test.dart 文件
 Future<bool> _hasTestFiles(Directory testDir) async {
   await for (final entity in testDir.list(recursive: true)) {
     if (entity is File && entity.path.endsWith('_test.dart')) {
@@ -307,9 +320,7 @@ Future<String?> _findPackage(String projectRoot, String packageName) async {
 
   for (final dir in searchDirs) {
     final pubspecFile = File(path.join(dir, 'pubspec.yaml'));
-    if (await pubspecFile.exists()) {
-      return dir;
-    }
+    if (await pubspecFile.exists()) return dir;
   }
 
   return null;
@@ -318,6 +329,5 @@ Future<String?> _findPackage(String projectRoot, String packageName) async {
 class _TestTarget {
   final String path;
   final String displayName;
-
   const _TestTarget(this.path, this.displayName);
 }
