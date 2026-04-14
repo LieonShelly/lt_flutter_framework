@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Shell 脚本文档自动更新（新建）",
+  "description": "当 shell/bin/ 目录下新建 .dart 脚本文件时，自动分析脚本内容并更新 shell/README.md 文档，将新脚本的功能说明和使用方法补充进去。",
+  "version": "1",
+  "when": {
+    "type": "fileCreated",
+    "patterns": [
+      "shell/bin/*.dart"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "检测到 shell/bin/ 目录下新建了脚本文件。请按照 update-shell-docs skill 的指引执行以下操作：\n\n1. 读取新建的脚本文件，分析其功能、命令行参数和使用方法\n2. 读取 shell/bin/ 下所有其他脚本文件，确保文档完整性\n3. 读取当前的 shell/README.md\n4. 更新 shell/README.md，将新脚本的文档按照现有格式添加到「可用脚本」章节\n5. 如果新脚本适用于常见工作流，同步更新「常见工作流」章节\n6. 检查 Makefile 中是否有对应的 make target，如有则同步更新 Makefile 命令章节\n\n请保持文档的中文风格和现有格式一致。"
+  }
+}

@@ -1,74 +1,92 @@
 # Project Structure
 
-Monorepo using Dart Workspaces. All packages are registered in the root `pubspec.yaml` under `workspace:`.
+This is a **Dart Workspace monorepo** following **Clean Architecture** with strict unidirectional dependency flow.
+
+## Top-Level Layout
 
 ```
-├── apps/                        # Application entry points (thin shells)
-│   ├── lt_app/                  # Main reflection/journaling app (Riverpod)
-│   ├── compass_app/             # Travel booking app (Provider)
-│   ├── shop_app/                # E-commerce app
-│   └── algorithm_app/           # Sorting algorithm demos
-│
+├── apps/                    # Application entry points
 ├── packages/
-│   ├── core/                    # Infrastructure layer (no business logic)
-│   │   ├── network/             # Dio-based API client, interceptors, exceptions
-│   │   ├── lt_uicomponent/      # Shared UI widgets, themes, image processing
-│   │   ├── analysis_defaults/   # Shared lint rules
-│   │   └── storage/             # Secure token storage
-│   │
-│   ├── domain/                  # Business logic layer (pure Dart, no Flutter imports)
-│   │   ├── reflection_domain/   # Questions, answers, calendar entities + use cases
-│   │   ├── user_domain/         # User entity + auth use cases
-│   │   ├── wallet_domain/       # Wallet, transactions, contracts
-│   │   └── booking_domain/      # Booking, destinations, activities, itineraries
-│   │
-│   ├── data/                    # Data access layer (implements domain interfaces)
-│   │   ├── reflection_data/     # Remote data sources, models (DTOs), repository impls
-│   │   ├── user_data/
-│   │   ├── wallet_data/
-│   │   └── booking_data/
-│   │
-│   ├── features/                # Presentation layer (UI + state management)
-│   │   ├── calendar/            # Calendar views
-│   │   ├── thread/              # Question thread list
-│   │   ├── today_question/      # Daily question
-│   │   ├── add_answer/          # Answer submission
-│   │   ├── answer_detail/       # Answer detail view
-│   │   ├── copilot/             # AI assistant
-│   │   ├── user/                # User profile
-│   │   ├── wallets/             # Wallet management
-│   │   ├── booking/             # Booking flow (compass_app)
-│   │   ├── shop/                # Shop flow (shop_app)
-│   │   └── feature_core/        # Shared feature utilities (image processing providers)
-│   │
-│   └── utls/                    # Utility packages
-│       ├── date_utl/            # Date helpers
-│       ├── lt_annotation/       # Custom annotations
-│       └── common/              # Shared types (Result, Command patterns)
-│
-├── shell/                       # Dart automation scripts (setup, clean, codegen)
-├── Makefile                     # Build commands (delegates to shell scripts)
-└── pubspec.yaml                 # Root workspace config + centralized dependency versions
+│   ├── core/                # Infrastructure layer (lowest)
+│   ├── domain/              # Business logic layer (pure Dart, no Flutter)
+│   ├── data/                # Data access layer (implements domain interfaces)
+│   ├── features/            # Presentation layer (UI + state management)
+│   └── utls/                # Shared utilities
+├── shell/                   # Dart CLI scripts for build automation
+├── pubspec.yaml             # Workspace root — unified dependency versions
+└── Makefile                 # Developer task runner
 ```
 
-## Clean Architecture Layers & Dependency Rules
+## Dependency Direction (strict)
 
-Dependencies flow inward only: `Apps → Features → Domain ← Data ← Core`
+```
+Apps → Features → Domain ← Data → Core
+                    ↑               ↑
+                Features ───────────┘
+```
 
-| Layer | Location | Depends On | Contains |
-|-------|----------|------------|----------|
-| Core | `packages/core/` | Nothing | API client, storage, UI components |
-| Domain | `packages/domain/` | Nothing (pure Dart) | Entities, repository interfaces, use cases |
-| Data | `packages/data/` | Domain, Core | Models (DTOs), data sources, repository implementations, providers |
-| Features | `packages/features/` | Domain, Data, Core | Pages, controllers/viewmodels, use case providers |
-| Apps | `apps/` | Features, Core | App shell, routing, DI wiring |
+- **Domain** has zero framework dependencies (pure Dart)
+- **Data** implements Domain interfaces, depends on Core for networking
+- **Features** depend on Domain (entities, use cases) and Data (providers)
+- **Apps** aggregate Features and configure routing/DI
 
-## Key Conventions
+## Layer Details
 
-- Each business domain has a paired `domain` + `data` package (e.g., `reflection_domain` / `reflection_data`)
-- Domain layer entities are plain Dart classes; Data layer models use Freezed + JSON serialization
-- Data models provide `toEntity()` and `fromEntity()` conversion methods
-- Repository interfaces are defined in Domain; implementations live in Data
-- Each feature creates only the UseCase providers it needs (no global UseCase provider registry)
-- Each package has a barrel export file at `lib/<package_name>.dart`
-- Generated files use `.g.dart` (JSON/Riverpod) and `.freezed.dart` suffixes
+### Core (`packages/core/`)
+| Package | Purpose |
+|---------|---------|
+| `lt_network` (network/) | Dio-based API client, interceptors, exception handling |
+| `lt_uicomponent` | Shared widgets, theme, image processing |
+| `analysis_defaults` | Shared lint rules |
+| `storage/` | Secure token storage |
+
+### Domain (`packages/domain/`)
+Pure Dart packages. Each business domain contains:
+- `entities/` — Business entities (plain Dart classes)
+- `repositories/` — Abstract repository interfaces
+- `usecases/` — Business use cases (single-responsibility)
+
+Domains: `reflection_domain`, `user_domain`, `wallet_domain`, `booking_domain`
+
+### Data (`packages/data/`)
+Each data package mirrors a domain and contains:
+- `models/` — DTOs with Freezed, JSON serialization, and `toEntity()`/`fromEntity()` converters
+- `datasources/remote/` — Remote data source implementations
+- `repositories/` — Repository implementations (implements domain interfaces)
+- `providers/` — Riverpod providers for DataSource and Repository
+
+Packages: `reflection_data`, `user_data`, `wallet_data`, `booking_data`
+
+### Features (`packages/features/`)
+Each feature package contains:
+- `*_page.dart` — UI page widgets
+- `*_controller.dart` — Riverpod state controllers (`@riverpod` annotated)
+- `providers/` — UseCase providers (each feature creates only what it needs)
+- `*_route_config.dart` — GoRouter route definitions
+- Barrel export file at `lib/<package_name>.dart`
+
+Features: `calendar`, `thread`, `today_question`, `add_answer`, `answer_detail`, `copilot`, `user`, `wallets`, `booking`, `shop`, `feature_core`
+
+### Utilities (`packages/utls/`)
+| Package | Purpose |
+|---------|---------|
+| `date_utl` | Date formatting and helpers |
+| `lt_annotation` | Custom annotations (e.g., `@ltDeserialization`) |
+| `common` | Shared utilities |
+
+### Apps (`apps/`)
+| App | Purpose |
+|-----|---------|
+| `lt_app` | Main application shell — aggregates all features |
+| `answer_detail_module` | Standalone Flutter module for iOS XCFramework export |
+| `compass_app` | Reference/sample app |
+| `shop_app` | Shop feature standalone app |
+| `algorithm_app` | Algorithm learning app (pure Dart) |
+
+## Package Conventions
+
+- All sub-packages use `resolution: workspace` and `publish_to: none`
+- Dependency versions are centralized in the root `pubspec.yaml`
+- Each package has a barrel export file: `lib/<package_name>.dart`
+- Generated files use `.g.dart` (Riverpod, JSON) and `.freezed.dart` suffixes
+- Generated files are committed to the repo

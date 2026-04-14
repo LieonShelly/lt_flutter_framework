@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Shell 脚本文档自动更新（编辑）",
+  "description": "当 shell/bin/ 目录下的 .dart 脚本文件被编辑保存时，自动检查脚本变更内容并同步更新 shell/README.md 文档。",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "shell/bin/*.dart"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "检测到 shell/bin/ 目录下的脚本文件被修改。请按照 update-shell-docs skill 的指引执行以下操作：\n\n1. 读取被修改的脚本文件，分析其当前的功能、命令行参数和使用方法\n2. 读取当前的 shell/README.md\n3. 对比脚本的实际功能与文档中的描述，找出差异\n4. 如果有差异，更新 shell/README.md 中对应脚本的文档部分\n5. 如果参数或功能变更影响了常见工作流，同步更新相关章节\n\n请保持文档的中文风格和现有格式一致。仅更新有变化的部分，不要重写整个文档。"
+  }
+}
