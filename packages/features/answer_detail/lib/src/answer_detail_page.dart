@@ -129,7 +129,7 @@ class _AnswerDetailPageState extends ConsumerState<AnswerDetailPage>
   }
 
   Widget _buildHeader() {
-    final date = widget.answer.createdAt;
+    final date = widget.answer.createYmd ?? DateTime.now();
     final fromat = DateFormat.MMMd('en_US');
     final dateStr = fromat.format(date);
     return SizedBox(

@@ -49,4 +49,18 @@ class ReflectionRepositoryImpl implements ReflectionRepository {
     final model = await _remoteDataSource.fetchAnswerDetail(answerId);
     return model.toEntity();
   }
+
+  @override
+  Future<WeeklyReportListEntity> fetchWeeklyReports({
+    int? limit,
+    String? cursor,
+    bool? isRead,
+  }) async {
+    final model = await _remoteDataSource.fetchWeeklyReports(
+      limit: limit,
+      cursor: cursor,
+      isRead: isRead,
+    );
+    return model.toEntity();
+  }
 }

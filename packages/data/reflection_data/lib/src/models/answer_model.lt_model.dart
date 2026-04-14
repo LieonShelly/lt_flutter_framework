@@ -11,7 +11,8 @@ AnswerModel _$AnswerModelFromJson(Map<String, dynamic> json) {
   return AnswerModel(
     id: json['id'] as String,
     content: json['content'] as String,
-    createdYmd: json['created_ymd'] as String,
+    createdYmd: json['created_ymd'] as String?,
+    createdTms: json['created_tms'] as String?,
     question: json['question'] == null
         ? null
         : QuestionModel.fromJson(json['question']),

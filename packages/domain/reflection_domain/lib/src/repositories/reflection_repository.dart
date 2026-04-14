@@ -17,4 +17,10 @@ abstract interface class ReflectionRepository {
   });
 
   Future<AnswerEntity> fetchAnswerDetail(String answerId);
+
+  Future<WeeklyReportListEntity> fetchWeeklyReports({
+    int? limit,
+    String? cursor,
+    bool? isRead,
+  });
 }

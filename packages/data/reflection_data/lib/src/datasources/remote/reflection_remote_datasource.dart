@@ -17,6 +17,12 @@ abstract interface class ReflectionRemoteDataSource {
   });
 
   Future<AnswerModel> fetchAnswerDetail(String answerId);
+
+  Future<WeeklyReportListModel> fetchWeeklyReports({
+    int? limit,
+    String? cursor,
+    bool? isRead,
+  });
 }
 
 class ReflectionRemoteDataSourceImpl implements ReflectionRemoteDataSource {
@@ -83,5 +89,24 @@ class ReflectionRemoteDataSourceImpl implements ReflectionRemoteDataSource {
   Future<AnswerModel> fetchAnswerDetail(String answerId) async {
     final response = await _apiClient.get('/api/answers/$answerId');
     return AnswerModel.fromJson(response['data']);
+  }
+
+  @override
+  Future<WeeklyReportListModel> fetchWeeklyReports({
+    int? limit,
+    String? cursor,
+    bool? isRead,
+  }) async {
+    final queryParameters = <String, dynamic>{};
+    if (limit != null) queryParameters['limit'] = limit;
+    if (cursor != null) queryParameters['cursor'] = cursor;
+    if (isRead != null) queryParameters['isRead'] = isRead;
+
+    final response = await _apiClient.get(
+      '/api/weekly-reports',
+      queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+    );
+
+    return WeeklyReportListModel.fromJson(response);
   }
 }

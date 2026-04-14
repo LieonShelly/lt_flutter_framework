@@ -5,3 +5,4 @@ export 'answer_model.dart';
 export 'calendar_model.dart';
 export 'category_model.dart';
 export 'icon_model.dart';
+export 'weekly_report_model.dart';
