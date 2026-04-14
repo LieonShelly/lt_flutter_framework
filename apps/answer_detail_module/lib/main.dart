@@ -7,6 +7,7 @@ import 'package:reflection_domain/reflection_domain.dart';
 
 @pragma('vm:entry-point')
 void main() {
+  debugPrint('=== Flutter main() started ===');
   runApp(const ProviderScope(child: AnswerDetailModuleApp()));
 }
 
@@ -18,25 +19,14 @@ class AnswerDetailModuleApp extends StatefulWidget {
 }
 
 class _AnswerDetailModuleAppState extends State<AnswerDetailModuleApp> {
-  _AnswerDetailModuleAppState();
-  late MethodChannel? channel;
+  final MethodChannel channel = MethodChannel('answer_detail_data_channel');
+  late final GoRouter _router;
 
   @override
   void initState() {
     super.initState();
-    channel = MethodChannel('answer_detail_data_channel');
-    channel?.setMethodCallHandler((call) async {
-      if (call.method == 'setAnswerData') {
-        final json = call.arguments as Map<String, dynamic>;
-        final answer = AnswerEntity.fromJson(json);
-        context.go('/answer_detail', extra: answer);
-      }
-    });
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    final router = GoRouter(
+    _router = GoRouter(
       initialLocation: '/',
       routes: [
         GoRoute(
@@ -64,8 +54,46 @@ class _AnswerDetailModuleAppState extends State<AnswerDetailModuleApp> {
       ],
     );
 
+    // 只监听 iOS 端主动推送，不再主动请求
+    channel.setMethodCallHandler((call) async {
+      debugPrint('=== Flutter received method call: ${call.method} ===');
+      if (call.method == 'setAnswerData') {
+        final json = _castMap(call.arguments);
+        final answer = AnswerEntity.fromJson(json);
+        _router.go('/answer_detail', extra: answer);
+      }
+    });
+  }
+
+  /// 递归将 iOS 返回的 Map<Object?, Object?> 转换为 Map<String, dynamic>
+  Map<String, dynamic> _castMap(dynamic data) {
+    if (data is Map<String, dynamic>) return data;
+    if (data is Map) {
+      return data.map((key, value) {
+        final dynamic castValue;
+        if (value is Map) {
+          castValue = _castMap(value);
+        } else if (value is List) {
+          castValue = value.map((e) => e is Map ? _castMap(e) : e).toList();
+        } else {
+          castValue = value;
+        }
+        return MapEntry(key.toString(), castValue);
+      });
+    }
+    throw ArgumentError('Expected a Map but got ${data.runtimeType}');
+  }
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return MaterialApp.router(
-      routerConfig: router,
+      routerConfig: _router,
       title: 'Answer Detail Module',
       theme: ThemeData(
         useMaterial3: true,

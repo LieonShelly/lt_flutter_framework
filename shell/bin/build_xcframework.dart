@@ -6,9 +6,18 @@ import 'package:path/path.dart' as path;
 
 const requiredFlutterVersion = '3.35.7';
 
+/// 支持的构建模式
+enum BuildMode { debug, profile, release }
+
 void main(List<String> arguments) async {
   final parser = ArgParser()
     ..addOption('module', abbr: 'm', help: 'Flutter module name (under apps/)')
+    ..addOption(
+      'mode',
+      help: 'Build mode: debug, release, or all (default: all)',
+      defaultsTo: 'all',
+      allowed: ['debug', 'release', 'all'],
+    )
     ..addFlag('help', abbr: 'h', negatable: false, help: 'Show usage help');
 
   try {
@@ -20,6 +29,7 @@ void main(List<String> arguments) async {
     }
 
     final moduleName = results['module'] as String?;
+    final modeStr = results['mode'] as String;
 
     if (moduleName == null) {
       print('❌ 缺少 --module 参数\n');
@@ -27,7 +37,14 @@ void main(List<String> arguments) async {
       exit(1);
     }
 
-    print('🔨 Flutter Module XCFramework 构建');
+    final modes = switch (modeStr) {
+      'debug' => [BuildMode.debug],
+      'release' => [BuildMode.release],
+      _ => [BuildMode.debug, BuildMode.release],
+    };
+
+    final modeNames = modes.map((m) => m.name).join(' + ');
+    print('🔨 Flutter Module XCFramework 构建 ($modeNames)');
     print('=' * 50);
 
     final currentDir = Directory.current.path;
@@ -37,6 +54,7 @@ void main(List<String> arguments) async {
 
     print('📁 Project root: $projectRoot');
     print('🎯 Target module: $moduleName');
+    print('🔧 Build mode: $modeNames');
     print('');
 
     final moduleDir = path.join(projectRoot, 'apps', moduleName);
@@ -52,21 +70,40 @@ void main(List<String> arguments) async {
     await _resolveDependencies(moduleDir);
 
     // Step 4: 构建 XCFramework
-    await _buildXcframework(moduleDir, outputDir);
+    await _buildXcframework(moduleDir, outputDir, modes);
 
     // Step 5: 验证产物
-    final releaseDir = path.join(moduleDir, outputDir, 'Release');
-    await _verifyArtifacts(releaseDir);
+    for (final mode in modes) {
+      final modeDir = path.join(
+        moduleDir,
+        outputDir,
+        mode == BuildMode.debug ? 'Debug' : 'Release',
+      );
+      await _verifyArtifacts(modeDir, mode.name);
+    }
 
     // 完成
     print('');
     print('✅ 🎉 $moduleName XCFramework 构建成功！');
-    print('   产物目录: $releaseDir');
-    print('   包含:');
-    await _listArtifacts(releaseDir);
+    for (final mode in modes) {
+      final modeDir = path.join(
+        moduleDir,
+        outputDir,
+        mode == BuildMode.debug ? 'Debug' : 'Release',
+      );
+      print('   ${mode.name} 产物目录: $modeDir');
+      print('   包含:');
+      await _listArtifacts(modeDir);
+    }
 
     print('\n' + '=' * 50);
-    print('✅ Build completed successfully!');
+    print('💡 集成提示:');
+    if (modes.contains(BuildMode.debug)) {
+      print('   模拟器调试 → 使用 Debug/ 目录下的 framework');
+    }
+    if (modes.contains(BuildMode.release)) {
+      print('   真机发布   → 使用 Release/ 目录下的 framework');
+    }
     print('=' * 50);
   } catch (e) {
     print('❌ Error: $e');
@@ -84,7 +121,9 @@ void _printHelp(ArgParser parser) {
   print('');
   print('Examples:');
   print('  dart build_xcframework.dart -m answer_detail_module');
-  print('  dart build_xcframework.dart --module answer_detail_module');
+  print('  dart build_xcframework.dart -m answer_detail_module --mode debug');
+  print('  dart build_xcframework.dart -m answer_detail_module --mode release');
+  print('  dart build_xcframework.dart -m answer_detail_module --mode all');
 }
 
 Future<void> _validateModule(String moduleDir, String moduleName) async {
@@ -154,49 +193,60 @@ Future<void> _resolveDependencies(String moduleDir) async {
   print('  ✓ 依赖解析完成\n');
 }
 
-Future<void> _buildXcframework(String moduleDir, String outputDir) async {
-  print('🔨 构建 XCFramework (Release)...');
+Future<void> _buildXcframework(
+  String moduleDir,
+  String outputDir,
+  List<BuildMode> modes,
+) async {
+  final modeNames = modes.map((m) => m.name).join(' + ');
+  print('🔨 构建 XCFramework ($modeNames)...');
 
-  final result = await Process.run('fvm', [
-    'flutter',
-    'build',
-    'ios-framework',
-    '--no-debug',
-    '--no-profile',
-    '--output=$outputDir',
-  ], workingDirectory: moduleDir);
+  final args = ['flutter', 'build', 'ios-framework', '--output=$outputDir'];
+
+  // 排除不需要的模式
+  if (!modes.contains(BuildMode.debug)) {
+    args.add('--no-debug');
+  }
+  // Profile 模式始终排除，减少构建时间
+  args.add('--no-profile');
+  if (!modes.contains(BuildMode.release)) {
+    args.add('--no-release');
+  }
+
+  final result = await Process.run('fvm', args, workingDirectory: moduleDir);
 
   if (result.exitCode != 0) {
-    print('  ${result.stderr}');
+    print('  stdout: ${result.stdout}');
+    print('  stderr: ${result.stderr}');
     throw Exception('XCFramework 构建失败 (flutter build ios-framework)');
   }
 
   print('  ✓ XCFramework 构建完成\n');
 }
 
-Future<void> _verifyArtifacts(String releaseDir) async {
-  print('🔎 验证构建产物...');
+Future<void> _verifyArtifacts(String modeDir, String modeName) async {
+  print('🔎 验证 $modeName 构建产物...');
 
-  final appXcframework = Directory(path.join(releaseDir, 'App.xcframework'));
+  final appXcframework = Directory(path.join(modeDir, 'App.xcframework'));
   if (!await appXcframework.exists()) {
-    throw Exception('缺少 App.xcframework');
+    throw Exception('缺少 $modeName/App.xcframework');
   }
 
   final flutterXcframework = Directory(
-    path.join(releaseDir, 'Flutter.xcframework'),
+    path.join(modeDir, 'Flutter.xcframework'),
   );
   if (!await flutterXcframework.exists()) {
-    throw Exception('缺少 Flutter.xcframework');
+    throw Exception('缺少 $modeName/Flutter.xcframework');
   }
 
-  print('  ✓ 产物验证通过\n');
+  print('  ✓ $modeName 产物验证通过\n');
 }
 
-Future<void> _listArtifacts(String releaseDir) async {
-  final dir = Directory(releaseDir);
-  if (!await dir.exists()) return;
+Future<void> _listArtifacts(String dir) async {
+  final directory = Directory(dir);
+  if (!await directory.exists()) return;
 
-  await for (final entity in dir.list()) {
+  await for (final entity in directory.list()) {
     final name = path.basename(entity.path);
     if (name.endsWith('.xcframework')) {
       print('     - $name');

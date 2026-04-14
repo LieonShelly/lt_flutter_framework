@@ -236,32 +236,44 @@ Found 12 packages with build_runner
 - 验证目标模块是否为有效的 Flutter Module（检查 `pubspec.yaml` 中的 `flutter.module` 配置）
 - 检查构建环境（FVM 安装、Flutter 版本匹配 3.35.7）
 - 自动解析依赖（`flutter pub get`）
-- 构建 Release 模式的 XCFramework（跳过 debug 和 profile）
-- 验证构建产物（`App.xcframework`、`Flutter.xcframework`）
-- 列出所有生成的 `.xcframework` 文件
+- 支持选择构建模式：`debug`、`release` 或 `all`（默认 `all`，同时构建 Debug + Release）
+- Profile 模式始终跳过，减少构建时间
+- 分别验证各模式的构建产物（`App.xcframework`、`Flutter.xcframework`）
+- 列出所有生成的 `.xcframework` 文件，并给出集成提示
 
 **参数**：
 
-| 参数 | 缩写 | 说明 |
-|------|------|------|
-| `--module` | `-m` | **必填**，Flutter Module 名称（位于 `apps/` 目录下） |
-| `--help` | `-h` | 显示帮助信息 |
+| 参数 | 缩写 | 默认值 | 说明 |
+|------|------|--------|------|
+| `--module` | `-m` | — | **必填**，Flutter Module 名称（位于 `apps/` 目录下） |
+| `--mode` | — | `all` | 构建模式：`debug`、`release` 或 `all` |
+| `--help` | `-h` | — | 显示帮助信息 |
 
 **构建步骤**：
 1. 模块验证 — 检查 `apps/<module>/pubspec.yaml` 存在且包含 `module:` 配置
 2. 环境检查 — 确认 FVM 已安装且 Flutter 版本为 3.35.7
 3. 依赖解析 — 在模块目录执行 `fvm flutter pub get`
-4. 构建 XCFramework — 执行 `fvm flutter build ios-framework --no-debug --no-profile`
-5. 验证产物 — 确认 `App.xcframework` 和 `Flutter.xcframework` 存在
+4. 构建 XCFramework — 根据 `--mode` 参数构建对应模式（始终跳过 profile）
+5. 验证产物 — 分别确认各模式下 `App.xcframework` 和 `Flutter.xcframework` 存在
 
-**产物目录**：`apps/<module>/build/ios/xcframework/Release/`
+**产物目录**：
+- Debug 模式：`apps/<module>/build/ios/xcframework/Debug/`
+- Release 模式：`apps/<module>/build/ios/xcframework/Release/`
 
 **使用方法**：
 
 ```bash
-# 构建 answer_detail_module 的 XCFramework
+# 构建所有模式（Debug + Release，默认）
 dart shell/bin/build_xcframework.dart -m answer_detail_module
-dart shell/bin/build_xcframework.dart --module answer_detail_module
+
+# 仅构建 Debug 模式（适合模拟器调试）
+dart shell/bin/build_xcframework.dart -m answer_detail_module --mode debug
+
+# 仅构建 Release 模式（适合真机发布）
+dart shell/bin/build_xcframework.dart -m answer_detail_module --mode release
+
+# 显式指定构建所有模式
+dart shell/bin/build_xcframework.dart -m answer_detail_module --mode all
 
 # 查看帮助
 dart shell/bin/build_xcframework.dart --help
@@ -270,10 +282,11 @@ dart shell/bin/build_xcframework.dart --help
 **输出示例**：
 
 ```
-🔨 Flutter Module XCFramework 构建
+🔨 Flutter Module XCFramework 构建 (debug + release)
 ==================================================
 📁 Project root: /path/to/project
 🎯 Target module: answer_detail_module
+🔧 Build mode: debug + release
 
 🔍 验证模块 answer_detail_module...
   ✓ 模块验证通过
@@ -284,20 +297,29 @@ dart shell/bin/build_xcframework.dart --help
 📦 解析依赖...
   ✓ 依赖解析完成
 
-🔨 构建 XCFramework (Release)...
+🔨 构建 XCFramework (debug + release)...
   ✓ XCFramework 构建完成
 
-🔎 验证构建产物...
-  ✓ 产物验证通过
+🔎 验证 debug 构建产物...
+  ✓ debug 产物验证通过
+
+🔎 验证 release 构建产物...
+  ✓ release 产物验证通过
 
 ✅ 🎉 answer_detail_module XCFramework 构建成功！
-   产物目录: apps/answer_detail_module/build/ios/xcframework/Release
+   debug 产物目录: apps/answer_detail_module/build/ios/xcframework/Debug
+   包含:
+     - App.xcframework
+     - Flutter.xcframework
+   release 产物目录: apps/answer_detail_module/build/ios/xcframework/Release
    包含:
      - App.xcframework
      - Flutter.xcframework
 
 ==================================================
-✅ Build completed successfully!
+💡 集成提示:
+   模拟器调试 → 使用 Debug/ 目录下的 framework
+   真机发布   → 使用 Release/ 目录下的 framework
 ==================================================
 ```
 
@@ -421,10 +443,18 @@ fvm flutter run
 ### 构建 iOS XCFramework
 
 ```bash
-# 构建 answer_detail_module 的 XCFramework
+# 构建所有模式（Debug + Release，默认）
 dart shell/bin/build_xcframework.dart -m answer_detail_module
 
-# 产物位于 apps/answer_detail_module/build/ios/xcframework/Release/
+# 仅构建 Debug（模拟器调试）
+dart shell/bin/build_xcframework.dart -m answer_detail_module --mode debug
+
+# 仅构建 Release（真机发布）
+dart shell/bin/build_xcframework.dart -m answer_detail_module --mode release
+
+# 产物位于:
+#   Debug:   apps/answer_detail_module/build/ios/xcframework/Debug/
+#   Release: apps/answer_detail_module/build/ios/xcframework/Release/
 # 将生成的 .xcframework 文件集成到原生 iOS 项目中
 ```
 

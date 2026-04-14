@@ -15,7 +15,9 @@ help:
 	@echo "  make reset              - Clean, setup, and codegen (full reset)"
 	@echo "  make shell-deps         - Install shell script dependencies"
 	@echo "  make help               - Show this help message"
-	@echo "  make xcframework MODULE=name - Build XCFramework for a Flutter module"
+	@echo "  make xcframework MODULE=name          - Build XCFramework (Debug + Release)"
+	@echo "  make xcframework MODULE=name MODE=debug   - Build Debug only (for simulator)"
+	@echo "  make xcframework MODULE=name MODE=release  - Build Release only (for device)"
 	@echo ""
 	@echo "Package-specific operations:"
 	@echo "  make setup PACKAGE=name    - Setup specific package"
@@ -29,6 +31,7 @@ help:
 	@echo "  make codegen PACKAGE=lt_app"
 	@echo "  make watch PACKAGE=user_data"
 	@echo "  make xcframework MODULE=answer_detail_module"
+	@echo "  make xcframework MODULE=answer_detail_module MODE=debug"
 
 # Install shell script dependencies
 shell-deps:
@@ -94,13 +97,15 @@ reset:
 	@echo "✅ Full reset completed!"
 
 MODULE ?=
+MODE ?= all
 
 xcframework: shell-deps
 ifndef MODULE
 	@echo "❌ 缺少 MODULE 参数"
-	@echo "用法: make xcframework MODULE=<module_name>"
+	@echo "用法: make xcframework MODULE=<module_name> [MODE=debug|release|all]"
 	@echo "示例: make xcframework MODULE=answer_detail_module"
+	@echo "      make xcframework MODULE=answer_detail_module MODE=debug"
 	@exit 1
 else
-	@dart shell/bin/build_xcframework.dart --module $(MODULE)
+	@dart shell/bin/build_xcframework.dart --module $(MODULE) --mode $(MODE)
 endif
