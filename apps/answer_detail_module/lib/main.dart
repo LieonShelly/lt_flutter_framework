@@ -45,7 +45,12 @@ class _AnswerDetailModuleAppState extends State<AnswerDetailModuleApp> {
             final answer = state.extra as AnswerEntity;
             return AnswerDetailPage(
               answer: answer,
-              onClose: () => _hostApi.dismiss(),
+              onClose: () {
+                // 先导航回初始路由，销毁 AnswerDetailPage 的状态
+                _router.go('/');
+                // 再通知原生端关闭 FlutterViewController
+                _hostApi.dismiss();
+              },
             );
           },
         ),
