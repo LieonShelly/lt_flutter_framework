@@ -41,7 +41,10 @@ class _AnswerDetailModuleAppState extends State<AnswerDetailModuleApp> {
           path: '/answer_detail',
           builder: (context, state) {
             final answer = state.extra as AnswerEntity;
-            return AnswerDetailPage(answer: answer);
+            return AnswerDetailPage(
+              answer: answer,
+              onClose: () => channel.invokeMethod('dismiss'),
+            );
           },
         ),
         GoRoute(

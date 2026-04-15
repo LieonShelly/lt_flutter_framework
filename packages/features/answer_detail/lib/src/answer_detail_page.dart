@@ -8,7 +8,8 @@ import 'package:feature_core/feature_core.dart';
 
 class AnswerDetailPage extends ConsumerStatefulWidget with ImageCacheKeyType {
   final AnswerEntity answer;
-  const AnswerDetailPage({super.key, required this.answer});
+  final VoidCallback? onClose;
+  const AnswerDetailPage({super.key, required this.answer, this.onClose});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() {
@@ -144,6 +145,7 @@ class _AnswerDetailPageState extends ConsumerState<AnswerDetailPage>
   }
 
   Widget _buildIconView(BuildContext context) {
+    debugPrint('=== icon url: ${widget.answer.icon?.url} ===');
     final icon = AspectRatio(
       aspectRatio: 1,
       child: ProcessedIconView(
@@ -237,7 +239,11 @@ class _AnswerDetailPageState extends ConsumerState<AnswerDetailPage>
     );
     return GestureDetector(
       onTap: () {
-        context.pop();
+        if (widget.onClose != null) {
+          widget.onClose!();
+        } else {
+          context.pop();
+        }
       },
       child: padding,
     );
