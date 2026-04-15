@@ -204,6 +204,36 @@ struct ApiIcon {
   }
 }
 
+/// 订单信息，用于传递给 Order_Confirm_Page
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct ApiOrderInfo {
+  var orderId: String
+  var productName: String
+  var price: Double
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> ApiOrderInfo? {
+    let orderId = pigeonVar_list[0] as! String
+    let productName = pigeonVar_list[1] as! String
+    let price = pigeonVar_list[2] as! Double
+
+    return ApiOrderInfo(
+      orderId: orderId,
+      productName: productName,
+      price: price
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      orderId,
+      productName,
+      price,
+    ]
+  }
+}
+
 private class AnswerDetailApiPigeonCodecReader: FlutterStandardReader {
   override func readValue(ofType type: UInt8) -> Any? {
     switch type {
@@ -215,6 +245,8 @@ private class AnswerDetailApiPigeonCodecReader: FlutterStandardReader {
       return ApiCategory.fromList(self.readValue() as! [Any?])
     case 132:
       return ApiIcon.fromList(self.readValue() as! [Any?])
+    case 133:
+      return ApiOrderInfo.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
     }
@@ -234,6 +266,9 @@ private class AnswerDetailApiPigeonCodecWriter: FlutterStandardWriter {
       super.writeValue(value.toList())
     } else if let value = value as? ApiIcon {
       super.writeByte(132)
+      super.writeValue(value.toList())
+    } else if let value = value as? ApiOrderInfo {
+      super.writeByte(133)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)
@@ -315,6 +350,118 @@ class AnswerDetailHostApiSetup {
       }
     } else {
       dismissChannel.setMessageHandler(nil)
+    }
+  }
+}
+/// iOS → Flutter：原生端驱动 Flutter 页面导航
+///
+/// Generated protocol from Pigeon that represents Flutter messages that can be called from Swift.
+protocol NavigationFlutterApiProtocol {
+  func navigateToProductDetail(productId productIdArg: String, completion: @escaping (Result<Void, PigeonError>) -> Void)
+  func navigateToOrderConfirm(orderInfo orderInfoArg: ApiOrderInfo, completion: @escaping (Result<Void, PigeonError>) -> Void)
+}
+class NavigationFlutterApi: NavigationFlutterApiProtocol {
+  private let binaryMessenger: FlutterBinaryMessenger
+  private let messageChannelSuffix: String
+  init(binaryMessenger: FlutterBinaryMessenger, messageChannelSuffix: String = "") {
+    self.binaryMessenger = binaryMessenger
+    self.messageChannelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+  }
+  var codec: AnswerDetailApiPigeonCodec {
+    return AnswerDetailApiPigeonCodec.shared
+  }
+  func navigateToProductDetail(productId productIdArg: String, completion: @escaping (Result<Void, PigeonError>) -> Void) {
+    let channelName: String = "dev.flutter.pigeon.answer_detail_module.NavigationFlutterApi.navigateToProductDetail\(messageChannelSuffix)"
+    let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
+    channel.sendMessage([productIdArg] as [Any?]) { response in
+      guard let listResponse = response as? [Any?] else {
+        completion(.failure(createConnectionError(withChannelName: channelName)))
+        return
+      }
+      if listResponse.count > 1 {
+        let code: String = listResponse[0] as! String
+        let message: String? = nilOrValue(listResponse[1])
+        let details: String? = nilOrValue(listResponse[2])
+        completion(.failure(PigeonError(code: code, message: message, details: details)))
+      } else {
+        completion(.success(Void()))
+      }
+    }
+  }
+  func navigateToOrderConfirm(orderInfo orderInfoArg: ApiOrderInfo, completion: @escaping (Result<Void, PigeonError>) -> Void) {
+    let channelName: String = "dev.flutter.pigeon.answer_detail_module.NavigationFlutterApi.navigateToOrderConfirm\(messageChannelSuffix)"
+    let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
+    channel.sendMessage([orderInfoArg] as [Any?]) { response in
+      guard let listResponse = response as? [Any?] else {
+        completion(.failure(createConnectionError(withChannelName: channelName)))
+        return
+      }
+      if listResponse.count > 1 {
+        let code: String = listResponse[0] as! String
+        let message: String? = nilOrValue(listResponse[1])
+        let details: String? = nilOrValue(listResponse[2])
+        completion(.failure(PigeonError(code: code, message: message, details: details)))
+      } else {
+        completion(.success(Void()))
+      }
+    }
+  }
+}
+/// Flutter → iOS：Flutter 端请求原生端执行操作
+///
+/// Generated protocol from Pigeon that represents a handler of messages from Flutter.
+protocol NavigationHostApi {
+  func openCustomerService() throws
+  func goBack() throws
+  func confirmOrder(orderId: String) throws
+}
+
+/// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
+class NavigationHostApiSetup {
+  static var codec: FlutterStandardMessageCodec { AnswerDetailApiPigeonCodec.shared }
+  /// Sets up an instance of `NavigationHostApi` to handle messages through the `binaryMessenger`.
+  static func setUp(binaryMessenger: FlutterBinaryMessenger, api: NavigationHostApi?, messageChannelSuffix: String = "") {
+    let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    let openCustomerServiceChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.answer_detail_module.NavigationHostApi.openCustomerService\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      openCustomerServiceChannel.setMessageHandler { _, reply in
+        do {
+          try api.openCustomerService()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      openCustomerServiceChannel.setMessageHandler(nil)
+    }
+    let goBackChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.answer_detail_module.NavigationHostApi.goBack\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      goBackChannel.setMessageHandler { _, reply in
+        do {
+          try api.goBack()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      goBackChannel.setMessageHandler(nil)
+    }
+    let confirmOrderChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.answer_detail_module.NavigationHostApi.confirmOrder\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      confirmOrderChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let orderIdArg = args[0] as! String
+        do {
+          try api.confirmOrder(orderId: orderIdArg)
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      confirmOrderChannel.setMessageHandler(nil)
     }
   }
 }

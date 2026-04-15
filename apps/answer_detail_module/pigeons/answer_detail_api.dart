@@ -72,3 +72,35 @@ abstract class AnswerDetailFlutterApi {
 abstract class AnswerDetailHostApi {
   void dismiss();
 }
+
+// ============================================================
+// 单引擎混合栈 Demo - 导航通信接口
+// ============================================================
+
+/// 订单信息，用于传递给 Order_Confirm_Page
+class ApiOrderInfo {
+  ApiOrderInfo({
+    required this.orderId,
+    required this.productName,
+    required this.price,
+  });
+
+  final String orderId;
+  final String productName;
+  final double price;
+}
+
+/// iOS → Flutter：原生端驱动 Flutter 页面导航
+@FlutterApi()
+abstract class NavigationFlutterApi {
+  void navigateToProductDetail(String productId);
+  void navigateToOrderConfirm(ApiOrderInfo orderInfo);
+}
+
+/// Flutter → iOS：Flutter 端请求原生端执行操作
+@HostApi()
+abstract class NavigationHostApi {
+  void openCustomerService();
+  void goBack();
+  void confirmOrder(String orderId);
+}

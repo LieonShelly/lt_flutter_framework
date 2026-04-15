@@ -6,6 +6,9 @@ import 'package:reflection_domain/reflection_domain.dart';
 
 import 'src/generated/answer_detail_api.g.dart';
 import 'src/answer_detail_flutter_api_impl.dart';
+import 'src/navigation_flutter_api_impl.dart';
+import 'src/pages/product_detail_page.dart';
+import 'src/pages/order_confirm_page.dart';
 
 @pragma('vm:entry-point')
 void main() {
@@ -22,6 +25,7 @@ class AnswerDetailModuleApp extends StatefulWidget {
 
 class _AnswerDetailModuleAppState extends State<AnswerDetailModuleApp> {
   final AnswerDetailHostApi _hostApi = AnswerDetailHostApi();
+  final NavigationHostApi _navigationHostApi = NavigationHostApi();
   late final GoRouter _router;
 
   @override
@@ -61,10 +65,33 @@ class _AnswerDetailModuleAppState extends State<AnswerDetailModuleApp> {
             return ExternalTextureEditor(imagePath: imagePath);
           },
         ),
+        GoRoute(
+          path: '/product_detail',
+          builder: (context, state) {
+            final productId = state.extra as String;
+            return ProductDetailPage(
+              productId: productId,
+              hostApi: _navigationHostApi,
+            );
+          },
+        ),
+        GoRoute(
+          path: '/order_confirm',
+          builder: (context, state) {
+            final orderInfo = state.extra as Map<String, dynamic>;
+            return OrderConfirmPage(
+              orderId: orderInfo['orderId'] as String,
+              productName: orderInfo['productName'] as String,
+              price: orderInfo['price'] as double,
+              hostApi: _navigationHostApi,
+            );
+          },
+        ),
       ],
     );
 
     AnswerDetailFlutterApi.setUp(AnswerDetailFlutterApiImpl(_router));
+    NavigationFlutterApi.setUp(NavigationFlutterApiImpl(_router));
   }
 
   @override

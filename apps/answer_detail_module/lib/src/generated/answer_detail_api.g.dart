@@ -173,6 +173,38 @@ class ApiIcon {
   }
 }
 
+/// 订单信息，用于传递给 Order_Confirm_Page
+class ApiOrderInfo {
+  ApiOrderInfo({
+    required this.orderId,
+    required this.productName,
+    required this.price,
+  });
+
+  String orderId;
+
+  String productName;
+
+  double price;
+
+  Object encode() {
+    return <Object?>[
+      orderId,
+      productName,
+      price,
+    ];
+  }
+
+  static ApiOrderInfo decode(Object result) {
+    result as List<Object?>;
+    return ApiOrderInfo(
+      orderId: result[0]! as String,
+      productName: result[1]! as String,
+      price: result[2]! as double,
+    );
+  }
+}
+
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
@@ -193,6 +225,9 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is ApiIcon) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
+    }    else if (value is ApiOrderInfo) {
+      buffer.putUint8(133);
+      writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
     }
@@ -209,6 +244,8 @@ class _PigeonCodec extends StandardMessageCodec {
         return ApiCategory.decode(readValue(buffer)!);
       case 132: 
         return ApiIcon.decode(readValue(buffer)!);
+      case 133: 
+        return ApiOrderInfo.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -274,6 +311,150 @@ class AnswerDetailHostApi {
     );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(null) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+}
+
+/// iOS → Flutter：原生端驱动 Flutter 页面导航
+abstract class NavigationFlutterApi {
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  void navigateToProductDetail(String productId);
+
+  void navigateToOrderConfirm(ApiOrderInfo orderInfo);
+
+  static void setUp(NavigationFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+    {
+      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.answer_detail_module.NavigationFlutterApi.navigateToProductDetail$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.answer_detail_module.NavigationFlutterApi.navigateToProductDetail was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final String? arg_productId = (args[0] as String?);
+          assert(arg_productId != null,
+              'Argument for dev.flutter.pigeon.answer_detail_module.NavigationFlutterApi.navigateToProductDetail was null, expected non-null String.');
+          try {
+            api.navigateToProductDetail(arg_productId!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.answer_detail_module.NavigationFlutterApi.navigateToOrderConfirm$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.answer_detail_module.NavigationFlutterApi.navigateToOrderConfirm was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final ApiOrderInfo? arg_orderInfo = (args[0] as ApiOrderInfo?);
+          assert(arg_orderInfo != null,
+              'Argument for dev.flutter.pigeon.answer_detail_module.NavigationFlutterApi.navigateToOrderConfirm was null, expected non-null ApiOrderInfo.');
+          try {
+            api.navigateToOrderConfirm(arg_orderInfo!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+  }
+}
+
+/// Flutter → iOS：Flutter 端请求原生端执行操作
+class NavigationHostApi {
+  /// Constructor for [NavigationHostApi].  The [binaryMessenger] named argument is
+  /// available for dependency injection.  If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  NavigationHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  Future<void> openCustomerService() async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.answer_detail_module.NavigationHostApi.openCustomerService$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(null) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> goBack() async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.answer_detail_module.NavigationHostApi.goBack$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(null) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> confirmOrder(String orderId) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.answer_detail_module.NavigationHostApi.confirmOrder$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(<Object?>[orderId]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {
