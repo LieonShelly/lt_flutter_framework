@@ -58,7 +58,6 @@
 
 
 
-
 # 二、 引擎管理与内存优化 (Engine & Memory Management)
 - 5. 什么是 Flutter 引擎的预热（Warm-up）？为什么在混合开发中很重要？
     - 什么是 Flutter 引擎的预热（Warm-up）？
@@ -126,8 +125,96 @@
 
 
 8. 如何优雅地处理 Flutter 引擎的销毁与生命周期管理，以避免内存泄漏？
+    - 考核点： 考察对 FlutterEngineCache 的使用以及在原生侧（Activity/ViewController 销毁时）手动调用 engine 的 destroy 方法，同时解绑 Platform Channels 避免回调导致泄露。
+    - 一、 区分引擎的“所有权”：缓存引擎 vs 独立引擎
+        - 在销毁引擎之前，第一步是明确这个引擎是全局缓存的还是跟随页面独立的。这是决定是否调用 destroy() 的关键前提。
+        - 缓存引擎（全局单例或 FlutterEngineGroup 派生）：
+            - 通常我们为了秒开，会把引擎存放在 FlutterEngineCache 中。
+            - 处理方案： 当承载它的原生页面（Activity/ViewController）被销毁时，千万不要调用 engine.destroy()。你只需要将引擎从当前的 UI 容器上解绑（Detach）。引擎会继续存活在内存中，等待下一次被其他页面复用。或者可以在 warmUp 阶段初始化一个 rootEngine，这样也可以调用 调用其他页面的 engine 进行 destory
+            ```Swift
+                func warmUp() {
+                    guard rootEngine == nil else { return }
+                    let engine = engineGroup.makeEngine(withEntrypoint: "main", libraryURI: nil)
+                    GeneratedPluginRegistrant.register(with: engine)
+                    rootEngine = engine
+                }
+                 func destroyEngine(_ engine: FlutterEngine) {
+                    engine.viewController = nil
+                    NavigationHostApiSetup.setUp(binaryMessenger: engine.binaryMessenger, api: nil)
+                    engine.destroyContext()
+                }
+            ```
+        - 独立引擎（按需新建的 Engine）：
+            - 如果这个引擎是伴随当前页面临时创建的，且后续不再复用。
+            - 处理方案： 必须在原生页面生命周期结束时（如 Android 的 onDestroy，iOS 的 dealloc），彻底销毁它。
 
-考核点： 考察对 FlutterEngineCache 的使用以及在原生侧（Activity/ViewController 销毁时）手动调用 engine 的 destroy 方法，同时解绑 Platform Channels 避免回调导致泄露。
+    - 二、 优雅销毁的“标准三步曲”
+        - 对于需要彻底销毁的独立引擎，标准的释放流程必须严格按顺序执行：
+                - 第一步：解绑 Platform Channels（最容易导致泄漏的地方）
+                    - 痛点： 很多开发者在原生端注册了 MethodChannel 并在回调里引用了 Activity 或 ViewController。如果引擎没销毁，Channel 的回调依然活跃，就会导致整个原生页面对象被引用，造成极其严重的内存泄漏。
+                    - 做法： 在页面销毁前，必须手动将该页面注册的所有 Channel 监听器置空（例如 channel.setMethodCallHandler(null)）。
+                - 第二步：解绑 FlutterView (Detach View)
+                    - 断开 Flutter 引擎的渲染管道与原生 UI 容器的连接。如果你使用的是标准的 FlutterActivity 或 FlutterViewController，框架通常会帮你做这一步；但果是自定义的混合视图，需要手动 detach。
+                - 第三步：彻底调用 destroyContext()
+                    - 在完成上述清理后，最后调用 flutterEngine.destroyContext()。 这会触发 C++ 层释放 Skia 渲染资源，并关闭底层的 Dart Isolate，真正释放内存空间。
+
+    - 三、 进阶加分项：Dart 侧的协同清理
+        - “除了在原生端处理 destroy()，优雅的销毁还需要 Dart 侧的配合。当原生端准备销毁引擎前，可以通过内置的 System Channel 发送一个 popRoute 或自定义的退出信号。让 Dart 侧有机会去 cancel 掉正在进行的长连接、定时器（Timer）或释放复杂的外部资源（比如停止正在播放的音视频流）。等 Dart 侧清理完毕后，原生端再去执行最终的 destroy()，这样才是真正无缝且安全的生命周期管理。”
+
+        ```Swift
+            // 假设你准备销毁 ViewController
+            deinit {
+                // 1. 向 Dart 侧发送系统级的 popRoute 信号
+                flutterEngine?.navigationChannel.invokeMethod("popRoute", arguments: nil)
+            }
+        ```
+
+        ```Dart
+            import 'package:flutter/material.dart';
+            class MyFlutterModule extends StatefulWidget {
+            @override
+            _MyFlutterModuleState createState() => _MyFlutterModuleState();
+            }
+
+            class _MyFlutterModuleState extends State<MyFlutterModule> with WidgetsBindingObserver {
+            
+            @override
+            void initState() {
+                super.initState();
+                // 注册系统生命周期与路由监听
+                WidgetsBinding.instance.addObserver(this);
+            }
+
+            @override
+            void dispose() {
+                // 别忘了移除监听
+                WidgetsBinding.instance.removeObserver(this);
+                super.dispose();
+            }
+
+            // 监听到原生端发来的 popRoute 信号
+            @override
+            Future<bool> didPopRoute() async {
+                print("收到原生的 popRoute 信号，开始清理复杂资源...");
+                
+                // 1. 在这里执行你的清理逻辑
+                await _stopVideoPlayer();
+                _cancelWebSockets();
+                _closeDatabaseConnections();
+                
+                // 2. 返回 false 表示 Flutter 路由栈已经到底了，不需要 Flutter 内部再做页面 pop
+                // 这时候原生端就可以放心地销毁容器和引擎了
+                return false; 
+            }
+
+            Future<void> _stopVideoPlayer() async {
+                // 模拟耗时的资源释放
+                await Future.delayed(Duration(milliseconds: 300));
+            }
+            // ... 其他 UI 构建逻辑
+            }
+        ```
+
 
 三、 平台通道与通信 (Platform Channels)
 9. 简述 MethodChannel、EventChannel 和 BasicMessageChannel 的应用场景及区别。

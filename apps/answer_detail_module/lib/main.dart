@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:answer_detail/answer_detail.dart';
@@ -12,6 +13,11 @@ import 'src/pages/order_confirm_page.dart';
 
 @pragma('vm:entry-point')
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+}
+
+@pragma('vm:entry-point')
+void singleEngineMain() {
   debugPrint('=== Flutter main() started ===');
   runApp(const ProviderScope(child: AnswerDetailModuleApp()));
 }
@@ -110,5 +116,101 @@ class _AnswerDetailModuleAppState extends State<AnswerDetailModuleApp> {
         scaffoldBackgroundColor: const Color(0xFFFFFDF8),
       ),
     );
+  }
+}
+
+@pragma('vm:entry-point')
+void productDetailMain() {
+  runApp(const ProviderScope(child: ProductDetailApp()));
+}
+
+class ProductDetailApp extends StatefulWidget {
+  const ProductDetailApp({super.key});
+
+  @override
+  State<ProductDetailApp> createState() => _ProductDetailAppState();
+}
+
+class _ProductDetailAppState extends State<ProductDetailApp> {
+  final NavigationHostApi _navigationHostApi = NavigationHostApi();
+  String? _productId;
+
+  @override
+  void initState() {
+    super.initState();
+    final route = WidgetsBinding.instance.platformDispatcher.defaultRouteName;
+    if (route.startsWith('/product/')) {
+      _productId = route.substring('/product/'.length);
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      MethodChannel('flutter_ready').invokeMethod('ready');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Product Detail',
+      theme: ThemeData(
+        useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFFFFFDF8),
+      ),
+      home: ProductDetailPage(
+        productId: _productId ?? 'unknown',
+        hostApi: _navigationHostApi,
+      ),
+    );
+  }
+}
+
+@pragma('vm:entry-point')
+void orderConfirmMain() {
+  runApp(const ProviderScope(child: OrderConfirmApp()));
+}
+
+class OrderConfirmApp extends StatefulWidget {
+  const OrderConfirmApp({super.key});
+
+  @override
+  State<OrderConfirmApp> createState() => _OrderConfirmAppState();
+}
+
+class _OrderConfirmAppState extends State<OrderConfirmApp>
+    with WidgetsBindingObserver {
+  final NavigationHostApi _navigationHostApi = NavigationHostApi();
+  String _orderId = '';
+
+  @override
+  void initState() {
+    super.initState();
+    final route = WidgetsBinding.instance.platformDispatcher.defaultRouteName;
+    if (route.startsWith('/order/')) {
+      _orderId = route.substring('/order/'.length);
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      MethodChannel('flutter_ready').invokeMethod('ready');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Order Confirm',
+      theme: ThemeData(
+        useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFFFFFDF8),
+      ),
+      home: OrderConfirmPage(
+        orderId: _orderId,
+        productName: 'Demo 商品',
+        price: 99.0,
+        hostApi: _navigationHostApi,
+      ),
+    );
+  }
+
+  @override
+  Future<bool> didPopRoute() {
+    return super.didPopRoute();
   }
 }
