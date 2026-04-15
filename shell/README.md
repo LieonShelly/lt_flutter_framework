@@ -239,7 +239,8 @@ Found 12 packages with build_runner
 - 支持选择构建模式：`debug`、`release` 或 `all`（默认 `all`，同时构建 Debug + Release）
 - Profile 模式始终跳过，减少构建时间
 - 分别验证各模式的构建产物（`App.xcframework`、`Flutter.xcframework`）
-- 列出所有生成的 `.xcframework` 文件，并给出集成提示
+- 自动查找并拷贝 Pigeon 生成的 `.g.swift` 文件到产物目录，同时将访问级别提升为 `public`（无 Pigeon 文件时自动跳过）
+- 列出所有生成的 `.xcframework` 和 `.swift` 文件，并给出集成提示
 
 **参数**：
 
@@ -255,10 +256,12 @@ Found 12 packages with build_runner
 3. 依赖解析 — 在模块目录执行 `fvm flutter pub get`
 4. 构建 XCFramework — 根据 `--mode` 参数构建对应模式（始终跳过 profile）
 5. 验证产物 — 分别确认各模式下 `App.xcframework` 和 `Flutter.xcframework` 存在
+6. 拷贝 Pigeon Swift 文件 — 查找模块中 Pigeon 生成的 `.g.swift` 文件（搜索 `ios/` 和 `lib/src/generated/` 目录），将访问级别提升为 `public`，然后拷贝到各构建模式的产物目录中。Host App 需要将这些 Swift 文件添加到 Xcode 工程中编译，以获得 Pigeon 生成的类型安全通信接口。如果未发现 `.g.swift` 文件则自动跳过
 
 **产物目录**：
 - Debug 模式：`apps/<module>/build/ios/xcframework/Debug/`
 - Release 模式：`apps/<module>/build/ios/xcframework/Release/`
+- 各模式目录下包含 `App.xcframework`、`Flutter.xcframework`，以及 Pigeon 生成的 `.g.swift` 文件（如有）
 
 **使用方法**：
 
@@ -306,15 +309,22 @@ dart shell/bin/build_xcframework.dart --help
 🔎 验证 release 构建产物...
   ✓ release 产物验证通过
 
+📋 处理 Pigeon 生成的 Swift 文件...
+  ✓ answer_detail_api.g.swift → debug/
+  ✓ answer_detail_api.g.swift → release/
+  ✓ Swift 文件已提升为 public 访问级别并拷贝到产物目录
+
 ✅ 🎉 answer_detail_module XCFramework 构建成功！
    debug 产物目录: apps/answer_detail_module/build/ios/xcframework/Debug
    包含:
      - App.xcframework
      - Flutter.xcframework
+     - answer_detail_api.g.swift
    release 产物目录: apps/answer_detail_module/build/ios/xcframework/Release
    包含:
      - App.xcframework
      - Flutter.xcframework
+     - answer_detail_api.g.swift
 
 ==================================================
 💡 集成提示:
@@ -456,6 +466,8 @@ dart shell/bin/build_xcframework.dart -m answer_detail_module --mode release
 #   Debug:   apps/answer_detail_module/build/ios/xcframework/Debug/
 #   Release: apps/answer_detail_module/build/ios/xcframework/Release/
 # 将生成的 .xcframework 文件集成到原生 iOS 项目中
+# 如果模块使用了 Pigeon，产物目录中还会包含 .g.swift 文件，
+# 需要将其添加到 Xcode 工程中编译以获得类型安全的通信接口
 ```
 
 ## Makefile 命令

@@ -349,18 +349,72 @@ func updateMetalTextureColor(red: Double, green: Double, blue: Double, alpha: Do
 |---|---|---|---|
 | `updateColor` | `[double, double, double, double]`（RGBA，值域 `[0.0, 1.0]`） | `void` | 更新指定 Metal Overlay View 的颜色叠加参数 |
 
-### 5.4 统一注册入口
+### 5.4 Pigeon API 注册
+
+answer_detail 模块使用 [Pigeon](https://pub.dev/packages/pigeon) 自动生成类型安全的双向通信代码，替代手写 MethodChannel。生成的 Swift 代码位于 `ios/answer_detail_api.g.swift`，Host App 需要将该文件添加到 Xcode 工程中。
+
+#### AnswerDetailHostApi — Flutter → iOS
+
+Host App 需要实现 `AnswerDetailHostApi` Swift 协议，处理 Flutter 端发起的操作请求（如关闭页面）。
+
+```swift
+import Flutter
+
+/// 实现 Pigeon 生成的 AnswerDetailHostApi 协议
+class AnswerDetailHostApiHandler: AnswerDetailHostApi {
+
+    private weak var flutterViewController: FlutterViewController?
+
+    init(flutterViewController: FlutterViewController?) {
+        self.flutterViewController = flutterViewController
+    }
+
+    func dismiss() throws {
+        flutterViewController?.dismiss(animated: true)
+    }
+}
+```
+
+使用 `AnswerDetailHostApiSetup.setUp` 注册协议实现：
+
+```swift
+func registerAnswerDetailHostApi(engine: FlutterEngine, flutterVC: FlutterViewController?) {
+    let handler = AnswerDetailHostApiHandler(flutterViewController: flutterVC)
+    AnswerDetailHostApiSetup.setUp(
+        binaryMessenger: engine.binaryMessenger,
+        api: handler
+    )
+}
+```
+
+#### AnswerDetailFlutterApi — iOS → Flutter
+
+Host App 通过 `AnswerDetailFlutterApi` 实例向 Flutter 端推送数据（如 Answer 详情）。无需实现协议，直接创建实例即可调用：
+
+```swift
+let flutterApi = AnswerDetailFlutterApi(binaryMessenger: engine.binaryMessenger)
+```
+
+> **说明**：
+> - `AnswerDetailHostApiSetup.setUp` 必须在 `FlutterEngine.run()` 之后调用
+> - `AnswerDetailFlutterApi` 实例可在需要推送数据时随时创建
+> - 生成的 Swift 文件 `answer_detail_api.g.swift` 需添加到 Xcode 工程的编译源文件中
+
+### 5.5 统一注册入口
 
 在 `AppDelegate` 中统一注册全部 Platform Channel 处理器：
 
 ```swift
-func registerPlatformChannels(engine: FlutterEngine) {
+func registerPlatformChannels(engine: FlutterEngine, flutterVC: FlutterViewController? = nil) {
     // 1. 注册 Metal Overlay View 原生视图工厂
     //    （同时处理 color_overlayer_{id} 动态 Channel）
     registerMetalOverlayViewFactory(engine: engine)
 
     // 2. 注册 Metal Texture Channel
     registerMetalTextureChannel(engine: engine)
+
+    // 3. 注册 Pigeon 生成的 AnswerDetailHostApi
+    registerAnswerDetailHostApi(engine: engine, flutterVC: flutterVC)
 }
 ```
 
@@ -368,94 +422,65 @@ func registerPlatformChannels(engine: FlutterEngine) {
 
 ## 6. 数据传递
 
-Host App 需要将 `AnswerEntity` 数据传递给 Flutter 模块，以便 `AnswerDetailPage` 展示答案详情。
+Host App 需要将 Answer 数据传递给 Flutter 模块，以便 `AnswerDetailPage` 展示答案详情。模块使用 Pigeon 生成的类型安全 API 进行数据传递。
 
-### 6.1 AnswerEntity JSON 格式
+### 6.1 Pigeon 数据类型
 
-```json
-{
-  "id": "string",
-  "content": "string",
-  "createdAt": "2025-01-15T10:30:00.000Z",
-  "question": {
-    "id": "string",
-    "title": "string",
-    "category": {
-      "id": "string",
-      "name": "string",
-      "color": "string 或 null"
-    },
-    "pinned": false,
-    "subCategory": null
-  },
-  "icon": {
-    "status": "GENERATED",
-    "url": "https://example.com/icon.png"
-  }
-}
-```
+Pigeon 生成的 Swift 数据类型定义在 `answer_detail_api.g.swift` 中：
 
-**字段说明**：
+| Swift 类型 | 字段 | 说明 |
+|---|---|---|
+| `ApiAnswer` | `id: String`, `content: String`, `createTms: String?`, `createYmd: String?`, `question: ApiQuestion?`, `icon: ApiIcon?` | 答案数据 |
+| `ApiQuestion` | `id: String`, `title: String`, `category: ApiCategory`, `pinned: Bool`, `subCategory: ApiCategory?` | 问题数据 |
+| `ApiCategory` | `id: String`, `name: String`, `color: String?` | 分类数据 |
+| `ApiIcon` | `status: String`, `url: String` | 图标数据（status 值：`GENERATED`/`PENDING`/`FAILED`/`UNKNOWN`） |
 
-| 字段 | 类型 | 必填 | 说明 |
-|---|---|---|---|
-| `id` | `String` | 是 | 答案唯一标识 |
-| `content` | `String` | 是 | 答案内容文本 |
-| `createdAt` | `String` | 是 | ISO 8601 格式的创建时间（如 `2025-01-15T10:30:00.000Z`） |
-| `question` | `Object?` | 否 | 关联的问题对象 |
-| `question.id` | `String` | 是 | 问题唯一标识 |
-| `question.title` | `String` | 是 | 问题标题 |
-| `question.category` | `Object` | 是 | 问题分类 |
-| `question.category.id` | `String` | 是 | 分类唯一标识 |
-| `question.category.name` | `String` | 是 | 分类名称 |
-| `question.category.color` | `String?` | 否 | 分类颜色值 |
-| `question.pinned` | `Bool` | 是 | 是否置顶 |
-| `question.subCategory` | `Object?` | 否 | 子分类（结构同 `category`），可为 `null` |
-| `icon` | `Object?` | 否 | 答案图标对象 |
-| `icon.status` | `String` | 是 | 图标状态：`GENERATED`、`PENDING`、`FAILED`、`UNKNOWN` |
-| `icon.url` | `String` | 是 | 图标图片 URL |
+### 6.2 方式一：通过 Pigeon API 传递数据（推荐）
 
-### 6.2 方式一：通过 MethodChannel 传递数据（推荐）
-
-在 FlutterEngine 启动后，通过自定义 MethodChannel 将 JSON 数据发送给 Flutter 侧，由 Flutter 解析后导航到 `AnswerDetailPage`。
+在 FlutterEngine 启动后，通过 Pigeon 生成的 `AnswerDetailFlutterApi` 将类型安全的数据推送给 Flutter 端。Flutter 端自动将 Pigeon 消息类转换为 Domain Entity 并导航到详情页。
 
 **Swift 侧（Host App）**：
 
 ```swift
 import Flutter
 
-func sendAnswerData(engine: FlutterEngine, answerJson: [String: Any]) {
-    let channel = FlutterMethodChannel(
-        name: "answer_detail_data_channel",
-        binaryMessenger: engine.binaryMessenger
-    )
+func sendAnswerData(engine: FlutterEngine, answer: ApiAnswer) {
+    let flutterApi = AnswerDetailFlutterApi(binaryMessenger: engine.binaryMessenger)
 
-    channel.invokeMethod("setAnswerData", arguments: answerJson)
+    flutterApi.setAnswerData(answer: answer) { result in
+        switch result {
+        case .success:
+            print("Answer data sent successfully")
+        case .failure(let error):
+            print("Failed to send answer data: \(error)")
+        }
+    }
 }
 
 // 使用示例
 func presentAnswerDetail(from viewController: UIViewController) {
     guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
 
-    let answerJson: [String: Any] = [
-        "id": "answer-001",
-        "content": "这是答案内容...",
-        "createdAt": "2025-01-15T10:30:00.000Z",
-        "question": [
-            "id": "question-001",
-            "title": "今天让你感到开心的事情是什么？",
-            "category": ["id": "cat-001", "name": "日常"],
-            "pinned": false,
-            "subCategory": NSNull()
-        ],
-        "icon": [
-            "status": "GENERATED",
-            "url": "https://example.com/icon.png"
-        ]
-    ]
+    // 构造类型安全的 ApiAnswer 对象
+    let category = ApiCategory(id: "cat-001", name: "日常", color: nil)
+    let question = ApiQuestion(
+        id: "question-001",
+        title: "今天让你感到开心的事情是什么？",
+        category: category,
+        pinned: false,
+        subCategory: nil
+    )
+    let icon = ApiIcon(status: "GENERATED", url: "https://example.com/icon.png")
+    let answer = ApiAnswer(
+        id: "answer-001",
+        content: "这是答案内容...",
+        createTms: "2025-01-15T10:30:00.000Z",
+        createYmd: "2025-01-15",
+        question: question,
+        icon: icon
+    )
 
-    sendAnswerData(engine: appDelegate.flutterEngine, answerJson: answerJson)
-
+    // 展示 Flutter 页面
     let flutterVC = FlutterViewController(
         engine: appDelegate.flutterEngine,
         nibName: nil,
@@ -463,34 +488,22 @@ func presentAnswerDetail(from viewController: UIViewController) {
     )
     flutterVC.modalPresentationStyle = .fullScreen
     viewController.present(flutterVC, animated: true)
+
+    // 推送数据给 Flutter 端
+    sendAnswerData(engine: appDelegate.flutterEngine, answer: answer)
 }
 ```
 
-**Dart 侧（Flutter 模块）需要在 `main.dart` 中添加 Channel 监听**：
-
-```dart
-import 'dart:convert';
-import 'package:flutter/services.dart';
-import 'package:reflection_domain/reflection_domain.dart';
-
-// 在 AnswerDetailModuleApp 的 initState 或合适位置注册监听
-const _dataChannel = MethodChannel('answer_detail_data_channel');
-
-void listenForAnswerData(GoRouter router) {
-  _dataChannel.setMethodCallHandler((call) async {
-    if (call.method == 'setAnswerData') {
-      final json = call.arguments as Map<dynamic, dynamic>;
-      final map = json.cast<String, dynamic>();
-      final answer = AnswerEntity.fromJson(map);
-      router.go('/answer_detail', extra: answer);
-    }
-  });
-}
-```
+> **说明**：
+> - 使用 Pigeon 生成的 Swift 类型（`ApiAnswer`、`ApiQuestion` 等），编译器会检查字段类型和必填项
+> - `setAnswerData` 的 completion 回调可用于确认数据是否成功送达 Flutter 端
+> - Flutter 端接收到数据后，自动将 Pigeon 消息类转换为 `AnswerEntity` 并导航到 `AnswerDetailPage`
 
 ### 6.3 方式二：通过 initialRoute 传递数据
 
 将 JSON 数据编码到 `FlutterEngine` 的 `initialRoute` 中。适用于数据量较小的场景。
+
+> **注意**：此方式不推荐，建议优先使用方式一（Pigeon API）。Pigeon 方式提供编译时类型检查，避免手动 JSON 序列化/反序列化。
 
 **Swift 侧（Host App）**：
 
@@ -544,10 +557,11 @@ GoRoute(
 ),
 ```
 
-> **建议**：推荐使用 **方式一（MethodChannel）**，原因如下：
-> - 不受 URL 长度限制，适合传递较大的 JSON 数据
+> **建议**：推荐使用 **方式一（Pigeon API）**，原因如下：
+> - 编译时类型检查，Swift 编译器会验证字段类型和必填项
+> - 无需手动 JSON 序列化/反序列化，消除运行时类型转换错误
 > - 支持在 Flutter 页面已展示后动态更新数据
-> - 数据类型安全，无需 URL 编码/解码
+> - Pigeon 自动生成两端代码，接口变更时编译器会提示所有需要修改的位置
 
 ---
 
@@ -571,5 +585,5 @@ GoRoute(
 
 **解决**：
 1. 确认 `flutterEngine.run()` 已调用
-2. 确认通过 MethodChannel 或 initialRoute 传递了有效的 JSON 数据
+2. 确认通过 Pigeon API（`AnswerDetailFlutterApi.setAnswerData`）或 initialRoute 传递了有效数据
 3. 检查 Xcode 控制台是否有 Flutter 相关的错误日志

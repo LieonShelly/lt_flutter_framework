@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:answer_detail/answer_detail.dart';
 import 'package:reflection_domain/reflection_domain.dart';
+
+import 'src/generated/answer_detail_api.g.dart';
+import 'src/answer_detail_flutter_api_impl.dart';
 
 @pragma('vm:entry-point')
 void main() {
@@ -19,7 +21,7 @@ class AnswerDetailModuleApp extends StatefulWidget {
 }
 
 class _AnswerDetailModuleAppState extends State<AnswerDetailModuleApp> {
-  final MethodChannel channel = MethodChannel('answer_detail_data_channel');
+  final AnswerDetailHostApi _hostApi = AnswerDetailHostApi();
   late final GoRouter _router;
 
   @override
@@ -43,7 +45,7 @@ class _AnswerDetailModuleAppState extends State<AnswerDetailModuleApp> {
             final answer = state.extra as AnswerEntity;
             return AnswerDetailPage(
               answer: answer,
-              onClose: () => channel.invokeMethod('dismiss'),
+              onClose: () => _hostApi.dismiss(),
             );
           },
         ),
@@ -57,38 +59,7 @@ class _AnswerDetailModuleAppState extends State<AnswerDetailModuleApp> {
       ],
     );
 
-    // 只监听 iOS 端主动推送，不再主动请求
-    channel.setMethodCallHandler((call) async {
-      if (call.method == 'setAnswerData') {
-        try {
-          final json = _castMap(call.arguments);
-          final answer = AnswerEntity.fromJson(json);
-          _router.go('/answer_detail', extra: answer);
-        } catch (e, stackTrace) {
-          debugPrint('=== ERROR in setAnswerData: $e ===');
-          debugPrint('=== $stackTrace ===');
-        }
-      }
-    });
-  }
-
-  /// 递归将 iOS 返回的 Map<Object?, Object?> 转换为 Map<String, dynamic>
-  Map<String, dynamic> _castMap(dynamic data) {
-    if (data is Map<String, dynamic>) return data;
-    if (data is Map) {
-      return data.map((key, value) {
-        final dynamic castValue;
-        if (value is Map) {
-          castValue = _castMap(value);
-        } else if (value is List) {
-          castValue = value.map((e) => e is Map ? _castMap(e) : e).toList();
-        } else {
-          castValue = value;
-        }
-        return MapEntry(key.toString(), castValue);
-      });
-    }
-    throw ArgumentError('Expected a Map but got ${data.runtimeType}');
+    AnswerDetailFlutterApi.setUp(AnswerDetailFlutterApiImpl(_router));
   }
 
   @override

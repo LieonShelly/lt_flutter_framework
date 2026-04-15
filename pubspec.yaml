@@ -115,3 +115,4 @@ dev_dependencies:
   riverpod_generator: ^4.0.0+1
   freezed: ^3.2.3
   json_serializable: ^6.8.0
+  pigeon: ^22.7.4
