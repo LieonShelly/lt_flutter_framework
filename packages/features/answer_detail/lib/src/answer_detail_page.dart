@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:lt_uicomponent/uicomponent.dart';
 import 'package:reflection_domain/reflection_domain.dart';
 import 'package:feature_core/feature_core.dart';
+import 'package:answer_detail/l10n/answer_detail_localizations.dart';
 
 class AnswerDetailPage extends ConsumerStatefulWidget with ImageCacheKeyType {
   final AnswerEntity answer;
@@ -131,7 +132,8 @@ class _AnswerDetailPageState extends ConsumerState<AnswerDetailPage>
 
   Widget _buildHeader() {
     final date = widget.answer.createYmd ?? DateTime.now();
-    final fromat = DateFormat.MMMd('en_US');
+    final localeName = Localizations.localeOf(context).toString();
+    final fromat = DateFormat.MMMd(localeName);
     final dateStr = fromat.format(date);
     return SizedBox(
       height: 75,
@@ -223,6 +225,7 @@ class _AnswerDetailPageState extends ConsumerState<AnswerDetailPage>
   }
 
   Widget _buildBottomView(BuildContext context) {
+    final localizations = AnswerDetailLocalizations.of(context);
     final container = Container(
       width: 48,
       height: 48,
@@ -231,7 +234,10 @@ class _AnswerDetailPageState extends ConsumerState<AnswerDetailPage>
         borderRadius: BorderRadius.circular(12),
         color: Color(0xEBEBEBEB),
       ),
-      child: SvgAsset(IconName.close, width: 16, height: 16),
+      child: Tooltip(
+        message: localizations?.closeButtonTooltip('Page') ?? 'Close Page',
+        child: SvgAsset(IconName.close, width: 16, height: 16),
+      ),
     );
     final padding = Padding(
       padding: EdgeInsets.only(bottom: 40),

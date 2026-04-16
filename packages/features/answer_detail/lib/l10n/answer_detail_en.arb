@@ -1,0 +1,13 @@
+{
+  "@@locale": "en",
+  "closeButtonTooltip": "Close {name}",
+  "@closeButtonTooltip": {
+    "description": "Tooltip for the close button",
+    "placeholders": { 
+      "name": {
+        "type": "String",
+        "example": "page"        
+      }
+    }
+  }
+}
