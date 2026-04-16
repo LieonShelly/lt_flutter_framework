@@ -3,3 +3,4 @@ export 'src/processed_icon_view.dart';
 export 'src/app_route_path.dart';
 export 'src/providers/processed_icon_image_provider.dart';
 export 'src/route_config.dart';
+export 'src/locale/app_locale_provider.dart';
