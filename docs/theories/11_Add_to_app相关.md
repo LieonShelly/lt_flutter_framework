@@ -216,16 +216,34 @@
         ```
 
 
-三、 平台通道与通信 (Platform Channels)
-9. 简述 MethodChannel、EventChannel 和 BasicMessageChannel 的应用场景及区别。
+# 三、 平台通道与通信 (Platform Channels)
+- 9. 简述 MethodChannel、EventChannel 和 BasicMessageChannel 的应用场景及区别。
+    - 考核点：
+        - MethodChannel：一次性方法调用（如调用相机、获取电量）。
+        - EventChannel：数据流通信（如监听网络状态、传感器）。
+        - BasicMessageChannel：持续的字符串或半结构化信息收发。
+    - MethodChannel（方法通道）
+        - 核心机制：用于传递函数/方法调用（Request-Response 模式），类似于 RPC（远程过程调用）。
+        - 通信方向：双向（Flutter 可以调用原生方法，原生也可以调用 Flutter 方法），但通常以 Flutter 发起请求、原生返回结果最为常见。
+        - 应用场景：
+            - 一次性动作或操作：比如调用原生相机拍照、获取手机设备的电池电量、弹出一个原生的 Toast 或 Dialog、获取应用版本号。
+        - 生命周期请求：由 Flutter 端主动发起，期望得到一个成功或失败的回调结果。
+        - 特点：有明确的方法名（Method）和参数（Arguments），执行完成后会有明确的返回值（Result）。
 
-考核点：
+    - EventChannel（事件通道）
+        - 核心机制：用于传递数据流（Data Stream），适合连续或状态发生变化时的事件通知。
+        - 通信方向：单向（通常是 Native 端持续向 Flutter 端发送数据）。
+        - 应用场景：
+            - 持续监听的操作：比如监听手机网络状态（WiFi/蜂窝网络）切换、监听传感器数据（陀螺仪、计步器）、GPS 实时位置更新、蓝牙设备连接状态的持续回调、后台长连接的消息推送。
+            - 特点：Flutter 端以 Stream 的形式监听（receiveBroadcastStream），原生端通过 EventSink 持续发射数据。用完后必须记得取消订阅以释放资源。
+    - BasicMessageChannel（基础消息通道）
+        - 核心机制：用于传递字符串或半结构化的信息（如 JSON、字节流流等），是比较底层的数据传递通道。
+        - 通信方向：双向（Flutter 与 Native 随时可以向对方发送消息）。
+        - 应用场景：
+            - 大块数据传输或高频通信：比如传递大型 JSON 文本、图片数据流、或者需要自定义消息编解码器（Codec）以提升性能的场景。
+            - 模块间持续的双向对话：不像 MethodChannel 那样必须指明方法名，只是纯粹的数据丢来丢去。
+            - 特点：需要明确指定消息的编解码器（如 StringCodec，BinaryCodec，JSONMessageCodec，StandardMessageCodec）。因为可以自定义编解码器，所以在传输极大规模二进制数据时，使用 BinaryCodec 可以减少内存拷贝和序列化耗时。
 
-MethodChannel：一次性方法调用（如调用相机、获取电量）。
-
-EventChannel：数据流通信（如监听网络状态、传感器）。
-
-BasicMessageChannel：持续的字符串或半结构化信息收发。
 
 10. Platform Channel 的底层通信机制是什么？它是同步还是异步的？
 
