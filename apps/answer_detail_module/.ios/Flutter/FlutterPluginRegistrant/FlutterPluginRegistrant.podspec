@@ -21,5 +21,6 @@ Depends on all your plugins, and provides a function to register them.
   s.dependency 'Flutter'
   s.dependency 'flutter_secure_storage_darwin'
   s.dependency 'path_provider_foundation'
+  s.dependency 'shared_preferences_foundation'
   s.dependency 'sqflite_darwin'
 end

@@ -3,16 +3,16 @@
     // 悬停以查看现有属性的描述。
     // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": [ 
-         {
-            "name": "compass_app_debug",
+    "configurations": [
+        {
+            "name": "theme_debug",
             "type": "dart",
             "request": "launch",
-            "program": "apps/compass_app/lib/main_dev.dart",
+            "program": "apps/lt_app/lib/theme_main.dart",
             "flutterMode": "debug",
             "deviceId": "E7303DC2-C507-4CA5-9E18-11FF97D6BA68",
         },
-          {
+        {
             "name": "LTApp_Flutter",
             "type": "dart",
             "request": "launch",

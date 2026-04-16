@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'colors.dart';
+import 'lt_theme_type.dart';
+import 'lt_theme_colors.dart';
 
 abstract final class AppTheme {
   static const _textTheme = TextTheme(
@@ -34,17 +36,20 @@ abstract final class AppTheme {
     ),
   );
 
-  static ThemeData lightTheme = ThemeData(
-    brightness: Brightness.light,
-    colorScheme: AppColors.lightColorScheme,
-    textTheme: _textTheme,
-    inputDecorationTheme: _inputDecorationTheme,
-  );
+  static ThemeData getThemeData(LtThemeType type, Brightness brightness) {
+    final ColorScheme colorScheme = brightness == Brightness.light
+        ? LtThemeColors.getLightColorScheme(type)
+        : LtThemeColors.getDarkColorScheme(type);
 
-  static ThemeData darkTheme = ThemeData(
-    brightness: Brightness.dark,
-    colorScheme: AppColors.darkColorScheme,
-    textTheme: _textTheme,
-    inputDecorationTheme: _inputDecorationTheme,
-  );
+    return ThemeData(
+      brightness: brightness,
+      colorScheme: colorScheme,
+      textTheme: _textTheme,
+      inputDecorationTheme: _inputDecorationTheme,
+    );
+  }
+
+  static ThemeData lightTheme = getThemeData(LtThemeType.neutralV2, Brightness.light);
+
+  static ThemeData darkTheme = getThemeData(LtThemeType.neutralV2, Brightness.dark);
 }
