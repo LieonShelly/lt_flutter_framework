@@ -1,6 +1,6 @@
 // This is a generated file; do not edit or check into version control.
-FLUTTER_ROOT=/Users/renjunli/fvm/versions/3.35.7
-FLUTTER_APPLICATION_PATH=/Users/renjunli/Desktop/LittleThings/flutter_framework/apps/answer_detail_module
+FLUTTER_ROOT=/Users/renjun.li/fvm/versions/3.35.7
+FLUTTER_APPLICATION_PATH=/Users/renjun.li/Desktop/LittleThings/flutter_framework/apps/answer_detail_module
 COCOAPODS_PARALLEL_CODE_SIGN=true
 FLUTTER_TARGET=lib/main.dart
 FLUTTER_BUILD_DIR=build

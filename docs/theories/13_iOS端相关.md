@@ -178,3 +178,126 @@ self.currentTask = [AFHTTPSessionManager.manager GET:@"..." parameters:nil ... s
 
 **一句话总结：**
 对于你发出去的 Token ，服务端要么是拿着它去**查 Redis 对照表 (Session/Opaque Token)** 找出你的 UserID，要么是拿着绝密私钥去**验签并直接解开 Token 中的明文 (JWT)** 来直接读取你的 UserID。
+
+
+## Q: 你认为你在这个项目中做过最大的亮点是什么？
+
+### 回答方向：MVVM+Coordinator 导航架构
+
+---
+
+### 开场（Situation + Task）
+
+我们的项目是保时捷的 iOS 移动端 monorepo，包含 120+ 个模块、两个生产 App（全球版和中国版）。在这样的规模下，如果导航逻辑散落在各个 ViewController 里，模块之间会产生严重耦合，也很难支持 DeepLink、跨 Tab 跳转这些场景。所以我们设计并落地了一套完整的 MVVM+Coordinator 导航架构。
+
+---
+
+### 核心设计（Action）
+
+整个架构分三层协议：
+
+#### 1. Route — 导航的"语言"
+
+最底层是一个极简的 `Route` 协议，只要求 `Sendable`，定义在 utils 层，所有模块都能用。每个功能模块定义自己的 Route 枚举：
+
+```swift
+public protocol Route: Sendable {}
+
+// 每个模块定义自己的路由枚举
+public enum VehicleDetailsRoute: Route {
+    case showDetails(vin: Vehicle.VIN)
+}
+
+public enum ChargingFunctionRoute: Route {
+    case showChargingOverview(vin: Vehicle.VIN)
+    case showChargingHistory
+}
+```
+
+这样做的好处是，Route 是值类型、可序列化的，天然适合 DeepLink 转换，而且每个模块的路由是自包含的，不需要知道其他模块的存在。
+
+#### 2. Routing — 路由分发机制
+
+中间层是 `Routing` 协议，核心是两个方法：
+
+```swift
+@MainActor
+public protocol Routing: AnyObject {
+    var onFinishAction: (@Sendable (_ continueWithRoute: any Route) -> Void)? { get set }
+    func start(route: any Route) -> Bool
+    func handle(route: any Route)
+}
+```
+
+关键设计是 `handle(route:)` 的默认实现：如果当前 Coordinator 处理不了这个 Route，就通过 `onFinishAction` 向上冒泡给父 Coordinator。这形成了一个**责任链模式**——Route 会沿着 Coordinator 树向上传递，直到有人能处理它。
+
+```swift
+// handle 的默认实现
+func handle(route: any Route) {
+    if !start(route: route) {
+        // 当前 Coordinator 处理不了，传给父 Coordinator
+        onFinishAction?(route)
+    }
+}
+```
+
+#### 3. Coordinator — 导航的执行者
+
+最上层是 `Coordinator` 协议，继承 `Routing`，管理 `childCoordinators` 数组和 `navigationController`。每个 Coordinator 的 `start(route:)` 实现模式很统一：
+
+```swift
+public func start(route: any Route) -> Bool {
+    guard let route = route as? VehicleDetailsRoute else {
+        return startChildCoordinator(route: route)  // 交给子 Coordinator 尝试
+    }
+    switch route {
+    case .showDetails(let vin):
+        showDetails(vin: vin)
+        return true
+    }
+}
+```
+
+先尝试匹配自己的 Route 类型，匹配不上就遍历 childCoordinators 看谁能处理。这个模式在 77 个 Domain 模块里完全统一。
+
+#### 4. 顶层 AppCoordinator — 全局路由中枢
+
+AppCoordinator 是整棵树的根节点，它管理多个 `LayoutCoordinator`（对应 TabBar 的每个 Tab）和 `UtilityCoordinator`（全局功能如登录、版本检查）。路由分发的优先级是：
+
+```
+AppRoute（自身处理）→ UtilityCoordinators → LayoutCoordinators → MenuCoordinator
+```
+
+当 Route 命中某个 LayoutCoordinator 时，AppCoordinator 还会自动切换 TabBar 到对应的 Tab。这让 DeepLink 跳转到任意功能页面变得非常自然——只需要把 URL 转换成对应的 Route 对象，剩下的交给责任链。
+
+---
+
+### 解决了什么问题（Result）
+
+这套架构带来了几个实际收益：
+
+1. **模块完全解耦**：ViewController 不知道导航栈的存在，模块之间通过 Route 枚举通信，没有直接依赖
+2. **DeepLink 统一处理**：URL → Route 的转换只需要一个 `DeepLinkManager`，转换后的 Route 走和正常导航完全一样的路径
+3. **跨模块跳转零成本**：比如从"充电"模块跳到"车辆详情"，只需要 `handle(route: VehicleDetailsRoute.showDetails(vin: vin))`，Route 会自动冒泡到能处理它的 Coordinator
+4. **Swift 6 并发安全**：所有 Coordinator 和 Routing 协议都标记了 `@MainActor`，Route 要求 `Sendable`，在 Swift 6 严格并发检查下是安全的
+5. **新模块接入成本低**：新功能只需要定义自己的 Route 枚举、实现一个 Coordinator，注册为 childCoordinator 就完成了
+
+---
+
+### 面试官可能的追问
+
+#### Q: 为什么不用 SwiftUI 的 NavigationStack？
+
+项目从 iOS 16 开始支持，大量存量 UIKit 代码。Coordinator 模式对 UIKit 和 SwiftUI 都兼容——SwiftUI 的 View 可以通过 `RouteDispatching` 协议的 `onAction` 闭包把路由事件传给 Coordinator。
+
+#### Q: Route 冒泡会不会有性能问题？
+
+不会。Coordinator 树的深度通常只有 3-4 层（App → Layout → Feature → SubFeature），每层只是一个 `as?` 类型检查，开销可以忽略。
+
+#### Q: 怎么防止 Coordinator 内存泄漏？
+
+`addChildCoordinator` 时用 `[weak self]` 绑定 `onFinishAction`，Coordinator 结束时调用 `removeChildCoordinator` 从父节点移除。生命周期和 NavigationController 的 push/pop 对齐。
+
+#### Q: 和 Router 模式有什么区别？
+
+Router 通常是一个中心化的路由表（URL → Handler），我们的方案是去中心化的——每个 Coordinator 只认识自己的 Route 类型，通过责任链自动分发。好处是新增模块不需要修改全局路由表，坏处是调试时需要理解冒泡路径。
