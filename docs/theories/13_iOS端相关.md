@@ -301,3 +301,28 @@ AppRoute（自身处理）→ UtilityCoordinators → LayoutCoordinators → Men
 #### Q: 和 Router 模式有什么区别？
 
 Router 通常是一个中心化的路由表（URL → Handler），我们的方案是去中心化的——每个 Coordinator 只认识自己的 Route 类型，通过责任链自动分发。好处是新增模块不需要修改全局路由表，坏处是调试时需要理解冒泡路径。
+
+#### Swift 数组 Copy-on-Write (COW) 机制
+- **核心定义**：Swift 中的集合类型（Array, Dictionary, Set）虽然是值类型，但底层通过 COW 机制进行性能优化。
+- **触发条件**：
+    1. **修改操作**：执行了会改变集合内容的操作（如 `append`, `remove`, `subscript set`）。
+    2. **共享存储**：当前集合底层的内存缓冲引用计数大于 1（即有多个变量共享同一份数据）。
+- **性能优势**：避免了在仅仅是赋值或传递参数时发生无意义的大内存拷贝，只有在真正需要独立副本进行修改时才执行拷贝。
+- **代码演示**：
+```swift
+func printAddress(_ arr: [Int]) {
+    arr.withUnsafeBufferPointer { print($0.baseAddress!) }
+}
+
+var a = [1, 2, 3]
+var b = a  // 此时 a 和 b 共享内存
+
+printAddress(a) // 0x60000...
+printAddress(b) // 0x60000... (地址相同)
+
+b.append(4)     // b 发现有共享，触发 COW，拷贝后修改
+
+printAddress(a) // 0x60000... (原地址不变)
+printAddress(b) // 0x60001... (新地址)
+```
+- **自定义 COW**：对于自定义 struct，可以通过 `isKnownUniquelyReferenced` 检查内部引用类型的唯一性来手动实现 COW。
