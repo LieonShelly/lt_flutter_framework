@@ -1,6 +1,6 @@
 # Figma UI MCP
 
-这是一个基于 Model Context Protocol (MCP) 与 WebSocket 构建的底层通信桥梁项目。
+本项目是一个专业的 **Figma 设计稿实时数据桥梁**。它基于 Model Context Protocol (MCP) 标准构建，旨在将 Figma 中的 UI 设计属性（布局、样式、矢量图标等）实时同步给本地 AI 编程助手，实现“所见即所得”的代码自动生成体验。
 
 ## 1. 主要功能
 - **打破沙箱隔离**：成功打通 Figma 设计稿的隔离环境与本地 AI IDE 的双向通信。
@@ -34,7 +34,7 @@
 ### 步骤一：配置并初始化 Python 服务端
 1. 进入 `server` 目录：
    ```bash
-   cd apps/figma_ui_mcp/server
+   cd server
    ```
 2. 创建并启用 Python 虚拟环境（防止污染全局包）：
    ```bash
@@ -53,9 +53,9 @@
 {
   "mcpServers": {
     "FigmaLocalBridge": {
-      "command": "你的绝对路径/apps/figma_ui_mcp/server/venv/bin/python3",
+      "command": "你的绝对路径/server/venv/bin/python3",
       "args": [
-        "你的绝对路径/apps/figma_ui_mcp/server/figma_bridge.py"
+        "你的绝对路径/server/figma_bridge.py"
       ],
       "env": {
         "FORCE_RELOAD": "1"
@@ -78,7 +78,7 @@
    ```
 3. 打开 Figma 桌面端软件，打开任何一个设计稿：
    - 右键点击空白处 ➔ 选择 **Plugins** ➔ **Development** ➔ **Import plugin from manifest...**
-   - 在弹出的文件选择器中，定位到 `apps/figma_ui_mcp/local_bridge_plugin/manifest.json` 并导入。
+   - 在弹出的文件选择器中，定位到 `local_bridge_plugin/manifest.json` 并导入。
 
 ### 🚀 使用测试
 1. 在 Figma 中运行你刚导入的插件。
