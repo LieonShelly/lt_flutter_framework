@@ -4,6 +4,7 @@
 
   ws.onopen = () => {
     console.log('🟢 Figma Plugin connected to Local MCP Bridge!');
+    parent.postMessage({ pluginMessage: { type: 'ws-ready' } }, '*');
   };
 
   ws.onclose = () => {

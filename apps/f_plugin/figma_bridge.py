@@ -5,19 +5,21 @@ import threading
 import websockets
 from mcp.server.fastmcp import FastMCP
 
-# 内存中的全局状态，用于充当数据总线
-# Figma 插件将数据写入这里，AI 助手从这里读取
-LATEST_FIGMA_DATA = {
-    "status": "waiting",
-    "message": "暂无数据。请在 Figma 中选中图层，触发插件推送..."
-}
+import os
+
+DATA_FILE = os.path.join(os.path.dirname(__file__), "latest_selection.json")
+
+def get_fallback_data():
+    return {
+        "status": "waiting",
+        "message": "暂无数据。请在 Figma 中选中图层，触发插件推送..."
+    }
 
 # ==========================================
 # 模块 1: WebSocket 服务 (接收端)
 # ==========================================
 async def handle_ws_client(websocket):
     """处理来自 Figma Plugin 的长连接"""
-    global LATEST_FIGMA_DATA
     print("🟢 Figma Plugin 已连接到 WebSocket!", file=sys.stderr)
     
     try:
@@ -25,8 +27,14 @@ async def handle_ws_client(websocket):
             try:
                 # 接收并反序列化 Figma 推送的 UI 树数据
                 data = json.loads(message)
-                LATEST_FIGMA_DATA = data
-                print(f"📥 收到 Figma 数据更新 | 节点类型: {data.get('type', 'Unknown')}", file=sys.stderr)
+                # 写入文件，使得不同的 MCP 进程可以共享数据
+                with open(DATA_FILE, "w", encoding="utf-8") as f:
+                    json.dump(data, f, ensure_ascii=False)
+                
+                if isinstance(data, list):
+                    print(f"📥 收到 Figma 数据更新 | 选中根节点数量: {len(data)}", file=sys.stderr)
+                else:
+                    print(f"📥 收到 Figma 数据更新 | 节点类型: {data.get('type', 'Unknown') if isinstance(data, dict) else 'Unknown'}", file=sys.stderr)
             except json.JSONDecodeError:
                 print("❌ 收到无效的 JSON 数据", file=sys.stderr)
     except websockets.exceptions.ConnectionClosed:
@@ -34,9 +42,12 @@ async def handle_ws_client(websocket):
 
 async def start_ws_server():
     """启动 WebSocket 监听"""
-    async with websockets.serve(handle_ws_client, "localhost", 8765):
-        print("🚀 WebSocket Server 监听在 ws://localhost:8765", file=sys.stderr)
-        await asyncio.Future()  # 保持运行
+    try:
+        async with websockets.serve(handle_ws_client, "localhost", 8765):
+            print("🚀 WebSocket Server 监听在 ws://localhost:8765", file=sys.stderr)
+            await asyncio.Future()  # 保持运行
+    except OSError as e:
+        print(f"⚠️ WebSocket 启动失败 (可能是被另一个实例占用): {e}", file=sys.stderr)
 
 def run_ws_in_thread():
     """在独立线程中运行 asyncio 事件循环"""
@@ -55,7 +66,13 @@ def get_figma_selection() -> str:
     获取开发者当前在 Figma 中选中的节点数据 (UI 树结构、颜色、布局参数等)。
     当需要分析设计稿、生成 UI 代码 (如 Flutter/iOS) 或获取布局约束时调用此工具。
     """
-    return json.dumps(LATEST_FIGMA_DATA, ensure_ascii=False)
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                return f.read()
+        except Exception:
+            return json.dumps(get_fallback_data(), ensure_ascii=False)
+    return json.dumps(get_fallback_data(), ensure_ascii=False)
 
 
 # ==========================================

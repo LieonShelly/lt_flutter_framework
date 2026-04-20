@@ -8,9 +8,12 @@
     "figma",
     "dev"
   ],
+  "capabilities": [
+    "inspect"
+  ],
   "networkAccess": {
     "allowedDomains": [
-      "none"
+      "*"
     ],
     "reasoning": "This plugin requires WebSocket connection to localhost"
   }
