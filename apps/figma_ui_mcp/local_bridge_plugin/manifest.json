@@ -1,5 +1,5 @@
 {
-  "name": "local_bridge",
+  "name": "local_bridge_plugin",
   "id": "1627958719997360316",
   "api": "1.0.0",
   "main": "code.js",
