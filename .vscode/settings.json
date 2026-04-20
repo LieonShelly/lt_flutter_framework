@@ -1,5 +1,6 @@
 {
   "dart.flutterSdkPath": ".fvm/versions/3.35.7",
   "cmake.sourceDirectory": "/Users/renjunli/Desktop/LittleThings/flutter_framework/apps/compass_app/windows/runner",
-  "cmake.ignoreCMakeListsMissing": true
+  "cmake.ignoreCMakeListsMissing": true,
+  "makefile.configureOnOpen": false
 }

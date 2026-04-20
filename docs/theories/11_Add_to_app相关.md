@@ -245,53 +245,285 @@
             - 特点：需要明确指定消息的编解码器（如 StringCodec，BinaryCodec，JSONMessageCodec，StandardMessageCodec）。因为可以自定义编解码器，所以在传输极大规模二进制数据时，使用 BinaryCodec 可以减少内存拷贝和序列化耗时。
 
 
-10. Platform Channel 的底层通信机制是什么？它是同步还是异步的？
+- 10. Platform Channel 的底层通信机制是什么？它是同步还是异步的？
+    - 考核点： 底层基于二进制消息的异步传递。Channel 只能在原生平台的主线程（UI 线程）上接收和发送消息，如果在原生端进行耗时操作必须切换线程，否则会阻塞原生 UI 和 Flutter 的消息传递。同时需了解数据序列化（Codec）的过程。
+    - 底层机制：
+        - Platform Channel 基于 **二进制消息传递 (Binary Messaging)**。由于 Flutter Engine 与原生端运行在同一进程，它们通过传递二进制字节流（ByteBuffer）进行通信。
+        - 核心依赖 **BinaryMessenger** 发送数据，并使用 **MessageCodec**（如 StandardMessageCodec）将 Dart 对象与原生对象进行序列化/反序列化。
+        - 通信链路：`Dart (MethodChannel)` -> `BinaryMessenger (Uint8List)` -> `C++ Engine` -> `Native (MethodCallHandler)`。
+    - 同步/异步：
+        - **本质上是异步的**。在 Dart 侧调用 `invokeMethod` 返回的是一个 `Future`，原生侧通过回调函数 `result.success/error` 返回数据。
+        - 这种设计是为了避免原生端的耗时操作阻塞 Flutter 的渲染线程（UI Thread）。
+        - *特殊情况*：通过 **FFI (Foreign Function Interface)** 可以实现同步通信，但常规的 Channel 接口不支持同步返回。
+    - 线程限制：
+        - 必须在原生端的 **主线程（UI 线程）** 进行通信。如果在子线程中处理耗时任务，完成后必须切回主线程才能将结果回传给 Flutter。
 
-考核点： 底层基于二进制消息的异步传递。Channel 只能在原生平台的主线程（UI 线程）上接收和发送消息，如果在原生端进行耗时操作必须切换线程，否则会阻塞原生 UI 和 Flutter 的消息传递。
 
 11. 在混合开发中，如何优雅地管理大量的 MethodChannel 接口以避免“字符串硬编码”带来的维护灾难？
+    - 考核点： 重点在于提及代码生成工具（如官方推荐的 Pigeon 库），以及通过架构设计（封装、抽象）来解决维护性问题。针对大规模项目，类型安全和自动代码生成是核心关键。
+    - 核心痛点： 手写字符串方法名容易出错、参数类型校验缺失、文档与代码容易不同步。
+    - 解决方案：
+        1. **常量化管理**：将所有的 Channel Name 和 Method Name 统一放在一个常量类中，严禁在业务代码中直接写字符串。
+        2. **服务化封装**：将 MethodChannel 的调用封装在 Dart Service 层，对外暴露强类型的异步方法，屏蔽底层的 invokeMethod 细节。
+        3. **使用代码生成工具 (Pigeon)**：这是最优雅的方案。通过在 Dart 中定义接口 Schema，自动生成双端的强类型通信代码。
+        4. **协议分层**：类似于网络协议，定义统一的消息格式（如 JSON RPC 风格），减少 Channel 的数量，通过单一 Channel 配合 Action 分发逻辑。
 
-考核点： 提及代码生成工具（如官方推荐的 Pigeon 库）。
 
-12. Pigeon 的工作原理是什么？相比于手写 MethodChannel 有哪些优势？
 
-考核点： Pigeon 通过定义 Dart 接口，自动生成强类型的 Dart、Java/Kotlin 和 Objective-C/Swift 样板代码，不仅避免了方法名写错，还提供了类型安全的数据结构，省去了手动序列化/反序列化 JSON 的麻烦。
+- 12. Pigeon 的工作原理是什么？相比于手写 MethodChannel 有哪些优势？
+    - 考核点： 深入理解 Pigeon 如何通过静态代码生成（AOT 风格的协议定义）来解决跨端通信中的“类型安全”和“维护成本”问题。能够描述出从定义 Schema 到三端联调的完整流程。
+    - **工作原理**：
+        - **Schema 定义**：在 Dart 侧定义包含方法签名和数据结构的抽象类（使用 `@HostApi` 等注解）。
+        - **代码生成**：通过 Pigeon 命令自动生成 Dart 包装类、原生端的 Interface（Java/Kotlin）和 Protocol（OC/Swift）。
+        - **封装通信**：生成的代码内部依然走 `MethodChannel` 通信，但它通过生成的样板代码自动完成了方法分发、数据编解码等繁琐过程。
+    - **核心优势对比**：
+        | 特性 | 手写 MethodChannel | Pigeon (代码生成) |
+        | :--- | :--- | :--- |
+        | **类型检查** | 动态类型 (dynamic/Map)，易出错 | **强类型**，编译期检查错误 |
+        | **代码维护** | 需维护三端字符串标识，极易不一致 | **单点维护**，修改 Schema 即可同步三端 |
+        | **序列化** | 手动解析 Map，繁琐且易漏字段 | **自动序列化**，直接使用 Data Class |
+        | **开发效率** | 需手写大量 if-else 分发逻辑 | **只需实现业务接口**，无需关注底层 |
+        | **容错性** | 方法名拼错只能在运行时发现 | **零字符串依赖**，减少逻辑 Bug |
 
-四、 混合栈路由管理 (Mixed-Stack Routing)
-13. 什么是混合栈路由（原生-Flutter-原生跳转）？实现它的核心难点在哪里？
 
-考核点： 难点在于两套路由系统的生命周期同步。如果用单引擎，原生侧压栈时，Flutter 侧不知道自己被遮挡；如果是原生 A -> Flutter B -> 原生 C -> Flutter D，单引擎处理同级和后退逻辑会非常复杂且容易出现页面重影。
+# 四、 混合栈路由管理 (Mixed-Stack Routing)
+- 13. 什么是混合栈路由（原生-Flutter-原生跳转）？实现它的核心难点在哪里？
+    - **定义**：在一个 App 内，页面栈由原生页面（Native）和 Flutter 页面交替堆叠组成（例如 `Native A -> Flutter B -> Native C -> Flutter D`）。
+    - **核心难点**：在于**两套路由系统（Native 路由和 Flutter 路由）的状态与生命周期无法天然同步**。
+        1. **页面重影 (Ghosting)**：在单引擎架构下，Flutter 引擎内部共享一个 Navigator 栈。当 Native 栈和 Flutter 栈层级穿插时（如从 D 返回 C，此时 Flutter 引擎里仍活跃着 B），底层引擎无法自动切分图层，导致短暂闪烁出被遮挡页面的残影。
+        2. **生命周期错乱**：Flutter 内部的 Widget 无法天然感知外部原生容器（Activity/ViewController）被压入后台，从而可能在不可见状态下继续做动画或执行耗时渲染。
+        3. **返回按键劫持**：系统物理返回键或侧滑手势到底应该触发“关闭整个原生容器”还是“Pop Flutter 内部的路由栈”，需要极度复杂的跨端拦截与协调逻辑。
+    - 考核点： 重点理解混合栈导致的“状态不同步”问题。面试中一定要能举出 `A -> B -> C -> D` 这种穿插跳转导致的重影和生命周期痛点。
 
-14. 业界有哪些成熟的混合栈路由方案？简述其基本原理（如 FlutterBoost 或 Thrio）。
+- 14. 业界有哪些成熟的混合栈路由方案？简述其基本原理（如 FlutterBoost 或 Thrio）。
+    - 业界最成熟的方案主要有阿里闲鱼的 **FlutterBoost** 和哈啰出行的 **Thrio**。
+    - **FlutterBoost (阿里闲鱼)**：
+        - **核心思想**：**原生路由驱动**。完全弃用 Flutter 内部的 Navigator，所有的路由跳转全权交由原生的路由栈来统一管理。
+        - **基本原理**：基于**单引擎架构**。为了解决单引擎的重影问题，采用 **View 级别的 Attach/Detach** 机制。每次打开 Flutter 页面实质上是新建了一个原生容器（Activity/ViewController）。当容器可见时，将其 Surface 画布绑定到唯一的 Flutter 引擎上；不可见时立刻解绑。就像同一个演员（Engine）在不同的舞台（容器）上轮流表演。
+    - **Thrio (哈啰出行)**：
+        - **核心思想**：**多端一致的镜像路由栈**。在原生侧和 Dart 侧维护了一套高度同步的路由映射。
+        - **基本原理**：它同时支持单引擎和 **FlutterEngineGroup（多引擎）**。相比 FlutterBoost，它提供了三端（Android/iOS/Flutter）完全一致的路由调用 API，并且由于有镜像栈的存在，它能极其精准地将页面可见性生命周期（Appear/Disappear）分发给具体的 Flutter Widget。
+    - 考核点： 理解第三方框架的本质是“接管路由控制权”。对于 FlutterBoost，重点说出“原生路由驱动”和“单引擎 View 挂载/卸载”；对于 Thrio，重点提及“双端镜像路由”和“精准的生命周期分发”。
 
-考核点： 以闲鱼的 FlutterBoost 为例，其核心原理是原生路由驱动，即所有路由请求都拦截交由原生端处理，Flutter 页面实际上附着在一个原生的 Activity/ViewController 上，通过单引擎的 View 级别的 Attach/Detach 来复用引擎并保持状态。
+- 15. 如果不使用第三方库，原生页面如何向正在显示的 Flutter 页面传递初始参数？
+    - **方案一：`initialRoute` 拼接传参 (URL 风格)**
+        - **原理**：原生端启动 Flutter 页面时，将参数拼接到初始路由字符串中（如 `/page?id=123&name=test`）。Flutter 端在 `onGenerateRoute` 中解析该字符串。
+        - **特点**：简单快捷，但只能传递字符串。复杂对象需进行 JSON 序列化和 URL 编码。仅适用于页面初始化阶段。
+    - **方案二：`MethodChannel` 传参 (主流方案)**
+        - **原理**：通过 Platform Channel 传递支持的数据结构（如 Map）。
+        - **流派 - 原生主动推 (Push)**：原生容器准备好后，调用 `invokeMethod` 主动发给 Flutter 端。
+        - **流派 - Flutter 被动拉 (Pull) (推荐)**：原生端把参数存入 Intent/属性 中；等 Flutter 侧的 `initState` 触发时，主动通过 Channel 向原生索要 `getInitialArguments`。这样能彻底避免 Flutter UI 没渲染完导致的消息丢失问题。
+    - 考核点： 重点说明 `initialRoute` 的局限性（只能传字符串），以及推荐使用 MethodChannel 进行“被动拉取”以解决时序/消息丢失问题。
 
-15. 如果不使用第三方库，原生页面如何向正在显示的 Flutter 页面传递初始参数？
 
-考核点： 可以通过创建 Engine 时设置 initialRoute 带上参数；或者通过 MethodChannel 主动发送参数；或者使用 setInitialRoute 方法（需注意时机）。
+    **核心代码片段：**
 
-五、 原生视图嵌套 (Platform Views)
-16. 什么是 Platform View？在 Flutter 页面中嵌入原生组件（如地图、WebView）的原理是什么？
+    **1. `initialRoute` 传参 (Swift & Dart)**
+    ```swift
+    // Swift 启动引擎时设置 route
+    let flutterVC = FlutterViewController(project: nil, initialRoute: "/detail?id=1001", nibName: nil, bundle: nil)
+    ```
+    ```dart
+    // Dart 侧解析
+    onGenerateRoute: (settings) {
+    if (settings.name!.startsWith('/detail')) {
+        final uri = Uri.parse(settings.name!);
+        return MaterialPageRoute(builder: (_) => DetailPage(id: uri.queryParameters['id']));
+        }
+    }
+    ```
 
-考核点： Platform View 允许将原生控件（AndroidView / UiKitView）渲染进 Flutter 树中。考察对 Android 的 Virtual Displays（虚拟显示）和 Hybrid Composition（混合组合）概念的了解。
+    **2. `MethodChannel` 被动拉取模式 (Swift & Dart) —— 推荐**
+    ```swift
+    // Swift 侧：监听拉取请求
+    let channel = FlutterMethodChannel(name: "com.app/params", binaryMessenger: self.binaryMessenger)
+    channel.setMethodCallHandler { [weak self] (call, result) in
+        if call.method == "getInitialArguments" {
+            result(["id": 1001, "source": "home"]) // 返回字典给 Flutter
+        }
+    }
+    ```
+    ```dart
+    // Dart 侧：页面初始化时主动拉取
+    static const _channel = MethodChannel('com.app/params');
 
-17. Android 端的 Platform View 从 Virtual Displays 演进到 Hybrid Composition，解决了什么问题？
+    @override
+    void initState() {
+        super.initState();
+        _fetchParams();
+    }
 
-考核点： 虚拟显示模式下，键盘弹起、无障碍访问和视频渲染存在很多兼容性 Bug；Hybrid Composition 将原生 View 直接添加到原生的视图层级中，完美支持各种原生特性，但也会带来一定的层级合成性能损耗。
+    Future<void> _fetchParams() async {
+        final result = await _channel.invokeMethod('getInitialArguments');
+        print('拿到了原生参数: $result');
+    }
+    ```
 
-18. 在 Add-to-App 场景中嵌套 Platform View，常见的“手势冲突”问题如何解决？
 
-考核点： 考察原生触摸事件传递到 Flutter 再传回原生 View 的机制（如通过 PlatformViewHitTestBehavior 调整，或在原生端处理 dispatchTouchEvent）。
+# 五、 原生视图嵌套 (Platform Views)
 
-六、 调试与进阶实践 (Debugging & Advanced Practices)
-19. 在 Add-to-App 模式下，如何对集成在原生工程中的 Flutter 模块进行热重载 (Hot Reload)？
+- 16. 什么是 Platform View？在 Flutter 页面中嵌入原生组件（如地图、WebView）的原理是什么？
+    - 考核点： 理解 Flutter 渲染隔离性，说明为什么不能直接把原生 View 放进 Widget 里，以及由此引申出的“图层合成”和“事件转发”机制。
+    - **定义**：Platform View 是 Flutter 提供的一种机制，允许开发者在 Flutter 的 Widget 树中直接无缝嵌入并显示原生的 UI 组件。在 Flutter 中分别体现为 `UiKitView` (iOS) 和 `AndroidView` (Android)。
+    - **使用场景**：通常用于接入地图（高德/Google Maps）、WebView、复杂的原生视频播放器，或者重写成本极高的已有原生业务组件。
+    - **核心原理**：
+        - Flutter 拥有自己独立的渲染引擎（Skia/Impeller），直接在 GPU 层面绘制画面，这意味着 Flutter 的 UI 树和原生的 View 树是物理隔离的。
+        - 为了把原生控件“塞进” Flutter 中，当 Dart 层渲染到 `UiKitView/AndroidView` 时，Flutter 引擎会向原生端发送指令，创建真正的原生 View 实例。
+        - 接着，Flutter 引擎需要将这个原生 View 的图像层 **合成 (Composite)** 到 Flutter 的画布树中，确保它能遵循 Flutter 的坐标、大小、裁剪和图层（Z-index）关系。
+        - 同时，Flutter 还要负责复杂的**事件穿透与转发 (Event Forwarding)**：用户的触摸事件首先被 Flutter 拦截，然后 Flutter 判断坐标是否在 Platform View 区域内，如果是，再包装成原生触摸事件转发给真正的原生 View。
+ 
 
-考核点： 考察实操能力。可以通过 flutter attach 命令，监听本地端口，关联到正在原生模拟器/真机上运行的 FlutterEngine 上，从而实现混合开发时的热重载。
+- 17. Android 端的 Platform View 从 Virtual Displays 演进到 Hybrid Composition，解决了什么问题？
+    - **背景**：Android 端的 Platform View 经历了巨大的架构演进。早期的方案叫 Virtual Displays（虚拟显示），Flutter 1.20 引入了 Hybrid Composition（混合组合）。
+    - **Virtual Displays 的痛点**：
+        - *原理*：将原生 View 画在一个不可见的内存画布上，然后作为一张 2D 纹理图片贴给 Flutter 引擎。
+        - *痛点 1 (输入法与焦点)*：由于真实的 View 不在 Android 原生真实的视图树（View Hierarchy）里，原生键盘弹出时经常丢失焦点、输入法兼容极差。
+        - *痛点 2 (SurfaceView 黑屏)*：视频播放器、高德地图等底层往往依赖 `SurfaceView`。而 `SurfaceView` 无法被画到虚拟画布上，导致严重黑屏或闪烁。
+    - **Hybrid Composition 解决了什么**：
+        - *原理*：不再当做图片贴图，而是直接通过 Android 原生的 `addView` 把真实的原生 View 插入到承载 Flutter 的底层容器里。如果这个原生 View 上方还有 Flutter Widget（遮挡关系），Flutter 会创建一个透明的中间层。
+        - *解决*：完美保留了原生 View 的所有特性，彻底解决了输入法、无障碍辅助功能 (Accessibility) 以及 `SurfaceView` 黑屏的致命 Bug。
+    - **带来的新问题 (妥协)**：
+        - *性能损耗*：打破了 Flutter 单一画布的渲染机制，需要强制进行多层 Android 原生 View 与 Flutter 图层的混合计算。在列表滑动等场景下，容易导致 UI 线程和渲染线程同步等待，从而引起卡顿掉帧。
+    - 考核点： 面试官想听到的关键词是：虚拟显示导致了**键盘焦点丢失**和**SurfaceView 黑屏**。而混合组合通过把真正的 View 添加到层级中解决了兼容性，但也**牺牲了滑动性能**。
 
-20. 当 Flutter 出现 Crash 时，在混合工程中如何收集和定位崩溃日志？
+- 18. 在 Add-to-App 场景中嵌套 Platform View，常见的“手势冲突”问题如何解决？
+    - 考核点： 面试官想听到两个核心词汇：**`EagerGestureRecognizer` (贪婪识别器)** 解决抢占问题，以及**理解手势的“双向转发链路”**。
+    - **产生原因**：Platform View 的手势需要经过 `原生系统拦截 -> Flutter 引擎竞技场(GestureArena)裁决 -> 打包发回原生端 -> 原生 View 消费` 的漫长链路。当外部包着 Flutter 的滑动组件（如 `ListView`），里面嵌着原生的滑动组件（如地图、WebView）时，Flutter 的手势竞技场不知道该把手势判给外层还是内层，从而导致滑动不连贯或失效。
+    - **解决方案 1：Dart 层接管（最推荐）**
+        - 使用 **`EagerGestureRecognizer` (贪婪手势识别器)**。
+        - **做法**：在 `AndroidView` 或 `UiKitView` 的 `gestureRecognizers` 属性中传入 `EagerGestureRecognizer`。
+        - **原理**：它会在 Flutter 的手势竞技场中直接“无脑胜出”。这意味着只要手指按在 Platform View 的区域内，外部的 `ListView` 就会立刻放弃手势，所有的触摸事件全部强制转发给里面的原生 View 处理，非常适合地图拖拽场景。
+    - **解决方案 2：原生层拦截**
+        - 如果业务极度复杂（如 WebView 嵌套在 Flutter ScrollView 中，不仅要内部滑动，内部滑到顶了还要让外部接着滑）。
+        - **做法**：需要回到原生 Android/iOS 端，重写包裹 Platform View 的父容器方法。例如 Android 端重写 `requestDisallowInterceptTouchEvent` 或 `dispatchTouchEvent`，在特定边界条件下手动控制把事件还给外部的 Flutter 引擎。
 
-考核点： 区分层级：
+**核心摘录：**
+处理嵌套原生 View 时产生的手势冲突，有两种维度的解法：
+1. **Dart 层霸占机制 (推荐)**：使用 `EagerGestureRecognizer`，让事件在 Flutter 竞技场直接胜出并全部转发给原生端，适合地图等需要独占手势的场景。
+2. **原生层并发机制 (Swift 为例)**：通过 `UIGestureRecognizerDelegate` 允许多个手势同时识别，适合原生 ScrollView 与 Flutter ScrollView 嵌套联动的复杂场景。
 
-Dart 层的异常（通常不会导致原生 App 闪退）：通过 FlutterError.onError 和 PlatformDispatcher.instance.onError 捕获。
+**核心代码片段：**
 
-Engine / Native 层的崩溃（如 C++ 越界或内存问题，导致 App 闪退）：需要借助原生端的 Crash 收集工具（如 Bugly、Firebase Crashlytics）去捕获 JNI 错误或底层崩溃栈。
+**1. Dart 侧使用贪婪手势识别器**
+```dart
+UiKitView(
+  viewType: 'com.example.map_view',
+  // 注入贪婪手势识别器
+  gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+    Factory<OneSequenceGestureRecognizer>(
+      () => EagerGestureRecognizer(),
+    ),
+  },
+)
+```
+
+**2. Swift 侧允许多手势并发**
+```swift
+class NativeScrollPlatformView: NSObject, FlutterPlatformView, UIGestureRecognizerDelegate {
+    private var _scrollView = UIScrollView()
+    
+    override init() {
+        super.init()
+        // 接管原生 ScrollView 的手势代理
+        _scrollView.panGestureRecognizer.delegate = self
+    }
+    
+    func view() -> UIView { return _scrollView }
+    
+    // 【核心拦截】：允许该原生手势与外部 Flutter 的手势同时被识别
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true 
+    }
+}
+```
+
+# 六、 调试与进阶实践 (Debugging & Advanced Practices)
+- 19. 在 Add-to-App 模式下，如何对集成在原生工程中的 Flutter 模块进行热重载 (Hot Reload)？
+    - **痛点**：在纯 Flutter 工程中，我们直接运行即可享受热重载。但在混合开发中，App 是由原生 IDE（Xcode 或 Android Studio 的 Android 模式）编译启动的。Flutter CLI 并没有接管启动流程，所以默认情况下修改 Dart 代码无法刷新原生启动的 App。
+    - **核心指令**：使用 **`flutter attach`**。
+    - **操作原理与流程**：
+        1. **前提**：原生 App 必须处于 Debug 模式（Release 模式剥离了 JIT 编译器，不支持热重载）。
+        2. **启动**：通过原生方式把 App 跑在真机或模拟器上，并且**一定要先打开包含 Flutter 的页面**（为了唤醒并初始化底层的 Flutter Engine，暴露 Observatory 调试端口）。
+        3. **连接**：在终端进入你的 Flutter Module 根目录，执行 `flutter attach`。
+        4. **机制**：该命令会自动扫描当前连接的设备，寻找处于活跃状态的 Dart VM 调试端口并进行建立 WebSocket 连接。
+        5. **重载**：连接成功后（提示 `Syncing files to device...`），只要修改 Dart 代码并保存，在终端按下 `r` 即可将增量代码同步到设备实现热重载，按 `R` 实现热重启。
+    - 考核点： 重点考察真实混合开发经验。必须准确说出 **`flutter attach`**，并指出一个容易踩坑的前提——**需要先在手机上点开 Flutter 页面触发引擎启动后，attach 才能连得上**。
+
+- 20. 当 Flutter 出现 Crash 时，在混合工程中如何收集和定位崩溃日志？
+    - **核心思路**：在混合工程中，崩溃收集必须**分层处理**，因为 Dart 虚拟机和底层 C++ 引擎的崩溃表现完全不同。
+    - **第一层：Dart 层异常 (不会闪退)**
+        - **现象**：比如数组越界、空指针异常、Widget 渲染出错。这些异常通常只会在 Flutter 页面上显示一块红屏（Debug）或灰屏（Release），**但绝不会导致整个原生 App 闪退**。
+        - **收集方案**：
+            1. **`FlutterError.onError`**：用于捕获 Flutter 框架级别的异常（如 `build` 函数报错）。
+            2. **`PlatformDispatcher.instance.onError`**（或老版本的 `runZonedGuarded`）：用于捕获未处理的异步异常（如 `Future` 或 Timer 内部的报错）。
+        - **上报链路**：在这些回调中捕获到堆栈信息后，通常通过 MethodChannel 传给原生端，由原生端的工具（如 Bugly）进行自定义上报。
+    - **第二层：Engine / Native 层崩溃 (会导致闪退)**
+        - **现象**：比如底层 Skia 引擎的 C++ 内存越界、OOM、或原生插件的 Objective-C/Java 代码报错。这会直接导致 App **闪退 (Crash / Force Close)**。
+        - **收集方案**：这部分直接依赖原生工程现有的基建。使用 Bugly、Firebase Crashlytics 等原生崩溃收集 SDK 去捕获。
+        - **定位难点**：收集到的 C++ 层底层崩溃往往是一堆毫无意义的内存地址，必须配合对应版本 Flutter Engine 的符号表（Symbols）才能进行反解析定位。
+    - 考核点： 面试中必须明确答出**“分层处理”**的概念。要清楚知道 Dart 报错不会导致 App 闪退，而底层 Engine 崩溃才会闪退。
+
+**1. Dart 侧异常拦截与发送**
+```dart
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+
+void main() {
+  const MethodChannel crashChannel = MethodChannel('com.example.app/crash_report');
+
+  // 1. 拦截 Flutter 框架内的构建/布局异常
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details); // 开发模式下正常抛出红屏
+    crashChannel.invokeMethod('reportException', {
+      'message': details.exceptionAsString(),
+      'stackTrace': details.stack?.toString() ?? '',
+    });
+  };
+
+  // 2. 拦截未捕获的异步异常 (兜底)
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    crashChannel.invokeMethod('reportException', {
+      'message': error.toString(),
+      'stackTrace': stack.toString(),
+    });
+    return true; // 返回 true 阻止异常继续向上抛
+  };
+
+  runApp(const MyApp());
+}
+```
+
+**2. Swift 侧接收并上报给 Firebase**
+```swift
+import Flutter
+import FirebaseCrashlytics
+
+// 在 AppDelegate 或预热引擎的地方
+let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
+let crashChannel = FlutterMethodChannel(name: "com.example.app/crash_report", binaryMessenger: controller.binaryMessenger)
+
+crashChannel.setMethodCallHandler { (call: FlutterMethodCall, result: @escaping FlutterResult) in
+    if call.method == "reportException" {
+        guard let args = call.arguments as? [String: Any],
+              let message = args["message"] as? String,
+              let stackTrace = args["stackTrace"] as? String else {
+            result(FlutterError(code: "INVALID_ARGS", message: "参数解析失败", details: nil))
+            return
+        }
+        
+        // 组装 Error 字典，把 Dart 堆栈作为附加信息放入 userInfo
+        let userInfo: [String: Any] = [
+            NSLocalizedDescriptionKey: NSLocalizedString("Flutter Error: \(message)", comment: ""),
+            "DartStackTrace": stackTrace
+        ]
+        
+        // 构造一个原生的 NSError，交给 Firebase
+        let flutterError = NSError(domain: "FlutterCrashDomain", code: 1001, userInfo: userInfo)
+        Crashlytics.crashlytics().record(error: flutterError)
+        
+        result(nil)
+    } else {
+        result(FlutterMethodNotImplemented)
+    }
+}
+```
