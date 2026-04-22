@@ -326,3 +326,208 @@ printAddress(a) // 0x60000... (原地址不变)
 printAddress(b) // 0x60001... (新地址)
 ```
 - **自定义 COW**：对于自定义 struct，可以通过 `isKnownUniquelyReferenced` 检查内部引用类型的唯一性来手动实现 COW。
+
+#### Swift 函数调用：栈区（Stack）还是堆区（Heap）？
+
+**核心结论：函数调用本身发生在栈区**，但函数内部操作的数据可能在堆区分配，取决于数据类型。
+
+**1. 为什么函数调用在栈区？**
+
+函数调用具有严格的**后进先出（LIFO）**特性，与栈结构天然契合：
+
+```
+main() 调用 foo() 调用 bar()
+
+Stack 状态:
+┌─────────────┐
+│  bar() 帧   │  ← 栈顶（最新调用）
+├─────────────┤
+│  foo() 帧   │
+├─────────────┤
+│  main() 帧  │  ← 栈底
+└─────────────┘
+```
+
+每次函数调用都会创建一个**栈帧（Stack Frame）**，包含：
+- **返回地址**：函数执行完后回到哪里
+- **参数（值类型）**：传入的 Int、Bool、struct 等
+- **局部变量（值类型）**：函数内部的临时变量
+- **寄存器保存值**：调用方的寄存器状态
+
+```swift
+func add(a: Int, b: Int) -> Int {
+    let result = a + b  // a, b, result 都在栈上
+    return result
+}   // 函数返回，栈帧自动销毁
+```
+
+栈分配性能极高：仅需移动栈指针（SP 寄存器），O(1) 时间，且自动管理，无需 ARC。
+
+**2. 什么时候涉及堆区？**
+
+| 场景 | 说明 |
+|---|---|
+| **引用类型（class 实例）** | 栈上存指针，堆上存实际数据，ARC 管理生命周期 |
+| **逃逸闭包捕获的变量** | 变量生命周期超过函数作用域，自动迁移到堆上 |
+| **String / Array 的内部存储** | 值类型本身的元数据在栈上，内部动态数组在堆上 |
+
+```swift
+class Person {
+    var name: String
+    init(name: String) { self.name = name }
+}
+
+func createPerson() {
+    let p = Person(name: "Tom")
+    // p 的"指针"在栈上，Person 实例的实际数据在堆上
+}
+
+func makeCounter() -> () -> Int {
+    var count = 0  // 被 @escaping 闭包捕获后，count 迁移到堆上
+    return { count += 1; return count }
+}
+```
+
+**3. Swift 编译器优化：逃逸分析（Escape Analysis）**
+
+编译器会判断对象是否"逃逸"出当前作用域：
+- 若 class 实例**不逃逸**，编译器可能将其优化到栈上分配，绕过 ARC；
+- 标记为 `@escaping` 的闭包，其捕获列表**必须在堆上**分配。
+
+**4. 总结对比**
+
+| 维度 | 栈区（Stack） | 堆区（Heap） |
+|---|---|---|
+| **函数调用本身** | ✅ | ❌ |
+| **值类型局部变量** | ✅ 默认 | ⚠️ 逃逸时迁移 |
+| **引用类型（class）** | 存指针 | ✅ 存实例数据 |
+| **捕获变量的逃逸闭包** | ❌ | ✅ |
+| **管理方式** | 自动（栈帧） | ARC |
+| **性能** | 极快（移动 SP 指针） | 较慢（malloc / ARC 计数） |
+
+#### Swift 自定义属性包裹器（Property Wrapper）
+
+**1. 核心语法**
+
+用 `@propertyWrapper` 标记 struct/class/enum，并实现必须的 `wrappedValue` 属性：
+
+```swift
+@propertyWrapper
+struct Clamped {
+    private var value: Int
+    private let range: ClosedRange<Int>
+
+    // ✅ 必须实现，这是属性的实际存储值
+    var wrappedValue: Int {
+        get { value }
+        set { value = min(max(newValue, range.lowerBound), range.upperBound) }
+    }
+
+    init(wrappedValue: Int, range: ClosedRange<Int>) {
+        self.range = range
+        self.value = min(max(wrappedValue, range.lowerBound), range.upperBound)
+    }
+}
+
+struct Player {
+    @Clamped(range: 0...100) var health: Int = 100
+}
+
+var p = Player()
+p.health = 150  // 自动夹紧到 100
+p.health = -10  // 自动夹紧到 0
+```
+
+**2. 三个核心要素**
+
+| 要素 | 是否必须 | 访问方式 | 说明 |
+|---|---|---|---|
+| `wrappedValue` | ✅ 必须 | `obj.propertyName` | 包裹器核心，实际值的读写逻辑 |
+| `projectedValue` | ❌ 可选 | `obj.$propertyName` | 额外暴露的元数据/状态 |
+| `init(wrappedValue:)` | ❌ 可选 | 赋值语法 `= xxx` | 支持 `@Wrapper var x = value` |
+
+**`projectedValue` 示例（用 `$` 前缀访问）：**
+
+```swift
+@propertyWrapper
+struct Logged<T> {
+    private var value: T
+    private(set) var projectedValue: [String] = []  // 操作日志
+
+    var wrappedValue: T {
+        get { value }
+        set {
+            projectedValue.append("修改为: \(newValue)")
+            value = newValue
+        }
+    }
+
+    init(wrappedValue: T) { self.value = wrappedValue }
+}
+
+struct Config {
+    @Logged var serverURL: String = "https://api.dev.com"
+}
+
+var config = Config()
+config.serverURL = "https://api.prod.com"
+print(config.$serverURL)  // ["修改为: https://api.prod.com"]
+```
+
+**3. 实战示例：封装 UserDefaults**
+
+```swift
+@propertyWrapper
+struct UserDefault<T> {
+    let key: String
+    let defaultValue: T
+
+    var wrappedValue: T {
+        get { UserDefaults.standard.value(forKey: key) as? T ?? defaultValue }
+        set { UserDefaults.standard.set(newValue, forKey: key) }
+    }
+}
+
+struct Settings {
+    @UserDefault(key: "isDarkMode", defaultValue: false) var isDarkMode: Bool
+    @UserDefault(key: "username", defaultValue: "Guest") var username: String = "Tom"
+}
+```
+
+**4. 编译器展开原理**
+
+理解展开过程有助于排查疑惑：
+
+```swift
+// 写法：
+@Clamped(range: 0...100) var health: Int = 100
+
+// 编译器等价展开为：
+private var _health = Clamped(wrappedValue: 100, range: 0...100)
+var health: Int {
+    get { _health.wrappedValue }
+    set { _health.wrappedValue = newValue }
+}
+```
+
+**5. 线程安全属性包裹器（进阶示例）**
+
+```swift
+@propertyWrapper
+final class ThreadSafe<T> {
+    private var value: T
+    private let lock = NSLock()
+
+    var wrappedValue: T {
+        get { lock.withLock { value } }
+        set { lock.withLock { value = newValue } }
+    }
+
+    init(wrappedValue: T) { self.value = wrappedValue }
+}
+
+class DataManager {
+    @ThreadSafe var counter: Int = 0  // 多线程读写安全
+}
+```
+
