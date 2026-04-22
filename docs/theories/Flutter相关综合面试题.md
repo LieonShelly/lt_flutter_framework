@@ -366,3 +366,132 @@ class UserProfileRoute extends StatelessWidget {
 面试官在看 BLoC 代码时，非常看重这种通过 `BlocProvider` 实现的“依赖注入”思想：
 1. **自动内存管理**：`BlocProvider` 会自动管理生命周期。当 `UserProfileRoute` 页面被从导航栈 Pop 掉销毁时，它会自动调用 `UserBloc.close()` 来关闭内部的 Stream 释放资源，绝不会内存泄漏。
 2. **极佳的可测试性 (Testability)**：你看 `UserRepository()` 是从外面传进去的。这就意味着在写单元测试时，我们可以极方便地传一个造假的 `MockUserRepository` 进去，完全不需要修改 Bloc 内部的任何逻辑，这就是高内聚低耦合的最佳体现。
+
+---
+
+### 面试题解答：Platform Channel 原理与性能优化
+
+**1. 三大 Channel 的区别与适用场景**
+Flutter 与原生 (iOS/Android) 之间的通信桥梁是 Platform Channel。面试官常考这三者的核心区别：
+
+*   **MethodChannel (最常用)**
+    *   **机制**：**单次、异步的“一次性请求-响应”机制**。非常类似于我们发起一次 HTTP GET 请求。
+    *   **使用场景**：调用原生设备的单次能力。比如：获取电池电量、获取系统版本号、调起系统相机相册、弹出一个原生的 Toast。
+*   **EventChannel**
+    *   **机制**：**持续的、单向的“数据流 (Stream)”机制**。原生端作为发布者（Publisher），不断往通道里发数据；Flutter 端作为订阅者（Subscriber）监听这些数据。
+    *   **使用场景**：需要持续监听原生底层事件的场景。比如：监听手机的重力感应器 (陀螺仪) 数据、监听 GPS 实时地理位置的回调、监听网络状态改变。
+*   **BasicMessageChannel**
+    *   **机制**：**双向的、支持持续收发的消息传递机制**。它允许两端随意互发消息，并且支持自定义消息的编解码器（Codec）。
+    *   **使用场景**：传递大量结构化数据或大型嵌套字典。某些情况下用它传递二进制数据流（如通过 `StandardMessageCodec` 或 `BinaryCodec`）会比 MethodChannel 更加灵活。
+
+**2. 核心考点：Channel 的性能瓶颈在哪里？**
+很多开发者认为 Channel 是万能的，但高级工程师必须知道它的致命弱点。
+
+*   **线程切换问题**：
+    默认情况下，Channel 的发送和接收都会涉及到线程切换。原生侧的消息处理器通常运行在**主线程 (Platform Thread / UI Thread)**，而 Flutter 侧处理在 **UI 线程 (Dart Main Thread)**。如果你在原生的 Channel 回调里做了大量耗时操作（如 I/O 操作、复杂计算），会**直接卡死 iOS 的主线程**，导致系统手势无响应。
+*   **序列化与内存拷贝损耗**：
+    通过 Channel 传递的所有数据，在底层都需要经历：`发送方序列化 -> 跨线程/进程拷贝 -> 接收方反序列化` 的过程。当传递极少量的文本或数字时，耗时可以忽略不计；但**如果用来传输大体积的图片（Base64 字符串）或高频的实时视频流帧数据，不仅 CPU 占用率会瞬间飙升，而且会引发严重的内存抖动，甚至 OOM**。
+
+**3. 面试高频追问：如何解决大数据的跨端传输性能问题？**
+面对大图片、视频流、重度计算，Channel 已经无能为力，必须祭出两套终极方案：
+
+*   **方案一：Texture 纹理共享 (针对图像/视频/相机渲染)**
+    *   **原理**：图形渲染界的“零拷贝”技术。我们不把巨大的图片像素数据通过 Channel 传给 Flutter。相反，**原生端 (iOS)** 利用 Metal/OpenGL 将相机或视频流的数据直接写入 **GPU 显存中**的某个纹理 (Texture)，然后生成一个极小的整型 ID（比如 `textureId = 123`）。
+    *   **跨端通信**：原生端通过 Channel 把仅仅是一个数字的 `textureId` 传给 Flutter。
+    *   **Flutter 渲染**：Flutter 拿到数字后，直接使用官方提供的 `<Texture textureId="123" />` Widget。底层的 Skia/Impeller 渲染引擎会直接通过这个 ID 去 GPU 显存里读取并画出画面。**整个过程几乎零 CPU 消耗，无比丝滑。**
+*   **方案二：C++ FFI (针对极高频调用的重度逻辑计算)**
+    *   **原理**：FFI (Foreign Function Interface) 允许 Dart 直接调用 C/C++ 的原生静态库。
+    *   **优势**：它是**同步调用**的，不走 Channel 的那套消息分发机制，**完全绕过了序列化/反序列化的开销**，甚至内存指针（Pointer）都可以两端共享。
+    *   **使用场景**：复杂的音视频解码算法、人脸识别特征点计算、加密解密算法。把这些逻辑用 C++ 写成 `.so` 或 `.framework`，iOS/Android 双端共用，并在 Flutter 端通过 `dart:ffi` 直接极速调用。
+
+---
+
+#### 💡 面试高难度追问辨析：BasicMessageChannel 传二进制 vs Channel 的性能瓶颈矛盾吗？
+
+这是一个非常尖锐且高水准的底层问题。很多面试官会故意设下陷阱：“既然你刚才说可以用 BasicMessageChannel 传二进制数据，为什么后面又说传大图片会导致内存抖动和 OOM ？”
+
+**答案是：两者并不矛盾，这是“相对优解”与“绝对极限”的区别。**
+
+1. **为什么推荐 BasicMessageChannel 传二进制？（因为它是 Channel 家族里最快的）**
+   *   如果在极其特殊的情况下，我们非要用 Channel 传一段稍大的文件数据，`MethodChannel` 默认使用的是 `StandardMessageCodec`（甚至有时会转成 JSON），这会涉及深层对象遍历、打包和解包，即极其沉重的**序列化/反序列化计算**。
+   *   而 `BasicMessageChannel` 允许你指定为 **`BinaryCodec`**。在底层，它会**直接跳过序列化和反序列化步骤**，把一块纯粹的 `Byte Buffer`（字节数组）抛给对方。省去了巨量的 CPU 解析时间，所以它比 MethodChannel 灵活高效得多。
+
+2. **为什么又说 Channel 搞不定真正的大数据？（因为内存拷贝的物理极限）**
+   *   即使 `BinaryCodec` 跳过了序列化，但它**依然无法逃避“内存跨线程/跨进程的物理拷贝 (Memory Copy)”**的宿命。
+   *   当数据量小或低频时（比如点一下按钮传一张几百 KB 的图片），这点内存拷贝开销微不足道。
+   *   但如果是**高频且海量的大数据**（比如 60FPS 的 1080P 相机实时预览画面），意味着每秒要发生 60 次以 MB 为单位的**内存疯狂搬运**以及**线程环境切换**。这时候，即使是无序列化的 `BinaryCodec`，也会因为疯狂吃满 CPU 总线和内存而导致严重掉帧、甚至发热崩溃。
+
+**技术选型界限总结**：
+*   **KB ~ 几 MB 级别的低频数据传输**：用 `BasicMessageChannel` + `BinaryCodec` 是 Channel 体系内的最优解。
+*   **高频、几十 MB 级别以上的流媒体数据**：Channel 体系彻底破产，必须抛弃所有 Channel，改用“零拷贝”的 **Texture 纹理共享**或 **C++ FFI**。
+
+---
+
+### 面试题解答：Plugin 插件开发与 iOS 生命周期事件注入
+
+Plugin 开发是混合栈工程师的核心日常工作之一，这道题旨在考察你是否具备跨端轮子开发能力，以及对原生底层运行机制的熟悉程度。
+
+**1. 如何编写和发布一个完整的 Plugin？**
+整个生命周期可以概括为以下四个标准步骤：
+
+*   **Step 1: 脚手架初始化**
+    使用命令行生成标准的插件目录结构，这里通常指定语言为 Swift 和 Kotlin：
+    ```bash
+    flutter create --template=plugin --platforms=ios,android -a kotlin -i swift my_custom_plugin
+    ```
+    生成的目录会包含：`lib/` (Dart 接口层), `ios/` (原生实现), `android/` (原生实现), 以及用来测试调用的 `example/` 工程。
+*   **Step 2: 三端代码实现 (MethodChannel 通信)**
+    *   在 Dart 侧 (`lib/`) 暴露对外接口，并通过 `MethodChannel.invokeMethod` 抛出请求。
+    *   在 iOS 侧 (`ios/Classes/MyPlugin.swift`) 实现 `FlutterPlugin` 协议，在 `handle(_ call: FlutterMethodCall, result: @escaping FlutterResult)` 中接收请求、执行原生逻辑（如调起相册），然后通过 `result(xxx)` 返回数据。
+*   **Step 3: 本地联合调试**
+    在 `example/` 目录的 `pubspec.yaml` 中，通过 `path: ../` 引入你的插件源码。直接运行 example 工程就能进行双端联调验证。
+*   **Step 4: 规范化发布 (Publish)**
+    *   完善信息：必须填写好 `pubspec.yaml` (版本号/描述/主页)、`README.md` (使用文档) 和 `CHANGELOG.md` (更新日志)。
+    *   预检：运行 `flutter pub publish --dry-run` 检查是否符合规范。
+    *   发布：运行 `flutter pub publish` 推送到 pub.dev 官方仓库（若是公司内部插件，则通常推送到私有 Git 仓库并通过 Git url 引入）。
+
+**2. 核心难点：如何处理 iOS 原生侧的 AppDelegate 生命周期事件注入？**
+
+这是很多初涉 Flutter 的原生开发者容易踩坑的地方。**痛点在于**：通常的 `MethodChannel` 只能响应被动调用。但如果你开发的插件需要监听推送通知 (APNs)、深度链接 (DeepLink/Universal Link) 或者微信分享回调，这些必须依赖 iOS 最底层的 `UIApplicationDelegate` 生命周期方法。我们总不能让主工程的 AppDelegate 侵入式地挨个转发给我们的插件吧？
+
+**优雅的解决方案（无侵入注入）：**
+Flutter 底层设计了极好的注册机制。在 `MyPlugin.swift` 中，我们可以让插件自身监听并拦截 AppDelegate 的回调：
+
+*   **1. 监听委托 (Add Delegate)**：在插件的入口 `register(with registrar: FlutterPluginRegistrar)` 中，通过 `registrar` 把自己注册为生命周期的代理。
+*   **2. 实现协议 (Conform Protocol)**：让 `MyPlugin` 遵循 `UIApplicationDelegate` 协议。
+
+**核心代码示例：**
+```swift
+import Flutter
+import UIKit
+
+// 1. 实现 UIApplicationDelegate 协议
+public class MyCustomPlugin: NSObject, FlutterPlugin, UIApplicationDelegate {
+    
+  public static func register(with registrar: FlutterPluginRegistrar) {
+    let channel = FlutterMethodChannel(name: "my_custom_plugin", binaryMessenger: registrar.messenger())
+    let instance = MyCustomPlugin()
+    registrar.addMethodCallDelegate(instance, channel: channel)
+    
+    // 2. 极其关键的一步：告诉 Flutter 引擎，请把 AppDelegate 的生命周期事件转发一份给当前插件！
+    registrar.addApplicationDelegate(instance)
+  }
+
+  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    // 处理普通的 MethodChannel 调用
+  }
+
+  // 3. 完美拦截：在这里自动收到 iOS 底层的生命周期回调，彻底与主工程解耦！
+  public func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+      // 在这里处理拿到 APNs 推送 Token 的逻辑，并抛回给 Dart 侧
+  }
+  
+  public func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+      // 在这里处理 Universal Link 唤醒的逻辑
+      return true
+  }
+}
+```
+
+**面试高分总结：**
+“在插件开发中，最关键的是要做到**‘无侵入性’**。对于需要拦截底层回调的插件（如极光推送、微信 SDK），我绝对不会要求业务方的 iOS 开发去修改主工程的 `AppDelegate.swift`。我会利用 `FlutterPluginRegistrar` 提供的 `addApplicationDelegate` 接口，在插件内部悄无声息地完成对 `UIApplicationDelegate` 生命周期的监听和拦截。这极大地降低了插件接入者的心智负担，也是一个优秀跨端组件必须具备的素养。”
