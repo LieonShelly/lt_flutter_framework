@@ -48,3 +48,4 @@ app.*.map.json
 # FVM Version Cache
 .fvm/
 docs/theories/简历.md
+apps/figma_ui_mcp/server/venv/
