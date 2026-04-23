@@ -530,3 +530,113 @@ class DataManager {
     @ThreadSafe var counter: Int = 0  // 多线程读写安全
 }
 ```
+
+
+
+### 1. Struct (结构体) 和 Class (类) 的本质区别是什么？你在实际项目中如何做技术选型？
+- 核心考点： 值类型 (Value Type) vs 引用类型 (Reference Type)、内存分配、方法分派 (Method Dispatch)。
+- 资深视角： 普通候选人只能答出“Struct 不能继承，是值类型传递拷贝；Class 是引用类型”。但高级开发者需要指出：
+- 内存层面： Struct 默认分配在栈 (Stack) 上，速度极快且线程安全；Class 分配在堆 (Heap) 上，存在 ARC 的引用计数开销。
+- 分派机制： Struct 默认使用静态派发 (Static Dispatch)，性能最优；Class 存在继承，使用动态派发 (Dynamic / V-Table Dispatch)。
+- 进阶知识点： 写时复制 (Copy-on-Write, CoW)。这是苹果为了优化大型值类型（如 Array、Dictionary）内存而引入的核心机制。
+
+### 2. 请解释一下 Swift 中的 Protocol-Oriented Programming (面向协议编程，POP) 与传统的 OOP 有什么区别和优势？
+- 核心考点： 协议扩展 (Protocol Extension)、多继承困境、代码解耦。
+- 资深视角： OOP 的基类容易变得极其臃肿（比如广为诟病的 BaseViewController），且 Swift 的 Class 只支持单继承。
+
+POP 的精髓在于通过 Protocol + Extension 提供默认实现。它允许我们像搭积木一样为 Struct 或 Class 横向赋予能力（比如 Loggable, NetworkFetchable），彻底打破了继承树的束缚，这也是 SwiftUI 底层的核心设计理念。
+
+### 3. Swift 内存管理中的 weak 和 unowned 有什么区别？分别适用于什么场景？
+- 核心考点： ARC (自动引用计数)、循环引用 (Retain Cycle)、野指针与崩溃。
+- 资深视角： * 相同点：两者都不会增加引用计数，都能打破闭包或对象间的循环引用。
+- 不同点：weak 修饰的对象释放后，指针会被自动置为 nil，所以它必须是可选类型 (Optional)。而 unowned (无主引用) 假定引用的对象生命周期永远等于或长于当前对象。如果对象被释放后依然访问 unowned 指针，会直接触发运行时 Crash。
+- 考察点在于候选人是否具有写出高可用代码的安全意识。
+
+### 4. 什么是 Opaque Return Types（不透明返回类型，some 关键字）？它和泛型 (Generics) 或 Any 有什么不同？
+- 核心考点： Swift 5.1 引入的特性，也是 SwiftUI var body: some View 的底层基础、反向泛型。
+- 资深视角： 返回 Any 或者 Protocol 是一种“类型擦除”，编译器在编译期丢失了具体的底层类型信息，导致无法调用一些关联类型 (Associated Type) 的方法。
+- 返回 some Protocol 则是由函数内部实现决定具体的返回类型，但对外隐藏。它在保证了封装性的同时，让编译器依然能推断出真实的静态类型，从而保证了类型安全和性能。
+
+### 5. 请聊聊 Result Type 以及它如何优化 Swift 的错误处理机制？
+- 核心考点： 泛型枚举、Error Handling 演进。
+- 资深视角： 传统网络请求回调闭包通常是 (Data?, Error?) -> Void，这存在一种歧义状态：Data 和 Error 同时存在，或者同时为 nil，导致控制流校验非常繁琐。Result<Success, Failure: Error> 利用枚举的互斥性，从类型层面上强制规定了非黑即白的结果（要么成功带数据，要么失败带错误），结合 switch 语句极大提升了代码的严谨性。
+
+### Swift 中 Any, any, AnyObject, AnyClass 这几个关键字分别代表什么？
+- 1. Any (任意类型的实例)
+Any 代表了 Swift 中任何类型的实例。无论它是值类型（Struct、Enum）、引用类型（Class），甚至是闭包（Function Type），都可以被隐式转换为 Any。
+- 核心特性： 极其灵活，但也是一把双刃剑。返回 Any 或者 Protocol 是一种“类型擦除” 。编译器在编译期会丢失具体的底层类型信息，导致你无法直接调用它原本的方法或关联类型 。
+- 应用场景： 处理类型极度混合的集合（如老旧的 Objective-C API 返回的无类型数组），或编写高度动态化的接口。
+    ```Swift
+    var mixedArray: [Any] = [1, "Hello", true, { print("Closure") }]
+    ```
+- 2. AnyObject (任意类的实例)
+    - AnyObject 是一个系统内置的协议（Protocol），Swift 中所有的类（Class）都隐式遵守了这个协议。它专门用来代表任何引用类型的实例。
+    - 核心特性： 明确排除了 Struct、Enum 等值类型。
+    - 经典场景： 最常用于定义 delegate 协议时，限制该协议只能被 Class 遵守，从而可以使用 weak 关键字修饰代理属性，打破循环引用。
+    ```Swift
+    // 限制协议只能由 Class 遵守
+    protocol NetworkDelegate: AnyObject {
+        func didFinishFetch()
+    }
+
+    class NetworkManager {
+        weak var delegate: NetworkDelegate?
+    }
+    ```
+- 3. AnyClass (任意类的元类型)
+    - AnyClass 并不是指类的实例，而是指类本身的类型（Metatype）。在 Swift 源码中，它的定义是 typealias AnyClass = AnyObject.Type。
+    - 核心特性： 代表着类型自身，类似于 Objective-C 中的 Class 类型。
+    - 应用场景： 常见于组件化路由、反射机制，或者在使用 UITableView / UICollectionView 注册纯代码 Cell 时传入类型对象。
+
+    ```Swift
+    // 接受一个类类型本身，而不是它的实例化对象
+    func registerClass(_ cellClass: AnyClass) {
+        print("Registered: \(cellClass)")
+    }
+    ```
+- 4. any (小写 any：存在类型标记)
+    - any 是 Swift 5.6 引入的关键字，用来显式标记存在类型（Existential Type）。它是伴随着现代 Swift 协议演进而来的重要特性。
+
+    - 核心特性： 当你把一个协议当作具体的类型来使用时（例如声明一个变量 var animal: Animal），系统在底层其实是在创建一个“装箱（Box）”来包裹背后的真实数据。为了让开发者明确意识到这种动态派发带来的性能损耗，Swift 强制要求在协议名前加上 any 关键字。
+
+    - 与泛型/some的区别： 泛型和 some 是编译期确定的静态类型，性能高且类型安全；而 any 是运行时的动态类型，支持多态但在运行时有额外的内存和派发开销。
+    ```Swift
+    protocol Animal {
+        func speak()
+    }   
+    protocol Animal {
+        func speak()
+    }
+
+    struct Dog: Animal { func speak() { print("Woof") } }
+    struct Cat: Animal { func speak() { print("Meow") } }
+
+    // 使用 any 明确表示这里装箱了一个遵守 Animal 协议的动态类型
+    let myPets: [any Animal] = [Dog(), Cat()]
+    ```
+
+
+### 6. Swift 中，方法派发的方式有哪些？
+
+- 静态派发 (Static / Direct Dispatch)
+    - 核心特性： 系统在编译期就已经明确知道了具体要调用的函数内存地址，运行时会直接跳转到该地址执行相应的汇编指令。
+    - 核心优势： 性能极高。因为地址在编译时就已固定，编译器甚至可以对其进行内联（Inline）优化，将函数体直接展开在调用处，进一步省去函数调用栈的压栈出栈开销。
+
+    - 适用场景：
+        - 值类型： Struct 默认使用静态派发 (Static Dispatch)，性能最优 。Enum 也是如此。
+        - 被封闭的引用类型： 被 final 关键字修饰的 Class 或其内部方法。final 相当于向编译器发誓“这个类或方法绝对不会被继承或重写”，编译器就会放心地使用静态派发。
+        - 扩展： 在 Extension 中直接定义的方法（注意：非 Protocol 中声明的方法）默认使用静态派发。
+
+2. 函数表派发 (Table Dispatch / V-Table)
+    - 核心特性： 编译型面向对象语言（如 C++、Swift）实现多态的最常见动态派发机制。它在运行期通过查表来动态确定函数的实际地址。
+    - 底层机制： Class 存在继承，使用动态派发 (Dynamic / V-Table Dispatch) 。系统会为每个类在内存中维护一个虚函数表（Virtual Table，简称 V-Table），表中存储着该类所有可重写方法的内存地址数组。子类会拷贝父类的表，并替换掉自己重写的方法地址。当调用方法时，程序会在运行时先读取当前对象的 V-Table，找到正确的偏移量索引，获取方法地址后再跳转执行。
+    - 协议派发 (Witness Table)： 当使用 Protocol 类型的变量调用方法时，底层使用的是类似的“协议见证表（Protocol Witness Table）”。
+    - 性能损耗： 相比静态派发，它在运行时多出了两次内存读取操作（读取表、读取函数地址），且由于运行时才能确定跳转目标，编译器通常无法进行内联等高级优化。
+
+3. 消息机制派发 (Message Dispatch)
+    - 核心特性： Objective-C 的“灵魂”，也是 Swift 为了兼容 Cocoa 框架和纯动态特性而保留的最慢、但最灵活的派发方式。
+    - 底层机制： 完全在运行期动态决定。底层会调用 objc_msgSend 函数，顺着对象的 isa 指针找到类对象，在方法缓存（Cache）或方法列表（Method List）中查找。如果找不到，还会沿着 superclass 指针一直向上查找到 NSObject，甚至触发消息转发（Message Forwarding）机制。
+    - 核心优势： 极度的灵活性。它允许开发者在运行时动态修改方法的实现。著名的 KVO (键值观察) 和 Method Swizzling (黑魔法) 都是基于这套消息机制实现的。
+    - 适用场景：
+        - 被 @objc dynamic 联合修饰的方法。
+        - 继承自 Objective-C 类的原生方法。
