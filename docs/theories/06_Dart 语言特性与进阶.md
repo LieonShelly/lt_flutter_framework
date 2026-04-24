@@ -1,8 +1,8 @@
 # Dart 语言特性与进阶 (Dart Language)
 - Null Safety 原理：Dart 的健全空安全（Sound Null Safety）在运行时如何保证性能？
     - 1. 核心概念：什么是“健全（Sound）”？
-        - 很多语言（比如 TypeScript 或 Kotlin 配合 Java 代码时）也有空安全，但它们是**非健全（Unsound）**的。在 TypeScript 中，虽然编译器告诉你这个变量不是 null，但由于底层依然是 JavaScript，运行时依然有极大概率混入 null。所以引擎在执行时，依然要提心吊胆。
-        - 而 Dart 的健全空安全提供了一个物理级的物理契约：如果一个变量的类型是 String（而不是 String?），那么在运行时，它的内存地址里绝对、永远、不可能是 null。
+        - 很多语言（比如 TypeScript 或 Kotlin 配合 Java 代码时）也有空安全，但它们是**非健全（Unsound）**的。在 TypeScript 中，虽然编译器告诉你这个变量不是 null，但由于底层依然是 JavaScript，运行时依然有极大慨率混入 null。所以引擎在执行时，依然要提心吊胆。
+        - 而 Dart 的健全空安全提供了一个物理级的物理契约：如果一个变量的类型 is String（而不是 String?），那么在运行时，它的内存地址里绝对、永远、不可能是 null。
 
     - 2. 性能红利一：斩断隐式的运行时检查 (Eliminating Null Checks)
         - 在没有健全空安全的时代（Dart 2.12 之前），编译器是不信任开发者的。
@@ -293,7 +293,7 @@
             - 包体积与内存的双重瘦身：没有了庞大的 JIT 编译器，并且通过 Tree Shaking 移除了所有死代码，最终的 .so 或可执行文件极其精简。运行时的内存占用也大幅下降。
             - 代价：极长的构建时间。AOT 编译器的静态分析和机器码生成是非常耗时的运算，这也是为什么打一个 Release 包通常需要几分钟甚至十几分钟的原因。但这个代价是由开发者/CI服务器承担的，换来的是千万用户的流畅体验。
 
-- 宏 (Macros)：Dart 最新的宏功能（自省编程）对 Model 解析（如 JsonSerializable）的影响。
+- 宏 (Macros)：Dart 最新的宏功能（自省编程）对 Model 解析（如 JsonSerializable）的影响.
     - 1. 黎明前的黑暗：json_serializable 与 build_runner 的三宗罪
         - 在没有宏的时代，Dart 因为禁用了反射，无法在运行时动态解析 JSON。我们被迫采用 json_serializable。它的底层逻辑是：用一个外部的独立进程去扫描你的源码，然后生成物理文件。
         - 这种模式有着极其惨痛的代价：
@@ -475,7 +475,7 @@
             - 检查：极其严格。后续如果你尝试 x = 10;，编译器会直接亮起红线，拒绝编译。
 
         - Object (或 Object?)：多态的顶端（安全的泛化契约）
-            - 本质：Object 是 Dart 整个类层次结构的绝对根节点（在健全空安全下，Object? 才是包含 null 的真·根节点）。
+            - 本员：Object 是 Dart 整个类层次结构的绝对根节点（在健全空安全下，Object? 才是包含 null 的真·根节点）。
             - 规则：因为多态，你可以把任何东西赋值给 Object?。
             - 检查：依然极其严格。虽然能接收万物，但编译器只允许你调用 Object 自带的方法（如 toString(), hashCode, ==）。如果你尝试调用 obj.length，编译器会立刻报错。你必须通过 is String 进行类型测试（Type Promotion）或使用 as 强转后，才能调用特有方法。
 
@@ -659,3 +659,348 @@
             return Rx.concat([s1, s2]);
         }
         ```
+
+# 🎯 Dart 与 Flutter 混合开发核心面试题精选 (20道)
+
+## 一、 变量与类型系统 (Variables & Type System)
+
+1. **var、final、const 和 dynamic 有什么区别？**
+   - **var**：用于类型推断。一旦赋值，类型确定后不可更改。
+   - **final**：运行时常量。只能赋值一次，其值在程序运行期间确定。
+   - **const**：编译时常量。在编译时就必须确定值，且具有传递性，性能优于 final。
+   - **dynamic**：动态类型。关闭静态类型检查，变量可以在运行时指向任何类型，但容易引发运行时崩溃。
+
+2. **什么是空安全 (Sound Null Safety)？?、!、?? 和 late 如何使用？**
+   - **背景**：这是 Dart 3.0 的核心特性，旨在消除 Null 引用异常。
+   - **?**：声明可空类型（如 `String? name`）。
+   - **!**：强行断言非空，如果为 null 会抛出异常。
+   - **??**：空值合并运算符，若左侧为 null 则返回右侧的值。
+   - **late**：延迟初始化。用于解决非空变量无法在构造函数中立刻赋值的问题。
+
+3. **Dart 中的 num 类型是什么？它与 int、double 的关系？**
+   - `num` 是 `int` 和 `double` 的超类。
+   - 在处理通用数值计算或不确定数值是否包含小数时（如 DApp 中的 Token 数量），理解这种继承关系有助于编写更健壮的代码。
+
+4. **为什么说 Dart 的类型系统是“健全的”（Sound Type System）？**
+   - Dart 确保变量的值始终与其静态类型匹配（Soundness），这减少了运行时的类型错误，并允许编译器进行更好的 AOT 优化。
+
+## 二、 函数与面向对象 (Functions & OOP)
+
+5. **简述 Dart 构造函数：默认、命名、工厂构造（factory）的区别？**
+   - **默认构造**：与类同名的函数。
+   - **命名构造**：允许一个类有多个构造函数（如 `User.fromJson`）。
+   - **factory**：工厂构造函数。它不总是创建新实例，可以返回缓存的实例（实现单例模式）或返回子类实例。
+
+6. **什么是 Mixin（混入）？它与继承和接口的区别？**
+   - Dart 不支持多继承。
+   - **Mixin** 提供了一种在多个类层次结构中复用代码的方式（使用 `with` 关键字），无需形成严格的父子继承关系。
+
+7. **Dart 中的 extension 扩展方法解决了什么问题？**
+   - 允许在不修改原始类源码的情况下，为其添加新功能（例如给 `String` 类添加校验方法），增强了代码的整洁度和可读性。
+
+## 三、 异步编程 (Asynchronous Programming)
+
+8. **什么是事件循环（Event Loop）？微任务队列与事件队列的优先级？**
+   - Dart 是单线程运行机制。
+   - **优先级**：微任务队列（Microtask Queue）始终优先于事件队列（Event Queue）。
+   - 如果在微任务里写死循环，事件队列里的 UI 绘制任务将永远无法执行，导致界面卡死。
+
+9. **Future 和 Stream 的区别是什么？**
+   - **Future**：代表一个异步操作的单次结果（成功或失败）。
+   - **Stream**：代表一连串连续的异步事件（如监听接口推送、读取大文件流）。
+
+   **📦 Future 示例代码**
+
+   ```dart
+   import 'dart:async';
+
+   // ── 1. 基础用法：模拟一次网络请求 ──
+   Future<String> fetchUserName(int id) async {
+     await Future.delayed(Duration(seconds: 2)); // 模拟网络延迟
+     if (id <= 0) throw Exception('非法的用户 ID');
+     return '用户_$id';
+   }
+
+   // ── 2. async/await 风格（推荐）──
+   Future<void> demoAsyncAwait() async {
+     try {
+       final name = await fetchUserName(42);
+       print('✅ 获取成功: $name');
+     } catch (e) {
+       print('❌ 请求失败: $e');
+     }
+   }
+
+   // ── 3. .then / .catchError 链式回调风格 ──
+   void demoThenCatch() {
+     fetchUserName(42)
+         .then((name) => print('✅ 获取成功: $name'))
+         .catchError((e) => print('❌ 请求失败: $e'))
+         .whenComplete(() => print('🔚 无论成败，请求已结束'));
+   }
+
+   // ── 4. Future.wait：并发多个 Future，全部完成后统一处理 ──
+   Future<void> demoFutureWait() async {
+     final results = await Future.wait([
+       fetchUserName(1),
+       fetchUserName(2),
+       fetchUserName(3),
+     ]);
+     print('并发结果: $results'); // [用户_1, 用户_2, 用户_3]
+   }
+
+   void main() async {
+     await demoAsyncAwait();
+     demoThenCatch();
+     await demoFutureWait();
+   }
+   ```
+
+   **🌊 Stream 示例代码**
+
+   ```dart
+   import 'dart:async';
+
+   // ── 1. async* 生成器创建 Stream（推荐方式）──
+   // 场景：模拟文件下载进度，每 500ms 上报一次
+   Stream<int> downloadProgress(int totalChunks) async* {
+     for (int i = 1; i <= totalChunks; i++) {
+       await Future.delayed(Duration(milliseconds: 500));
+       yield (i / totalChunks * 100).toInt(); // 产出进度百分比
+     }
+   }
+
+   // ── 2. StreamController 手动控制流（适合事件总线/实时推送）──
+   void demoStreamController() {
+     final controller = StreamController<String>();
+
+     // 订阅流
+     controller.stream.listen(
+       (data) => print('📨 收到消息: $data'),
+       onError: (e) => print('❌ 流发生错误: $e'),
+       onDone: () => print('🔚 流已关闭'),
+     );
+
+     // 向流中推送数据
+     controller.sink.add('Hello');
+     controller.sink.add('World');
+     controller.sink.addError(Exception('模拟错误'));
+     controller.sink.add('继续推送');
+     controller.close(); // 关闭流
+   }
+
+   // ── 3. 广播流 (Broadcast Stream)：允许多个监听者同时订阅 ──
+   void demoBroadcastStream() {
+     final controller = StreamController<int>.broadcast();
+
+     // 多个订阅者同时监听
+     controller.stream.listen((v) => print('订阅者A: $v'));
+     controller.stream.listen((v) => print('订阅者B: $v'));
+
+     controller.sink.add(1);
+     controller.sink.add(2);
+     controller.close();
+   }
+
+   // ── 4. await for 消费 Stream（推荐风格）──
+   Future<void> demoAwaitFor() async {
+     print('开始下载...');
+     await for (final progress in downloadProgress(5)) {
+       print('🔋 下载进度: $progress%');
+       if (progress >= 60) {
+         print('⚠️ 用户取消，中断流');
+         break; // 可随时中断
+       }
+     }
+     print('下载结束');
+   }
+
+   // ── 5. Stream 链式操作符（map / where / take）──
+   Future<void> demoStreamOperators() async {
+     final evenSquares = Stream.fromIterable([1, 2, 3, 4, 5, 6])
+         .where((n) => n.isEven)    // 过滤偶数
+         .map((n) => n * n)         // 计算平方
+         .take(2);                  // 只取前 2 个
+
+     await for (final val in evenSquares) {
+       print('结果: $val'); // 4, 16
+     }
+   }
+
+   void main() async {
+     demoStreamController();
+     demoBroadcastStream();
+     await demoAwaitFor();
+     await demoStreamOperators();
+   }
+   ```
+
+   > **核心区别对比**
+   >
+   > | 对比维度 | Future | Stream |
+   > |---------|--------|--------|
+   > | 结果数量 | **单次** 结果 | **持续多次** 事件 |
+   > | 适用场景 | 网络请求、文件读写 | 实时推送、进度上报、WebSocket |
+   > | 消费方式 | `await` / `.then()` | `await for` / `.listen()` |
+   > | 错误处理 | `try/catch` / `.catchError()` | `onError` 回调 |
+   > | 是否可取消 | ❌ 不能中途取消 | ✅ 可随时 `break` 或取消订阅 |
+
+10. **await for 循环的作用是什么？**
+    - 用于异步迭代 Stream 中的值，代码会在此处等待，直到流中有新数据产生或流关闭。
+
+## 四、 并发与内存管理 (Isolates & Memory)
+
+11. **什么是 Isolate？它为什么能避免并发冲突？**
+    - **Isolate** 是 Dart 的并发模型。每个 Isolate 拥有独立的内存堆，彼此不共享状态。
+    - 由于没有共享内存，因此不需要加锁，从根本上避免了竞态条件（Race Conditions）。
+
+12. **如何在两个 Isolate 之间传递大数据而避免拷贝开销？**
+    - 使用 `TransferableTypedData` 或者在 Dart 2.15+ 中使用 `Isolate.exit()`，后者可以将内存所有权直接移交给接收者，实现零拷贝传递。
+
+    **方案一：`TransferableTypedData` —— 显式转移所有权**
+
+    ```dart
+    import 'dart:isolate';
+    import 'dart:typed_data';
+
+    // 子 Isolate 的入口函数
+    // 参数：[SendPort, TransferableTypedData]
+    void heavyWorker(List<dynamic> args) {
+      final sendPort = args[0] as SendPort;
+      final transferable = args[1] as TransferableTypedData;
+
+      // ✅ 将 TransferableTypedData 还原为可用的 Uint8List
+      // 注意：materialize() 之后，原始 transferable 对象就失效了（所有权已转移）
+      final data = transferable.materialize().asUint8List();
+
+      print('[子 Isolate] 收到数据，长度: ${data.length} 字节');
+
+      // 模拟耗时计算（如图像解码、加密运算）
+      int checksum = data.fold(0, (sum, byte) => sum + byte);
+
+      // 将计算结果返回给主 Isolate（结果很小，普通发送即可）
+      sendPort.send(checksum);
+    }
+
+    Future<void> demoTransferableTypedData() async {
+      // 模拟一块 10MB 的大数据（如图片的原始字节）
+      final bigData = Uint8List(10 * 1024 * 1024);
+      for (int i = 0; i < bigData.length; i++) {
+        bigData[i] = i % 256;
+      }
+      print('[主 Isolate] 原始数据大小: ${bigData.lengthInBytes / 1024 / 1024} MB');
+
+      final receivePort = ReceivePort();
+
+      // ⚡ 核心：将 Uint8List 包装为 TransferableTypedData
+      // 此后 bigData 的内存所有权交给了 transferable，零拷贝！
+      final transferable = TransferableTypedData.fromList([bigData]);
+
+      await Isolate.spawn(
+        heavyWorker,
+        [receivePort.sendPort, transferable],
+      );
+
+      final checksum = await receivePort.first;
+      print('[主 Isolate] 子 Isolate 计算出的校验和: $checksum');
+      receivePort.close();
+    }
+    ```
+
+    **方案二：`Isolate.exit()` —— 结果直接移交，无需序列化（Dart 2.15+）**
+
+    ```dart
+    import 'dart:isolate';
+    import 'dart:typed_data';
+
+    // 子 Isolate 处理完毕后，用 Isolate.exit() 将结果直接"移交"给主 Isolate
+    // 效果：主 Isolate 拿到的是同一块内存，而不是副本
+    void processAndExit(List<dynamic> args) {
+      final sendPort = args[0] as SendPort;
+      final inputData = args[1] as Uint8List;
+
+      print('[子 Isolate] 开始处理 ${inputData.length} 字节的数据...');
+
+      // 模拟耗时处理，生成一份结果数据（同样很大）
+      final result = Uint8List(inputData.length);
+      for (int i = 0; i < inputData.length; i++) {
+        result[i] = (inputData[i] + 1) % 256; // 简单变换
+      }
+
+      // ✅ Isolate.exit() 会：
+      // 1. 将 result 的内存所有权直接移交给 sendPort 的接收方
+      // 2. 子 Isolate 立即退出，无需手动调用 receivePort.close()
+      // 3. 主 Isolate 收到的是原始内存块，零序列化开销
+      Isolate.exit(sendPort, result);
+    }
+
+    Future<void> demoIsolateExit() async {
+      // 模拟 5MB 输入数据
+      final inputData = Uint8List(5 * 1024 * 1024)
+        ..fillRange(0, 5 * 1024 * 1024, 128);
+
+      final receivePort = ReceivePort();
+
+      await Isolate.spawn(processAndExit, [receivePort.sendPort, inputData]);
+
+      // 等待子 Isolate 通过 exit() 发回结果
+      final result = await receivePort.first as Uint8List;
+      print('[主 Isolate] 接收到处理结果，大小: ${result.length / 1024 / 1024} MB');
+      print('[主 Isolate] 首字节: ${result[0]}'); // 应为 129
+
+      receivePort.close();
+    }
+
+    void main() async {
+      print('=== 方案一：TransferableTypedData ===');
+      await demoTransferableTypedData();
+
+      print('\n=== 方案二：Isolate.exit() ===');
+      await demoIsolateExit();
+    }
+    ```
+
+    > **两种方案对比**
+    >
+    > | 对比维度 | `TransferableTypedData` | `Isolate.exit()` |
+    > |---------|------------------------|-----------------|
+    > | 适用方向 | 主 → 子（传入大数据） | 子 → 主（传出大数据结果） |
+    > | Dart 版本 | 2.8+ | **2.15+** |
+    > | 使用复杂度 | 需手动 `materialize()` 还原 | 极简，一行搞定 |
+    > | Isolate 生命周期 | 子 Isolate 继续运行 | 子 Isolate **立即退出** |
+    > | 原理 | 显式转移 `TypedData` 所有权 | 退出时移交任意对象的所有权 |
+
+13. **Dart 的垃圾回收（GC）机制是怎样的？**
+    - 采用分代回收（Generational GC）。
+    - **新生代**：使用 Scavenge 算法（半空间拷贝，极快）。
+    - **老生代**：使用 Mark-Sweep（标记清除）算法处理长生命周期对象。
+
+## 五、 编译与运行模式 (Compilation & Runtime)
+
+14. **简述 JIT 和 AOT 编译。为什么 Flutter 开发快、发布快？**
+    - **JIT (Just-In-Time)**：用于 Debug 模式，支持热重载（Hot Reload），开发效率极高。
+    - **AOT (Ahead-Of-Time)**：用于 Release 模式，将 Dart 预编译为机器码，提升启动速度和运行流畅度。
+
+15. **什么是 Tree Shaking（摇树优化）？**
+    - 在 AOT 编译期间，编译器会移除代码库中未被调用的函数和类，显著减小最终生成的安装包体积。
+
+## 六、 混合开发进阶 (Add-to-App & Advanced)
+
+16. **什么是 FlutterEngineGroup？它解决了什么痛点？**
+    - 这是官方为了解决多引擎内存暴增而推出的方案。
+    - **解决痛点**：通过共享 GPU 上下文、字体和 Isolate 核心内存，将新增引擎的开销从 ~30MB 降低到约 180KB，兼顾了页面隔离与低内存占用。
+
+17. **在原生工程中集成 Flutter，源码依赖与产物依赖有何区别？**
+    - **源码依赖**：原生工程关联本地 Flutter 源码，方便双端联调，但要求全员安装 Flutter SDK。
+    - **产物依赖**：将 Flutter 编译为 AAR 或 Framework。原生开发者无需配置环境，适合大团队协作，但联调成本较高。
+
+18. **如何在优雅地销毁 Flutter 引擎以避免内存泄漏？**
+    - **步骤**：1. 先解绑 Platform Channels 监听器；2. 断开 FlutterView 渲染连接；3. 最后调用 `flutterEngine.destroy()`。
+    - **加分项**：在销毁前通过 Channel 通知 Dart 侧取消长连接和定时器，实现双端协同清理。
+
+19. **Dart FFI 是什么？它在混合开发中的作用？**
+    - **FFI** 允许 Dart 直接调用 C/C++ 库。其性能远高于 MethodChannel，适用于音视频解码、高性能加密或复杂计算场景。
+
+20. **为什么 Dart 选择单线程模型配合事件循环？**
+    - **减少开销**：避免了多线程环境下复杂的上下文切换和锁竞争。
+    - **契合 UI**：UI 渲染天然是单线程的，且单线程模型对处理 UI 框架中产生的大量短生命周期对象（新生代 GC）非常友好。
