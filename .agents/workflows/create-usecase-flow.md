@@ -1,6 +1,10 @@
-# Workflow: usecase-workflow
+---
+description: 在 lt_app Monorepo 中，按照 Clean Architecture 规范快速创建一个完整的 UseCase
+---
 
-> 触发命令：`/usecase-workflow`
+# Workflow: create-usecase-flow
+
+> 触发命令：`/create-usecase-flow`
 
 ## 用途
 
