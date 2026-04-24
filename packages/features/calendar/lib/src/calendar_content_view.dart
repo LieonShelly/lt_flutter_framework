@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lt_uicomponent/uicomponent.dart';
-import 'calendar_controller.dart';
+import 'calendar_view_model.dart';
 import 'calendar_month_view.dart';
 
 class CalendarContentView extends ConsumerWidget {
@@ -21,10 +21,10 @@ class CalendarContentView extends ConsumerWidget {
     final aspectRatio = itemWidth / itemHeight;
     final spacingH = 20.0;
     final reflectionMap = ref.watch(
-      calendarControllerProvider.select((state) => state.reflectionMap.value),
+      calendarViewModelProvider.select((state) => state.reflectionMap.value),
     );
     final monthList = ref.watch(
-      calendarControllerProvider.select(
+      calendarViewModelProvider.select(
         (state) => state.monthList
             .where((month) => month.style == CalendarMonthItemStyle.normal)
             .toList(),
@@ -35,7 +35,7 @@ class CalendarContentView extends ConsumerWidget {
       itemCount: monthList.length,
       onPageChanged: (index) {
         final newMonth = monthList[index].month;
-        ref.read(calendarControllerProvider.notifier).onPageChanged(newMonth);
+        ref.read(calendarViewModelProvider.notifier).onPageChanged(newMonth);
       },
       itemBuilder: (context, index) {
         if (index >= monthList.length) {

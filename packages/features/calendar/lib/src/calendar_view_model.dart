@@ -1,7 +1,7 @@
 import 'package:calendar/src/providers/calendar_providers.dart';
 import 'package:reflection_domain/reflection_domain.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-part 'calendar_controller.g.dart';
+part 'calendar_view_model.g.dart';
 
 class CalendarState {
   final DateTime focusedMonth;
@@ -36,7 +36,7 @@ class CalendarState {
 }
 
 @riverpod
-class CalendarController extends _$CalendarController {
+class CalendarViewModel extends _$CalendarViewModel {
   List<CalendarMonthItem> get normalMonths {
     return state.monthList
         .where((e) => e.style == CalendarMonthItemStyle.normal)

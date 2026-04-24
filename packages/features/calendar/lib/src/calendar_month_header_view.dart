@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lt_uicomponent/uicomponent.dart';
-import 'calendar_controller.dart';
+import 'calendar_view_model.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 class CalendarMonthHeaderView extends ConsumerStatefulWidget {
@@ -54,8 +54,8 @@ class _CalendarMonthHeaderView extends ConsumerState<CalendarMonthHeaderView> {
   }
 
   void _scrollToCurrentFocusedMonth({bool animate = true}) {
-    final focusedMonth = ref.read(calendarControllerProvider).focusedMonth;
-    final monthList = ref.read(calendarControllerProvider).monthList;
+    final focusedMonth = ref.read(calendarViewModelProvider).focusedMonth;
+    final monthList = ref.read(calendarViewModelProvider).monthList;
     final index = monthList.indexWhere(
       (month) =>
           month.month.month == focusedMonth.month &&
@@ -68,7 +68,7 @@ class _CalendarMonthHeaderView extends ConsumerState<CalendarMonthHeaderView> {
   @override
   Widget build(BuildContext context) {
     ref.listen(
-      calendarControllerProvider.select((value) => value.focusedMonth),
+      calendarViewModelProvider.select((value) => value.focusedMonth),
       (previous, next) {
         if (previous?.month != next.month || previous?.year != next.year) {
           _scrollToCurrentFocusedMonth(animate: true);
@@ -76,9 +76,9 @@ class _CalendarMonthHeaderView extends ConsumerState<CalendarMonthHeaderView> {
       },
     );
     final focusedMonth = ref.watch(
-      calendarControllerProvider.select((value) => value.focusedMonth),
+      calendarViewModelProvider.select((value) => value.focusedMonth),
     );
-    final monthList = ref.read(calendarControllerProvider).monthList;
+    final monthList = ref.read(calendarViewModelProvider).monthList;
     return SizedBox(
       height: 42,
       child: ListView.builder(

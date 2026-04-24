@@ -5,7 +5,7 @@ import 'package:date_utl/date_utl.dart';
 import 'package:lt_uicomponent/uicomponent.dart';
 import 'calendar_content_view.dart';
 import 'calendar_month_header_view.dart';
-import 'calendar_controller.dart';
+import 'calendar_view_model.dart';
 
 class CalendarPage extends ConsumerStatefulWidget {
   const CalendarPage({super.key});
@@ -22,8 +22,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   @override
   void initState() {
     super.initState();
-    final controller = ref.read(calendarControllerProvider.notifier);
-    final state = ref.read(calendarControllerProvider);
+    final controller = ref.read(calendarViewModelProvider.notifier);
+    final state = ref.read(calendarViewModelProvider);
     final normalMonths = controller.normalMonths;
     int initialIndex = normalMonths.indexWhere(
       (e) =>
@@ -61,8 +61,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   }
 
   Widget _buildHeader() {
-    final calendarState = ref.watch(calendarControllerProvider);
-    final calendarController = ref.watch(calendarControllerProvider.notifier);
+    final calendarState = ref.watch(calendarViewModelProvider);
+    final calendarController = ref.watch(calendarViewModelProvider.notifier);
 
     final month = GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -127,7 +127,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       decoration: const BoxDecoration(),
       child: CalendarMonthHeaderView(
         onMonthSelected: (index) {
-          final fullList = ref.read(calendarControllerProvider).monthList;
+          final fullList = ref.read(calendarViewModelProvider).monthList;
           final selectedItem = fullList[index];
           if (selectedItem.style == CalendarMonthItemStyle.normal) {
             final normalMonths = calendarController.normalMonths;
@@ -184,7 +184,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
   Widget _buildCustomTableCalendar() {
     final focusedMonth = ref.watch(
-      calendarControllerProvider.select((value) => value.focusedMonth),
+      calendarViewModelProvider.select((value) => value.focusedMonth),
     );
     return LayoutBuilder(
       builder: (context, constrains) {
@@ -220,7 +220,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           backgroundColor: Colors.white,
           onRefresh: () async {
             await ref
-                .read(calendarControllerProvider.notifier)
+                .read(calendarViewModelProvider.notifier)
                 .refreshCurrentMonth();
           },
           child: scrollContent,

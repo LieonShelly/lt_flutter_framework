@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'calendar_controller.dart';
+part of 'calendar_view_model.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,28 +9,28 @@ part of 'calendar_controller.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(CalendarController)
-final calendarControllerProvider = CalendarControllerProvider._();
+@ProviderFor(CalendarViewModel)
+final calendarViewModelProvider = CalendarViewModelProvider._();
 
-final class CalendarControllerProvider
-    extends $NotifierProvider<CalendarController, CalendarState> {
-  CalendarControllerProvider._()
+final class CalendarViewModelProvider
+    extends $NotifierProvider<CalendarViewModel, CalendarState> {
+  CalendarViewModelProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'calendarControllerProvider',
+        name: r'calendarViewModelProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$calendarControllerHash();
+  String debugGetCreateSourceHash() => _$calendarViewModelHash();
 
   @$internal
   @override
-  CalendarController create() => CalendarController();
+  CalendarViewModel create() => CalendarViewModel();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(CalendarState value) {
@@ -41,10 +41,9 @@ final class CalendarControllerProvider
   }
 }
 
-String _$calendarControllerHash() =>
-    r'2448f7c93313d35d76e479e369e26aab0282f4bd';
+String _$calendarViewModelHash() => r'79f9da9275b26d10d152de369f98da744b86e2b0';
 
-abstract class _$CalendarController extends $Notifier<CalendarState> {
+abstract class _$CalendarViewModel extends $Notifier<CalendarState> {
   CalendarState build();
   @$mustCallSuper
   @override
