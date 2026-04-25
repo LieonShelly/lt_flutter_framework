@@ -1,11 +1,13 @@
 import 'package:dio/dio.dart';
+import '../network_core/token_refresher.dart';
 import '../network_core/token_storage.dart';
 
 class RefreshTokenInterceptor extends Interceptor {
   final Dio _dio;
   final TokenStorage _storage;
+  final TokenRefresher _tokenRefresher;
 
-  RefreshTokenInterceptor(this._dio, this._storage);
+  RefreshTokenInterceptor(this._dio, this._storage, this._tokenRefresher);
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
@@ -21,17 +23,15 @@ class RefreshTokenInterceptor extends Interceptor {
       if (refreshToken == null) {
         return handler.next(err);
       }
-      final refreshResponse = await Dio().post(
-        'https://things.dvacode.tech/api/auth/refresh',
-        data: {'refreshToken': refreshToken},
-        options: Options(headers: {'Content-Type': 'application/json'}),
-      );
-      final newAccesToken = refreshResponse.data['data']['accessToken'];
-      final newRrefreshToken = refreshResponse.data['data']['refreshToken'];
-      await _storage.saveTokens(newAccesToken, newRrefreshToken);
+
+      // 通过注入的抽象接口完成 Token 刷新，不依赖具体实现
+      final (newAccessToken, newRefreshToken) =
+          await _tokenRefresher.refresh(refreshToken);
+
+      await _storage.saveTokens(newAccessToken, newRefreshToken);
 
       final opts = err.requestOptions;
-      opts.headers['Authorization'] = 'Bearer $newAccesToken';
+      opts.headers['Authorization'] = 'Bearer $newAccessToken';
       final cloneReq = await _dio.fetch(opts);
       return handler.resolve(cloneReq);
     } on DioException catch (e) {

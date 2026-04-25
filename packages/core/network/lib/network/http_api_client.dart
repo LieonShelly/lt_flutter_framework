@@ -5,6 +5,7 @@ import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import '../network_core/api_client.dart';
 import '../network_core/app_exception.dart';
+import '../network_core/token_refresher.dart';
 import 'auth_interceptor.dart';
 import 'network_config.dart';
 import 'refresh_token_interceptor.dart';
@@ -13,8 +14,14 @@ import '../network_core/token_storage.dart';
 class HttpApiClient implements ApiClientType {
   late final Dio _dio;
   final TokenStorage _tokenStorage;
-  HttpApiClient({required String baseUrl, required TokenStorage tokenStorage})
-    : _tokenStorage = tokenStorage {
+  final TokenRefresher? _tokenRefresher;
+
+  HttpApiClient({
+    required String baseUrl,
+    required TokenStorage tokenStorage,
+    TokenRefresher? tokenRefresher,
+  }) : _tokenStorage = tokenStorage,
+       _tokenRefresher = tokenRefresher {
     _dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
@@ -50,7 +57,13 @@ class HttpApiClient implements ApiClientType {
             debugPrint('   Type: ${error.type}');
             debugPrint('   URL: ${error.requestOptions.uri}');
           }
-          RefreshTokenInterceptor(_dio, _tokenStorage).onError(error, handler);
+          final refresher = _tokenRefresher;
+          if (refresher != null) {
+            RefreshTokenInterceptor(_dio, _tokenStorage, refresher)
+                .onError(error, handler);
+          } else {
+            handler.next(error);
+          }
         },
       ),
     ]);
