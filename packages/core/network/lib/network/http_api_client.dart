@@ -5,6 +5,7 @@ import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import '../network_core/api_client.dart';
 import '../network_core/app_exception.dart';
+import '../network_core/ssl_pinning_config.dart';
 import '../network_core/token_refresher.dart';
 import 'auth_interceptor.dart';
 import 'network_config.dart';
@@ -15,13 +16,16 @@ class HttpApiClient implements ApiClientType {
   late final Dio _dio;
   final TokenStorage _tokenStorage;
   final TokenRefresher? _tokenRefresher;
+  final SslPinningConfig? _sslPinningConfig;
 
   HttpApiClient({
     required String baseUrl,
     required TokenStorage tokenStorage,
     TokenRefresher? tokenRefresher,
+    SslPinningConfig? sslPinningConfig,
   }) : _tokenStorage = tokenStorage,
-       _tokenRefresher = tokenRefresher {
+       _tokenRefresher = tokenRefresher,
+       _sslPinningConfig = sslPinningConfig {
     _dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
@@ -59,8 +63,11 @@ class HttpApiClient implements ApiClientType {
           }
           final refresher = _tokenRefresher;
           if (refresher != null) {
-            RefreshTokenInterceptor(_dio, _tokenStorage, refresher)
-                .onError(error, handler);
+            RefreshTokenInterceptor(
+              _dio,
+              _tokenStorage,
+              refresher,
+            ).onError(error, handler);
           } else {
             handler.next(error);
           }
@@ -82,6 +89,20 @@ class HttpApiClient implements ApiClientType {
           return client;
         },
       );
+    } else {
+      final pinning = _sslPinningConfig;
+      if (pinning != null && !pinning.disabled) {
+        _dio.httpClientAdapter = IOHttpClientAdapter(
+          createHttpClient: () {
+            final client = HttpClient();
+            client.badCertificateCallback =
+                (X509Certificate cert, String host, int port) {
+                  return pinning.validate(cert, host, port);
+                };
+            return client;
+          },
+        );
+      }
     }
   }
 

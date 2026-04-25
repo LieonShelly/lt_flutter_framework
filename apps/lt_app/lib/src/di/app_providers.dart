@@ -5,6 +5,7 @@ import 'package:user_data/user_data.dart' as user;
 import 'package:wallet_data/wallet_data.dart' as wallet;
 import 'package:user_domain/user_domain.dart';
 import 'package:user_data/user_data.dart' as user_data;
+import '../security/app_ssl_pinning_config.dart';
 
 final _tokenStorageProvider = Provider<TokenStorage>((ref) {
   const isProduction = bool.fromEnvironment('dart.vm.product');
@@ -24,6 +25,7 @@ final _mainApiClientProvider = Provider<ApiClientType>((ref) {
     baseUrl: 'https://things.dvacode.tech',
     tokenStorage: tokenStorage,
     tokenRefresher: tokenRefresher,
+    sslPinningConfig: const AppSslPinningConfig(),
   );
 }, name: '_mainApiClientProvider');
 
