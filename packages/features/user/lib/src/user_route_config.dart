@@ -7,10 +7,11 @@ class UserRouteConfig implements FeatureRouteConfig {
   List<RouteBase> get routes => [
     GoRoute(
       path: AppRoutePath.login,
-      pageBuilder: (context, state) => NoTransitionPage(
-        child: LoginView(onAppleSignIn: () {}, onGoogleSignIn: () {}),
+      pageBuilder: (context, state) => const NoTransitionPage(
+        child: LoginView(),
       ),
     ),
+
   ];
 
   @override

@@ -140,7 +140,10 @@ class _AnswerDetailPageState extends ConsumerState<AnswerDetailPage>
       child: Center(
         child: Text(
           dateStr,
-          style: AppTextStyle.poppins(color: Color(0xff423d3d), fontSize: 12),
+          style: AppTextStyle.poppinsRegular(
+            color: Color(0xff423d3d),
+            fontSize: 12,
+          ),
         ),
       ),
     );
@@ -206,7 +209,10 @@ class _AnswerDetailPageState extends ConsumerState<AnswerDetailPage>
       padding: EdgeInsets.all(20),
       child: Text(
         widget.answer.content,
-        style: AppTextStyle.poppins(fontSize: 14, color: Color(0xff323232)),
+        style: AppTextStyle.poppinsRegular(
+          fontSize: 14,
+          color: Color(0xff323232),
+        ),
       ),
     );
     final container = Container(

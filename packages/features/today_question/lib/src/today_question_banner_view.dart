@@ -122,7 +122,7 @@ class _TodayQuestionBannerViewState
           children: [
             Text(
               "Question of the day",
-              style: AppTextStyle.poppins(
+              style: AppTextStyle.poppinsRegular(
                 fontSize: 12,
                 color: Color(0xff6f6f6f),
               ),

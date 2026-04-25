@@ -136,7 +136,10 @@ class _AddAnswerPageState extends ConsumerState<AddAnswerPage>
       ),
       title: Text(
         dateStr,
-        style: AppTextStyle.poppins(color: Color(0xFF423d3d), fontSize: 12),
+        style: AppTextStyle.poppinsRegular(
+          color: Color(0xFF423d3d),
+          fontSize: 12,
+        ),
       ),
     );
   }
@@ -224,7 +227,7 @@ class _AddAnswerPageState extends ConsumerState<AddAnswerPage>
               ),
               child: Text(
                 '#$categoryTitle',
-                style: AppTextStyle.poppins(
+                style: AppTextStyle.poppinsRegular(
                   fontSize: 10,
                   color: Color(0xff000000),
                 ),
@@ -269,14 +272,20 @@ class _AddAnswerPageState extends ConsumerState<AddAnswerPage>
       controller: _textEditingController,
       maxLines: null,
       keyboardType: TextInputType.multiline,
-      style: AppTextStyle.poppins(color: Color(0xff000000), fontSize: 12),
+      style: AppTextStyle.poppinsRegular(
+        color: Color(0xff000000),
+        fontSize: 12,
+      ),
       decoration: InputDecoration(
         border: InputBorder.none,
         isDense: true,
         focusColor: Color(0xff000000),
         hint: Text(
           'Write anything....',
-          style: AppTextStyle.poppins(fontSize: 12, color: Color(0xFF6F6F6F)),
+          style: AppTextStyle.poppinsRegular(
+            fontSize: 12,
+            color: Color(0xFF6F6F6F),
+          ),
         ),
       ),
     );
