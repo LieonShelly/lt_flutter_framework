@@ -8,7 +8,9 @@ part 'auth_model.lt_model.dart';
 /// 对应 API 响应中的 data 字段：{ access_token, refresh_token, user }
 @ltDeserialization
 class AuthModel {
+  @LtJsonKey('access_token')
   final String accessToken;
+  @LtJsonKey('refresh_token')
   final String refreshToken;
   final UserModel user;
 

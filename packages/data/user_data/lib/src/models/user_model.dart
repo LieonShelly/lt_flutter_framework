@@ -6,17 +6,17 @@ part 'user_model.lt_model.dart';
 @ltDeserialization
 class UserModel {
   final String id;
-  final String name;
+  final String? name;
   final String? email;
   final String? avatar;
 
-  UserModel({required this.id, required this.name, this.email, this.avatar});
+  UserModel({required this.id, this.name, this.email, this.avatar});
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
 
   UserEntity toEntity() {
-    return UserEntity(id: id, name: name, email: email, avatar: avatar);
+    return UserEntity(id: id, name: name ?? "", email: email, avatar: avatar);
   }
 
   factory UserModel.fromEntity(UserEntity entity) {

@@ -11,6 +11,6 @@ AuthModel _$AuthModelFromJson(Map<String, dynamic> json) {
   return AuthModel(
     accessToken: json['access_token'] as String,
     refreshToken: json['refresh_token'] as String,
-    user: UserModel.fromJson(json['user'] as Map<String, dynamic>),
+    user: UserModel.fromJson(json['user']),
   );
 }

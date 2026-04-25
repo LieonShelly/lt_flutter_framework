@@ -11,14 +11,18 @@ class LoginView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final loginState = ref.watch(loginViewModelProvider);
     final vm = ref.read(loginViewModelProvider.notifier);
-    final isLoading = loginState is LoginLoading;
 
-    // 登录成功后的跳转由路由层监听处理（可在 app_router 中通过 redirect 实现）
+    final isAppleLoading =
+        loginState is LoginLoading && loginState.type == LoginType.apple;
+    final isGoogleLoading =
+        loginState is LoginLoading && loginState.type == LoginType.google;
+    final isAnyLoading = loginState is LoginLoading;
+
     ref.listen<LoginState>(loginViewModelProvider, (_, next) {
       if (next is LoginFailure) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.message)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(next.message)));
       }
     });
 
@@ -28,7 +32,6 @@ class LoginView extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // ── 品牌 Logo 区域 ─────────────────────────────────────────────────
             Expanded(
               child: Center(
                 child: Column(
@@ -48,17 +51,15 @@ class LoginView extends ConsumerWidget {
               ),
             ),
 
-            // ── 底部登录按钮区域 ────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
               child: Column(
                 children: [
-                  // Apple 登录
                   _LoginButton(
-                    onTap: isLoading ? null : vm.signInWithApple,
+                    onTap: isAnyLoading ? null : vm.signInWithApple,
                     backgroundColor: AppColors.black,
                     borderColor: AppColors.black,
-                    isLoading: isLoading,
+                    isLoading: isAppleLoading,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -77,12 +78,11 @@ class LoginView extends ConsumerWidget {
                   ),
                   const SizedBox(height: 14),
 
-                  // Google 登录
                   _LoginButton(
-                    onTap: isLoading ? null : vm.signInWithGoogle,
+                    onTap: isAnyLoading ? null : vm.signInWithGoogle,
                     backgroundColor: AppColors.oat,
                     borderColor: AppColors.greyDark,
-                    isLoading: false,
+                    isLoading: isGoogleLoading,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

@@ -1,5 +1,6 @@
 import 'package:lt_network/network.dart';
 import '../../models/models.dart';
+import 'package:flutter/foundation.dart';
 
 abstract interface class UserRemoteDataSource {
   Future<UserModel> getCurrentUser();
@@ -8,12 +9,8 @@ abstract interface class UserRemoteDataSource {
     required String identityToken,
     required String authorizationCode,
   });
-  Future<AuthModel> loginWithGoogle({
-    required String idToken,
-  });
-  Future<AuthModel> refreshToken({
-    required String refreshToken,
-  });
+  Future<AuthModel> loginWithGoogle({required String idToken});
+  Future<AuthModel> refreshToken({required String refreshToken});
 
   // ─── 用户设置 ───────────────────────────────────────────────────────────────
   Future<void> saveDeviceToken(String deviceToken);
@@ -47,54 +44,59 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     required String identityToken,
     required String authorizationCode,
   }) async {
-    final response = await _apiClient.post('/api/auth/apple', data: {
-      'identityToken': identityToken,
-      'authorizationCode': authorizationCode,
-    });
+    final response = await _apiClient.post(
+      '/api/auth/apple',
+      data: {
+        'identityToken': identityToken,
+        'authorizationCode': authorizationCode,
+      },
+    );
+    debugPrint('Apple login response: $response');
     return AuthModel.fromJson(response['data']);
   }
 
   @override
-  Future<AuthModel> loginWithGoogle({
-    required String idToken,
-  }) async {
-    final response = await _apiClient.post('/api/auth/google', data: {
-      'idToken': idToken,
-    });
+  Future<AuthModel> loginWithGoogle({required String idToken}) async {
+    final response = await _apiClient.post(
+      '/api/auth/google',
+      data: {'idToken': idToken},
+    );
     return AuthModel.fromJson(response['data']);
   }
 
   @override
-  Future<AuthModel> refreshToken({
-    required String refreshToken,
-  }) async {
-    final response = await _apiClient.post('/api/auth/refresh', data: {
-      'refresh_token': refreshToken,
-    });
-    return AuthModel.fromJson(response['data']);
+  Future<AuthModel> refreshToken({required String refreshToken}) async {
+    final response = await _apiClient.post(
+      '/api/auth/refresh',
+      data: {'refresh_token': refreshToken},
+    );
+    if (response is Map) {
+      return AuthModel.fromJson(response['data']);
+    }
+    throw Exception('Failed to refresh token');
   }
 
   // ─── 用户设置 ───────────────────────────────────────────────────────────────
 
   @override
   Future<void> saveDeviceToken(String deviceToken) async {
-    await _apiClient.post('/api/device-token', data: {
-      'deviceToken': deviceToken,
-    });
+    await _apiClient.post(
+      '/api/device-token',
+      data: {'deviceToken': deviceToken},
+    );
   }
 
   @override
   Future<void> saveTimezone(String timestamp) async {
-    await _apiClient.post('/api/timezone', data: {
-      'timestamp': timestamp,
-    });
+    await _apiClient.post('/api/timezone', data: {'timestamp': timestamp});
   }
 
   @override
   Future<void> updateQodStrategy(String strategy) async {
-    await _apiClient.post('/api/qod-strategy', data: {
-      'qod_strategy': strategy,
-    });
+    await _apiClient.post(
+      '/api/qod-strategy',
+      data: {'qod_strategy': strategy},
+    );
   }
 
   @override
@@ -114,9 +116,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
   @override
   Future<void> updateNickname(String? nickname) async {
-    await _apiClient.post('/api/me', data: {
-      'nickname': nickname,
-    });
+    await _apiClient.post('/api/me', data: {'nickname': nickname});
   }
 
   @override
@@ -127,10 +127,10 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
   @override
   Future<ReminderSlotModel> setReminderSlot(String? slot) async {
-    final response = await _apiClient.post('/api/me/reminder', data: {
-      'slot': slot,
-    });
+    final response = await _apiClient.post(
+      '/api/me/reminder',
+      data: {'slot': slot},
+    );
     return ReminderSlotModel.fromJson(response['data']);
   }
 }
-
