@@ -14,6 +14,16 @@ abstract interface class UserRemoteDataSource {
   Future<AuthModel> refreshToken({
     required String refreshToken,
   });
+
+  // ─── 用户设置 ───────────────────────────────────────────────────────────────
+  Future<void> saveDeviceToken(String deviceToken);
+  Future<void> saveTimezone(String timestamp);
+  Future<void> updateQodStrategy(String strategy);
+  Future<List<QodStrategyOptionModel>> fetchQodStrategyOptions();
+  Future<MeModel> fetchMe();
+  Future<void> updateNickname(String? nickname);
+  Future<ReminderSlotModel> fetchReminderSlot();
+  Future<ReminderSlotModel> setReminderSlot(String? slot);
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
@@ -63,4 +73,64 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     });
     return AuthModel.fromJson(response['data']);
   }
+
+  // ─── 用户设置 ───────────────────────────────────────────────────────────────
+
+  @override
+  Future<void> saveDeviceToken(String deviceToken) async {
+    await _apiClient.post('/api/device-token', data: {
+      'deviceToken': deviceToken,
+    });
+  }
+
+  @override
+  Future<void> saveTimezone(String timestamp) async {
+    await _apiClient.post('/api/timezone', data: {
+      'timestamp': timestamp,
+    });
+  }
+
+  @override
+  Future<void> updateQodStrategy(String strategy) async {
+    await _apiClient.post('/api/qod-strategy', data: {
+      'qod_strategy': strategy,
+    });
+  }
+
+  @override
+  Future<List<QodStrategyOptionModel>> fetchQodStrategyOptions() async {
+    final response = await _apiClient.get('/api/qod-strategy-options');
+    final list = response as List<dynamic>;
+    return list
+        .map((e) => QodStrategyOptionModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<MeModel> fetchMe() async {
+    final response = await _apiClient.get('/api/me');
+    return MeModel.fromJson(response['data']);
+  }
+
+  @override
+  Future<void> updateNickname(String? nickname) async {
+    await _apiClient.post('/api/me', data: {
+      'nickname': nickname,
+    });
+  }
+
+  @override
+  Future<ReminderSlotModel> fetchReminderSlot() async {
+    final response = await _apiClient.get('/api/me/reminder');
+    return ReminderSlotModel.fromJson(response['data']);
+  }
+
+  @override
+  Future<ReminderSlotModel> setReminderSlot(String? slot) async {
+    final response = await _apiClient.post('/api/me/reminder', data: {
+      'slot': slot,
+    });
+    return ReminderSlotModel.fromJson(response['data']);
+  }
 }
+

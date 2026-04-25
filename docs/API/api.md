@@ -107,7 +107,7 @@ Authorization: Bearer <your-jwt-token>
 - **说明**:
   - `user.qod_strategy` 为用户的「今日问题」策略，取值为 `RANDOM`、`PINNED`、`MIXED`
 
-#### 1.5 保存设备Token
+#### 1.5 保存设备DeviceToken
 
 - **URL**: `POST /api/device-token`
 - **描述**: 保存用户设备Token，用于后续推送通知功能

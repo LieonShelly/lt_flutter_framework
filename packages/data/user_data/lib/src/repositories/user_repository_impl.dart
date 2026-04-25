@@ -47,4 +47,51 @@ class UserRepositoryImpl implements UserRepository {
     );
     return model.toEntity();
   }
+
+  // ─── 用户设置 ───────────────────────────────────────────────────────────────
+
+  @override
+  Future<void> saveDeviceToken(String deviceToken) async {
+    await _remoteDataSource.saveDeviceToken(deviceToken);
+  }
+
+  @override
+  Future<void> saveTimezone(String timestamp) async {
+    await _remoteDataSource.saveTimezone(timestamp);
+  }
+
+  @override
+  Future<void> updateQodStrategy(QodStrategy strategy) async {
+    await _remoteDataSource.updateQodStrategy(strategy.toApiString());
+  }
+
+  @override
+  Future<List<QodStrategyOptionEntity>> fetchQodStrategyOptions() async {
+    final models = await _remoteDataSource.fetchQodStrategyOptions();
+    return models.map((m) => m.toEntity()).toList();
+  }
+
+  @override
+  Future<MeEntity> fetchMe() async {
+    final model = await _remoteDataSource.fetchMe();
+    return model.toEntity();
+  }
+
+  @override
+  Future<void> updateNickname(String? nickname) async {
+    await _remoteDataSource.updateNickname(nickname);
+  }
+
+  @override
+  Future<ReminderSlotEntity> fetchReminderSlot() async {
+    final model = await _remoteDataSource.fetchReminderSlot();
+    return model.toEntity();
+  }
+
+  @override
+  Future<ReminderSlotEntity> setReminderSlot(ReminderSlot? slot) async {
+    final model = await _remoteDataSource.setReminderSlot(slot?.toApiString());
+    return model.toEntity();
+  }
 }
+
