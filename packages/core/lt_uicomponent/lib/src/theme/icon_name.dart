@@ -12,6 +12,9 @@ enum IconName {
   smallCross,
   close,
   refresh,
+  apple,
+  google,
+  sun,
 }
 
 extension IconNameExtension on IconName {
@@ -43,6 +46,12 @@ extension IconNameExtension on IconName {
         return "close.svg";
       case IconName.refresh:
         return "refresh.svg";
+      case IconName.apple:
+        return "apple.svg";
+      case IconName.google:
+        return "google.svg";
+      case IconName.sun:
+        return "sun.svg";
     }
   }
 }

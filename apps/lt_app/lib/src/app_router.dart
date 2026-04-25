@@ -43,7 +43,7 @@ GoRouter router(Ref ref) {
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: AppRoutePath.calendar,
+    initialLocation: AppRoutePath.login,
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

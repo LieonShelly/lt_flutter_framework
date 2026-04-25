@@ -8,4 +8,5 @@ class AppRoutePath {
   static const chat = "/chat";
   static const iconEditor = "/iconEditor";
   static const market = '/market';
+  static const login = "/login";
 }
