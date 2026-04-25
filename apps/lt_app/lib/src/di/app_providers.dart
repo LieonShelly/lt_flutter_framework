@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lt_network/network.dart';
-import 'package:reflection_data/reflection_data.dart';
 import 'package:reflection_data/reflection_data.dart' as reflection;
 import 'package:user_data/user_data.dart' as user;
 import 'package:wallet_data/wallet_data.dart' as wallet;
@@ -49,6 +48,10 @@ class AppProviders {
 
     user.apiClientProvider.overrideWith((ref) {
       return ref.watch(_mainApiClientProvider);
+    }),
+
+    user.tokenStorageProvider.overrideWith((ref) {
+      return ref.watch(_tokenStorageProvider);
     }),
 
     wallet.apiClientProvider.overrideWith((ref) {

@@ -1,11 +1,12 @@
+import 'package:lt_network/network.dart';
 import 'package:user_domain/user_domain.dart';
 import '../datasources/datasources.dart';
-import '../models/models.dart';
 
 class UserRepositoryImpl implements UserRepository {
   final UserRemoteDataSource _remoteDataSource;
+  final TokenStorage _tokenStorage;
 
-  const UserRepositoryImpl(this._remoteDataSource);
+  const UserRepositoryImpl(this._remoteDataSource, this._tokenStorage);
 
   @override
   Future<UserEntity> getCurrentUser() async {
@@ -15,6 +16,7 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<void> logout() async {
+    await _tokenStorage.clear();
     await _remoteDataSource.logout();
   }
 
@@ -27,24 +29,23 @@ class UserRepositoryImpl implements UserRepository {
       identityToken: identityToken,
       authorizationCode: authorizationCode,
     );
+    await _tokenStorage.saveTokens(model.accessToken, model.refreshToken);
     return model.toEntity();
   }
 
   @override
-  Future<AuthEntity> loginWithGoogle({
-    required String idToken,
-  }) async {
+  Future<AuthEntity> loginWithGoogle({required String idToken}) async {
     final model = await _remoteDataSource.loginWithGoogle(idToken: idToken);
+    await _tokenStorage.saveTokens(model.accessToken, model.refreshToken);
     return model.toEntity();
   }
 
   @override
-  Future<AuthEntity> refreshToken({
-    required String refreshToken,
-  }) async {
+  Future<AuthEntity> refreshToken({required String refreshToken}) async {
     final model = await _remoteDataSource.refreshToken(
       refreshToken: refreshToken,
     );
+    await _tokenStorage.saveTokens(model.accessToken, model.refreshToken);
     return model.toEntity();
   }
 
@@ -94,4 +95,3 @@ class UserRepositoryImpl implements UserRepository {
     return model.toEntity();
   }
 }
-

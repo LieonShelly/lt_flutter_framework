@@ -11,6 +11,13 @@ final apiClientProvider = Provider<ApiClientType>(
   name: 'apiClientProvider',
 );
 
+final tokenStorageProvider = Provider<TokenStorage>(
+  (ref) => throw UnimplementedError(
+    'tokenStorageProvider must be overridden in App layer',
+  ),
+  name: 'tokenStorageProvider',
+);
+
 final userRemoteDataSourceProvider = Provider<UserRemoteDataSource>((ref) {
   final apiClient = ref.watch(apiClientProvider);
   return UserRemoteDataSourceImpl(apiClient);
@@ -18,5 +25,6 @@ final userRemoteDataSourceProvider = Provider<UserRemoteDataSource>((ref) {
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
   final dataSource = ref.watch(userRemoteDataSourceProvider);
-  return UserRepositoryImpl(dataSource);
+  final tokenStorage = ref.watch(tokenStorageProvider);
+  return UserRepositoryImpl(dataSource, tokenStorage);
 }, name: 'userRepositoryProvider');
