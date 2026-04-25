@@ -12,6 +12,15 @@ abstract final class AppColors {
   static const blackTransparent = Color(0x4D000000);
   static const red1 = Color(0xFFE74C3C);
 
+  static const black = Color(0xFF000000);
+  static const oat = Color(0xFFFFFDF8);
+  static const greyLight = Color(0xFFEBEBEB);
+  static const greyNeutral = Color(0xFFCDCDCD);
+  static const grey = Color(0xFFB8B8B8);
+  static const greyMedium = Color(0xFF6F6F6F);
+  static const greyDark = Color(0xFF323232);
+  static const white = Color(0xFFFFFFFF);
+
   static const lightColorScheme = ColorScheme(
     brightness: Brightness.light,
     primary: AppColors.black1,

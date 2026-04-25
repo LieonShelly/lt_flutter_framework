@@ -43,7 +43,7 @@ extension AppFontExtension on AppFont {
   }
 }
 
-class AppTextStyle extends TextStyle {
+final class AppTextStyle extends TextStyle {
   AppTextStyle({
     required AppFont font,
     super.fontSize,
@@ -54,26 +54,26 @@ class AppTextStyle extends TextStyle {
     super.decoration,
   }) : super(fontFamily: font.value, package: 'lt_uicomponent');
 
-  AppTextStyle.poppins({
+  AppTextStyle.poppinsRegular({
     double? fontSize,
     Color? color,
     FontWeight? fontWeight,
     double? height,
   }) : this(
-         font: AppFont.poppins,
+         font: AppFont.poppinsRegular,
          fontSize: fontSize,
          color: color,
          fontWeight: fontWeight,
          height: height,
        );
 
-  AppTextStyle.feltTipSeniorRegular({
+  AppTextStyle.poppinsBold({
     double? fontSize,
     Color? color,
     FontWeight? fontWeight,
     double? height,
   }) : this(
-         font: AppFont.feltTipSeniorRegular,
+         font: AppFont.poppinsBold,
          fontSize: fontSize,
          color: color,
          fontWeight: fontWeight,
@@ -93,6 +93,58 @@ class AppTextStyle extends TextStyle {
          height: height,
        );
 
+  AppTextStyle.feltTipSeniorRegular({
+    double? fontSize,
+    Color? color,
+    FontWeight? fontWeight,
+    double? height,
+  }) : this(
+         font: AppFont.feltTipSeniorRegular,
+         fontSize: fontSize,
+         color: color,
+         fontWeight: fontWeight,
+         height: height,
+       );
+
+  AppTextStyle.sfProRegular({
+    double? fontSize,
+    Color? color,
+    FontWeight? fontWeight,
+    double? height,
+  }) : this(
+         font: AppFont.sfProRegular,
+         fontSize: fontSize,
+         color: color,
+         fontWeight: fontWeight,
+         height: height,
+       );
+
+  AppTextStyle.sfProMedium({
+    double? fontSize,
+    Color? color,
+    FontWeight? fontWeight,
+    double? height,
+  }) : this(
+         font: AppFont.sfProMedium,
+         fontSize: fontSize,
+         color: color,
+         fontWeight: fontWeight,
+         height: height,
+       );
+
+  AppTextStyle.sfProBold({
+    double? fontSize,
+    Color? color,
+    FontWeight? fontWeight,
+    double? height,
+  }) : this(
+         font: AppFont.sfProBold,
+         fontSize: fontSize,
+         color: color,
+         fontWeight: fontWeight,
+         height: height,
+       );
+
   AppTextStyle.vividlyRegular({
     double? fontSize,
     Color? color,
@@ -106,14 +158,126 @@ class AppTextStyle extends TextStyle {
          height: height,
        );
 
+  AppTextStyle.ibmPlexMonoRegular({
+    double? fontSize,
+    Color? color,
+    FontWeight? fontWeight,
+    double? height,
+  }) : this(
+         font: AppFont.ibmPlexMonoRegular,
+         fontSize: fontSize,
+         color: color,
+         fontWeight: fontWeight,
+         height: height,
+       );
+
+  AppTextStyle.dsDigital({
+    double? fontSize,
+    Color? color,
+    FontWeight? fontWeight,
+    double? height,
+  }) : this(
+         font: AppFont.dsDigital,
+         fontSize: fontSize,
+         color: color,
+         fontWeight: fontWeight,
+         height: height,
+       );
+
   AppTextStyle.ltFont({
     double? fontSize,
     Color? color,
     FontWeight? fontWeight,
     double? height,
   }) : this(
-         font: AppFont.lt,
+         font: AppFont.littleThing,
          fontSize: fontSize,
+         color: color,
+         fontWeight: fontWeight,
+         height: height,
+       );
+
+  /// Heading – TheLittleThings 24px
+  AppTextStyle.heading({Color? color, FontWeight? fontWeight, double? height})
+    : this(
+        font: AppFont.littleThing,
+        fontSize: 24,
+        color: color,
+        fontWeight: fontWeight,
+        height: height,
+      );
+
+  /// Title – TheLittleThings 18px
+  AppTextStyle.title({Color? color, FontWeight? fontWeight, double? height})
+    : this(
+        font: AppFont.littleThing,
+        fontSize: 18,
+        color: color,
+        fontWeight: fontWeight,
+        height: height,
+      );
+
+  /// Section – TheLittleThings 14px
+  AppTextStyle.section({Color? color, FontWeight? fontWeight, double? height})
+    : this(
+        font: AppFont.littleThing,
+        fontSize: 14,
+        color: color,
+        fontWeight: fontWeight,
+        height: height,
+      );
+
+  /// Sub-section – TheLittleThings 10px
+  AppTextStyle.subSection({
+    Color? color,
+    FontWeight? fontWeight,
+    double? height,
+  }) : this(
+         font: AppFont.littleThing,
+         fontSize: 10,
+         color: color,
+         fontWeight: fontWeight,
+         height: height,
+       );
+
+  /// Subtitle – Poppins 16px
+  AppTextStyle.subtitle({Color? color, FontWeight? fontWeight, double? height})
+    : this(
+        font: AppFont.poppinsRegular,
+        fontSize: 16,
+        color: color,
+        fontWeight: fontWeight,
+        height: height,
+      );
+
+  /// Body – Poppins 14px
+  AppTextStyle.body({Color? color, FontWeight? fontWeight, double? height})
+    : this(
+        font: AppFont.poppinsRegular,
+        fontSize: 14,
+        color: color,
+        fontWeight: fontWeight,
+        height: height,
+      );
+
+  /// Caption – Poppins 12px
+  AppTextStyle.caption({Color? color, FontWeight? fontWeight, double? height})
+    : this(
+        font: AppFont.poppinsRegular,
+        fontSize: 12,
+        color: color,
+        fontWeight: fontWeight,
+        height: height,
+      );
+
+  /// Annotation – IBM Plex Mono 12px
+  AppTextStyle.annotation({
+    Color? color,
+    FontWeight? fontWeight,
+    double? height,
+  }) : this(
+         font: AppFont.ibmPlexMonoRegular,
+         fontSize: 12,
          color: color,
          fontWeight: fontWeight,
          height: height,

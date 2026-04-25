@@ -56,7 +56,7 @@ class LoginView extends ConsumerWidget {
                         const SizedBox(width: 8),
                         Text(
                           'Sign in with Apple',
-                          style: AppTextStyle.poppins(
+                          style: AppTextStyle.sfProBold(
                             fontSize: 17,
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
@@ -78,7 +78,7 @@ class LoginView extends ConsumerWidget {
                         const SizedBox(width: 8),
                         Text(
                           'Sign in with Google',
-                          style: AppTextStyle.poppins(
+                          style: AppTextStyle.sfProBold(
                             fontSize: 17,
                             color: const Color(0xFF323232),
                             fontWeight: FontWeight.w600,
