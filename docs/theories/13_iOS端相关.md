@@ -640,3 +640,42 @@ Any 代表了 Swift 中任何类型的实例。无论它是值类型（Struct、
     - 适用场景：
         - 被 @objc dynamic 联合修饰的方法。
         - 继承自 Objective-C 类的原生方法。
+
+#### Flutter/iOS CI 打包 `xcodebuild` 导出失败与签名排查
+在通过命令行或 CI 脚本（如 `flutter build ipa` 或直接使用 `xcodebuild -exportArchive`）导出 `.ipa` 时，如果遇到类似如下的错误：
+> `error: exportArchive "Runner.app" requires a provisioning profile with the Associated Domains, Push Notifications, and Sign In with Apple features.`
+
+**核心原因**：虽然 `Archive` 阶段编译成功，但在 `Export`（导出）阶段，`xcodebuild` 默认无法正确匹配到包含特定能力（Capabilities）的发布证书（Distribution Profile）。特别是在 **手动管理签名 (Manual Signing)** 的情况下，如果命令行不提供明确的描述文件映射关系，就会导致该报错。
+
+**解决方案：配置显式的 ExportOptions.plist**
+在执行导出命令时，必须通过 `--export-options-plist` 参数传入一个自定义的 `.plist` 文件。针对**手动签名**的场景，必须在该文件中使用 `provisioningProfiles` 字典将 Bundle ID 显式映射到你在苹果后台创建的具体的 Provisioning Profile 名称：
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>method</key>
+    <string>app-store</string>
+    <!-- 关键配置：指定手动签名 -->
+    <key>signingStyle</key>
+    <string>manual</string>
+    <!-- 关键配置：映射 Bundle ID 到精确的描述文件名称 -->
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>com.your.bundle.id</key>
+        <string>your_exact_profile_name</string>
+    </dict>
+    <key>stripSwiftSymbols</key>
+    <true/>
+    <key>manageAppVersionAndBuildNumber</key>
+    <true/>
+</dict>
+</plist>
+```
+
+将该文件生成并在打包时指定给 Flutter 命令行：
+```bash
+flutter build ipa --export-options-plist=ExportOptions.plist
+```
+这样底层调用的 `xcodebuild` 就会精准找到对应的发布证书，从而成功打出带有 Sign In with Apple、Push 等扩展权限的 App Store 安装包。

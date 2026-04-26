@@ -18,6 +18,7 @@ help:
 	@echo "  make xcframework MODULE=name          - Build XCFramework (Debug + Release)"
 	@echo "  make xcframework MODULE=name MODE=debug   - Build Debug only (for simulator)"
 	@echo "  make xcframework MODULE=name MODE=release  - Build Release only (for device)"
+	@echo "  make build-ios          - Build iOS IPA and upload to TestFlight"
 	@echo ""
 	@echo "Package-specific operations:"
 	@echo "  make setup PACKAGE=name    - Setup specific package"
@@ -109,3 +110,8 @@ ifndef MODULE
 else
 	@dart shell/bin/build_xcframework.dart --module $(MODULE) --mode $(MODE)
 endif
+
+build-ios: shell-deps
+	@echo "🚀 Starting iOS Build..."
+	@dart shell/bin/build_ios.dart $(if $(APPLE_ID),-u $(APPLE_ID)) $(if $(PASSWORD),-p $(PASSWORD)) $(if $(API_KEY),--api-key $(API_KEY)) $(if $(API_ISSUER),--api-issuer $(API_ISSUER))
+
