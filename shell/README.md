@@ -391,6 +391,39 @@ Found 5 packages with tests
 ==================================================
 ```
 
+### 6. build_ios.dart - 构建与上传 iOS App
+
+自动化构建 `apps/lt_app` iOS 应用（IPA），并支持上传至 App Store Connect (TestFlight)。
+
+**功能**：
+- 自动执行 `fvm flutter clean` 和 `fvm flutter pub get` 清理并获取环境依赖
+- 自动生成适用于手动管理签名的 `ExportOptions.plist` 配置文件
+- 运行 `fvm flutter build ipa` 构建 iOS 发布产物
+- （可选）使用 `xcrun altool` 将打出的 IPA 自动推送到 App Store Connect
+
+**参数**：
+
+| 参数 | 缩写 | 说明 |
+|------|------|------|
+| `--apple-id` | `-u` | App Store Connect 的 Apple ID |
+| `--password` | `-p` | Apple ID 的 App 专用密码 (App-Specific Password) |
+| `--api-key` | — | App Store Connect API Key ID |
+| `--api-issuer`| — | App Store Connect API Issuer ID |
+| `--help` | `-h` | 显示帮助信息 |
+
+**使用方法**：
+
+```bash
+# 仅构建生成 IPA（不传上传凭证会自动跳过上传步骤）
+dart shell/bin/build_ios.dart
+
+# 构建并使用 Apple ID 上传至 TestFlight
+dart shell/bin/build_ios.dart -u your@email.com -p xxxx-xxxx-xxxx-xxxx
+
+# 构建并使用 API Key 上传至 TestFlight
+dart shell/bin/build_ios.dart --api-key XXXXXXX --api-issuer XXXXXXX
+```
+
 ## 常见工作流
 
 ### 首次克隆项目
@@ -470,6 +503,19 @@ dart shell/bin/build_xcframework.dart -m answer_detail_module --mode release
 # 需要将其添加到 Xcode 工程中编译以获得类型安全的通信接口
 ```
 
+### 构建与分发 iOS 应用
+
+```bash
+# 自动构建并在本地生成 IPA 包
+make build-ios
+
+# 自动构建并上传至 TestFlight（基于 App 专用密码）
+make build-ios APPLE_ID="your@email.com" PASSWORD="xxxx-xxxx-xxxx-xxxx"
+
+# 自动构建并上传至 TestFlight（基于 API Key）
+make build-ios API_KEY="XXXXXXX" API_ISSUER="XXXXXXX"
+```
+
 ## Makefile 命令
 
 项目已包含 Makefile，支持以下命令：
@@ -504,6 +550,14 @@ make xcframework MODULE=answer_detail_module   # 构建指定模块的 XCFramewo
 ```
 
 > **注意**：`MODULE` 参数为必填项，未提供时会提示错误。
+
+### iOS App 构建与上传
+
+```bash
+make build-ios                               # 仅构建 iOS IPA
+make build-ios APPLE_ID=xxx PASSWORD=xxx     # 构建 iOS IPA 并上传 TestFlight (Apple ID)
+make build-ios API_KEY=xxx API_ISSUER=xxx    # 构建 iOS IPA 并上传 TestFlight (API Key)
+```
 
 ## 故障排除
 
