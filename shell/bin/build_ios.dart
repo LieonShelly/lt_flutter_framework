@@ -135,6 +135,7 @@ Future<String> _buildIpa(String appDir) async {
     'flutter',
     'build',
     'ipa',
+    '--analyze-size',
     '--export-options-plist=${exportOptionsFile.path}',
   ], workingDirectory: appDir);
 
