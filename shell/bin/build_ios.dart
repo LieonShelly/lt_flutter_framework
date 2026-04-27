@@ -111,23 +111,30 @@ Future<String> _buildIpa(String appDir) async {
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>destination</key>
+	<string>export</string>
+	<key>manageAppVersionAndBuildNumber</key>
+	<false/>
 	<key>method</key>
-	<string>app-store</string>
+	<string>app-store-connect</string>
 	<key>provisioningProfiles</key>
 	<dict>
 		<key>com.little.things</key>
 		<string>littile_things_distribute_profile</string>
 	</dict>
+	<key>signingCertificate</key>
+	<string>Apple Distribution</string>
 	<key>signingStyle</key>
 	<string>manual</string>
 	<key>stripSwiftSymbols</key>
 	<true/>
-	<key>manageAppVersionAndBuildNumber</key>
-	<true/>
+	<key>teamID</key>
+	<string>R7S4TKW9JF</string>
 	<key>uploadSymbols</key>
-	<true/>
+	<false/>
 </dict>
-</plist>''';
+</plist>
+''';
   await exportOptionsFile.writeAsString(plistContent);
 
   // Stream the output because the build process takes a long time
@@ -135,7 +142,11 @@ Future<String> _buildIpa(String appDir) async {
     'flutter',
     'build',
     'ipa',
-    '--analyze-size',
+    '--release',
+    '--obfuscate',
+    '--split-debug-info=build/ios/debug_info',
+    '--no-analyze-size',
+    '--tree-shake-icons',
     '--export-options-plist=${exportOptionsFile.path}',
   ], workingDirectory: appDir);
 
