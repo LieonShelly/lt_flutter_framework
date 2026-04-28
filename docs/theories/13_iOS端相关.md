@@ -679,3 +679,41 @@ Any 代表了 Swift 中任何类型的实例。无论它是值类型（Struct、
 flutter build ipa --export-options-plist=ExportOptions.plist
 ```
 这样底层调用的 `xcodebuild` 就会精准找到对应的发布证书，从而成功打出带有 Sign In with Apple、Push 等扩展权限的 App Store 安装包。
+
+### App 安全性考量点
+
+#### 一、 网络传输安全 (Data in Transit)
+> 防止中间人攻击（MitM）和数据被篡改的第一道防线。
+
+- **HTTPS 与 ATS 规范**：确保全站开启 HTTPS，并检查 `Info.plist` 中的 **App Transport Security (ATS)** 配置，避免因历史遗留问题开启了全局 `NSAllowsArbitraryLoads`。
+- **SSL Pinning (证书锁定)**：这是防抓包的核心手段。建议采用**固定公钥 (Public Key Pinning)** 而非固定证书，以避免服务器更换证书时导致 App 断网。
+- **备用密钥配置**：在实施 SSL Pinning 时，必须提前配置好**备用公钥 (Backup Pin)**，以防主私钥泄露或服务端突发更换密钥对。
+- **网络拦截与监控**：通过原生 `URLSessionDelegate` 进行底层拦截校验，或引入 `TrustKit` 等框架实现校验失败的日志上报。
+- **紧急降级开关**：配备高可用的旁路接口下发 **Kill Switch**。一旦线上发生证书不可用的灾难，能立刻放弃 Pinning 降级为普通 HTTPS，保全核心业务存活。
+
+#### 二、 本地数据存储 (Data at Rest)
+> 防止攻击者通过越狱或物理获取设备窃取本地敏感信息。
+
+- **敏感数据隔离**：严禁将 Token、用户密码、加密密钥等明文保存在 `UserDefaults`、`plist` 或 `SQLite/CoreData` 中。核心凭证必须存入系统的 **Keychain**。
+- **文件系统保护**：对于本地缓存的敏感文件（如账单、私密聊天记录），应利用苹果的 **Data Protection API**，将 `NSFileProtectionComplete` 属性设置为真，确保在设备锁屏状态下文件被硬件级强加密。
+- **日志审查**：检查工程中的 `print` 或 `NSLog`，确保在 Release 环境下彻底剥离了包含用户隐私、网络请求体或业务逻辑的调试日志。
+
+#### 三、 运行时与代码安全 (Runtime & Code)
+> 对抗逆向工程，增加破解和分析代码的成本。
+
+- **越狱环境检测**：在 App 启动和关键业务前，检测常见的越狱路径（如 `Cydia`、`MobileSubstrate`）、沙盒逃逸行为或异常的系统根目录读取操作。
+- **反调试与反注入**：通过 `ptrace` (如 `PT_DENY_ATTACH`) 阻止调试器附加，并在运行时检测当前进程是否被注入了 `Frida`、`Cycript` 等动态分析和 Hook 工具。
+- **代码与硬编码混淆**：对代码中的 API 密钥、加密盐值等敏感字符串进行**异或 (XOR) 混淆**，防止在 Mach-O 文件中以明文形式暴露。
+
+#### 四、 UI 与用户隐私层 (UI & Privacy Leakage)
+> 防止物理窥探或恶意软件窃取屏幕信息。
+
+- **后台视图防窥探 (App Switcher)**：当 App 进入后台时，为 window 覆盖一层高斯模糊或 Logo 遮罩，防止在多任务管理器缩略图中泄露金融资产或聊天记录。
+- **键盘与剪贴板限制**：对于敏感输入框，禁用自动纠错和文本预测 (`autocorrectionType = .no`)；对核心业务数据，限制剪贴板的复制权限。
+- **录屏监听与告警**：通过监听 `UIScreen.capturedDidChangeNotification`，在检测到用户正在录屏或投屏时，隐藏关键内容或给出风险弹窗。
+
+#### 五、 业务逻辑与身份验证 (Business & Authentication)
+> 贴近业务逻辑的安全防线。
+
+- **生物识别校验**：使用 `FaceID/TouchID` 时，不应仅依赖返回的布尔值，而应结合 **Secure Enclave** 生成的密钥对进行后端签名校验，防止本地 Hook 绕过。
+- **Token 生命周期管理**：采用 **Access Token (短效) + Refresh Token (长效)** 机制。Access Token 仅在内存中留存，通过长效 Token 在后台静默刷新。
