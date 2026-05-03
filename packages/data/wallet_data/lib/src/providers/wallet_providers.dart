@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wallet_domain/wallet_domain.dart';
 import 'package:lt_network/network.dart';
+import 'package:wallet_domain/wallet_domain.dart';
+
 import '../datasources/datasources.dart';
 import '../repositories/repositories.dart';
 
@@ -20,3 +21,17 @@ final walletRepositoryProvider = Provider<WalletRepository>((ref) {
   final dataSource = ref.watch(walletRemoteDataSourceProvider);
   return WalletRepositoryImpl(dataSource);
 }, name: 'walletRepositoryProvider');
+
+final klineRemoteDataSourceProvider = Provider<KlineRemoteDataSource>((ref) {
+  return const MockKlineRemoteDataSource();
+}, name: 'klineRemoteDataSourceProvider');
+
+final klineStoreProvider = Provider<KlineStore>((ref) {
+  return KlineStore();
+}, name: 'klineStoreProvider');
+
+final klineRepositoryProvider = Provider<KlineRepository>((ref) {
+  final dataSource = ref.watch(klineRemoteDataSourceProvider);
+  final store = ref.watch(klineStoreProvider);
+  return KlineRepositoryImpl(dataSource, store);
+}, name: 'klineRepositoryProvider');
