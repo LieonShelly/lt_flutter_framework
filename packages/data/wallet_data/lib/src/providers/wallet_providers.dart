@@ -22,7 +22,14 @@ final walletRepositoryProvider = Provider<WalletRepository>((ref) {
   return WalletRepositoryImpl(dataSource);
 }, name: 'walletRepositoryProvider');
 
+/// Enable real Binance data source (connects to Binance directly)
+final useRealBinanceProvider = StateProvider<bool>((ref) => false);
+
 final klineRemoteDataSourceProvider = Provider<KlineRemoteDataSource>((ref) {
+  final useReal = ref.watch(useRealBinanceProvider);
+  if (useReal) {
+    return BinanceKlineRemoteDataSource();
+  }
   return const MockKlineRemoteDataSource();
 }, name: 'klineRemoteDataSourceProvider');
 
