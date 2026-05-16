@@ -54,9 +54,9 @@ class BinanceClient:
             params["endTime"] = end_time
 
         url = f"{self.BASE_REST_URL}/api/v3/klines"
-        async with self._client.get(url, params=params) as response:
-            response.raise_for_status()
-            raw = response.json()
+        response = await self._client.get(url, params=params)
+        response.raise_for_status()
+        raw = response.json()
 
         candles = [self._parse_kline(k) for k in raw]
 

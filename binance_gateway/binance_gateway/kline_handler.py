@@ -4,8 +4,7 @@ import logging
 from typing import Optional
 
 import websockets
-from websockets.client import WebSocketClientProtocol
-from websockets.server import WebSocketServerProtocol, serve
+from fastapi import WebSocket
 
 from .binance_client import BinanceClient
 from .models import KlineInterval, CandleData, KlineWebSocketMessage
@@ -47,7 +46,7 @@ class KlineHandler:
 
     async def handle_websocket(
         self,
-        websocket: WebSocketClientProtocol,
+        websocket: WebSocket,
         symbol: str,
         interval: KlineInterval,
     ):
@@ -57,8 +56,8 @@ class KlineHandler:
         Subscribes to Binance kline stream and forwards messages.
         """
         symbol = symbol.upper()
+        logger.info(f"WebSocket connected: {symbol} {interval.value}")
         try:
-            # Subscribe to Binance stream
             async for candle in self._binance.subscribe_kline_stream(symbol, interval):
                 msg = KlineWebSocketMessage(
                     event_type="kline",
@@ -66,9 +65,9 @@ class KlineHandler:
                     interval=interval,
                     candle=candle,
                 )
-                await websocket.send(msg.model_dump_json())
+                await websocket.send_text(msg.model_dump_json())
         except websockets.ConnectionClosed:
-            logger.info(f"Client disconnected: {websocket.remote_address}")
+            logger.info(f"Client disconnected: {websocket.client}")
         except Exception as e:
             logger.error(f"Error in websocket handler: {e}")
         finally:

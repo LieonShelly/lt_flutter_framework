@@ -49,3 +49,9 @@ app.*.map.json
 .fvm/
 docs/theories/简历.md
 apps/figma_ui_mcp/server/venv/
+.venv/**
+.venv/*
+**/.venv
+
+# Worktrees
+.worktrees/

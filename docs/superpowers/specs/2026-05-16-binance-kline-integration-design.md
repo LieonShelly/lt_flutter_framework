@@ -90,4 +90,4 @@ WebSocket /ws/kline/{symbol}/{interval}
 ## 状态
 
 - [x] 设计完成
-- [ ] 实现中
+- [x] 实现完成
