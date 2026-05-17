@@ -1,7 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wallet_data/wallet_data.dart';
 import 'package:wallet_domain/wallet_domain.dart';
+
+import 'kline_providers.dart';
 
 class KlineState {
   final KlineKey key;
@@ -36,93 +39,89 @@ class KlineState {
   }
 }
 
-class KlineViewModel extends ChangeNotifier {
-  final KlineRepository _repository;
-
-  KlineState _state;
+class KlineViewModel extends Notifier<KlineState> {
+  late KlineRepository _repository;
   StreamSubscription<CandleEntity>? _realtimeSubscription;
 
-  KlineViewModel({
-    required KlineRepository repository,
-    required KlineKey initialKey,
-  }) : _repository = repository,
-       _state = KlineState(key: initialKey);
-
-  KlineState get state => _state;
-
-  Future<void> loadInitial({int limit = 200}) async {
-    _emit(_state.copyWith(isLoading: true, clearError: true));
-
-    try {
-      final candles = await _repository.getHistory(_state.key, limit: limit);
-      _emit(_state.copyWith(candles: candles, isLoading: false));
-      _subscribeRealtime();
-    } catch (error) {
-      _emit(_state.copyWith(isLoading: false, error: error));
-    }
+  @override
+  KlineState build() {
+    _repository = ref.watch(klineRepositoryProvider);
+    final key = ref.watch(defaultKlineKeyProvider);
+    _subscribeRealtime(key);
+    return KlineState(key: key);
   }
 
-  Future<void> loadMoreBefore({int limit = 200}) async {
-    if (_state.candles.isEmpty) {
-      return;
-    }
-
-    try {
-      final candles = await _repository.loadMoreBefore(
-        _state.key,
-        _state.candles.first.openTime,
-        limit: limit,
-      );
-      _emit(_state.copyWith(candles: candles, clearError: true));
-    } catch (error) {
-      _emit(_state.copyWith(error: error));
-    }
-  }
-
-  Future<void> switchKey(KlineKey key) async {
-    await _realtimeSubscription?.cancel();
-    _state = KlineState(key: key, isLoading: true);
-    notifyListeners();
-    await loadInitial();
-  }
-
-  void _subscribeRealtime() {
+  void _subscribeRealtime(KlineKey key) {
     _realtimeSubscription?.cancel();
     _realtimeSubscription = _repository
-        .watchRealtime(_state.key)
+        .watchRealtime(key)
         .listen(
           (incoming) {
-            final candles = _mergeIncoming(_state.candles, incoming);
-            _emit(_state.copyWith(candles: candles, clearError: true));
+            final candles = _mergeIncoming(state.candles, incoming);
+            state = state.copyWith(candles: candles, clearError: true);
           },
           onError: (Object error) {
-            _emit(_state.copyWith(isReconnecting: true, error: error));
-            _recoverAfterStreamError();
+            state = state.copyWith(isReconnecting: true, error: error);
+            _recoverAfterStreamError(key);
           },
         );
   }
 
-  Future<void> _recoverAfterStreamError() async {
-    if (_state.candles.isEmpty) {
+  Future<void> loadInitial({int limit = 200}) async {
+    final repository = ref.read(klineRepositoryProvider);
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    try {
+      final candles = await repository.getHistory(state.key, limit: limit);
+      state = state.copyWith(candles: candles, isLoading: false);
+    } catch (error) {
+      state = state.copyWith(isLoading: false, error: error);
+    }
+  }
+
+  Future<void> loadMoreBefore({int limit = 200}) async {
+    if (state.candles.isEmpty) return;
+
+    final repository = ref.read(klineRepositoryProvider);
+    try {
+      final candles = await repository.loadMoreBefore(
+        state.key,
+        state.candles.first.openTime,
+        limit: limit,
+      );
+      state = state.copyWith(candles: candles, clearError: true);
+    } catch (error) {
+      state = state.copyWith(error: error);
+    }
+  }
+
+  Future<void> switchKey(KlineKey key) async {
+    _realtimeSubscription?.cancel();
+    state = KlineState(key: key, isLoading: true);
+    _subscribeRealtime(key);
+    await loadInitial();
+  }
+
+  Future<void> _recoverAfterStreamError(KlineKey key) async {
+    if (state.candles.isEmpty) {
       await loadInitial();
       return;
     }
 
+    final repository = ref.read(klineRepositoryProvider);
     try {
-      final candles = await _repository.recoverFrom(
-        _state.key,
-        _state.candles.last.openTime,
+      final candles = await repository.recoverFrom(
+        key,
+        state.candles.last.openTime,
       );
-      _emit(
-        _state.copyWith(
-          candles: candles,
-          isReconnecting: false,
-          clearError: true,
-        ),
+      state = state.copyWith(
+        candles: candles,
+        isReconnecting: false,
+        clearError: true,
       );
-      _subscribeRealtime();
+      _subscribeRealtime(key);
     } catch (error) {
-      _emit(_state.copyWith(isReconnecting: false, error: error));
+      state = state.copyWith(isReconnecting: false, error: error);
     }
   }
 
@@ -155,14 +154,8 @@ class KlineViewModel extends ChangeNotifier {
     return List.unmodifiable(candles);
   }
 
-  void _emit(KlineState state) {
-    _state = state;
-    notifyListeners();
-  }
-
   @override
   void dispose() {
     _realtimeSubscription?.cancel();
-    super.dispose();
   }
 }

@@ -27,12 +27,11 @@ migrate_working_dir/
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
-.flutter-plugins
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-build/
-**/build/
+/build/
+/coverage/
 
 # Symbolication related
 app.*.symbols
@@ -44,15 +43,3 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
-# FVM Version Cache
-.fvm/
-docs/theories/简历.md
-apps/figma_ui_mcp/server/venv/
-.venv/**
-.venv/*
-**/.venv/
-.venv/
-
-# Worktrees
-.worktrees/

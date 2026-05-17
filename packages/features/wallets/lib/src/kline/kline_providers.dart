@@ -16,13 +16,10 @@ final defaultKlineKeyProvider = Provider<KlineKey>((ref) {
   );
 }, name: 'defaultKlineKeyProvider');
 
-final klineViewModelProvider = Provider<KlineViewModel>((ref) {
-  final repository = ref.watch(klineRepositoryProvider);
-  final key = ref.watch(defaultKlineKeyProvider);
-  final viewModel = KlineViewModel(repository: repository, initialKey: key);
-  ref.onDispose(viewModel.dispose);
-  return viewModel;
-}, name: 'klineViewModelProvider');
+final klineViewModelProvider = NotifierProvider<KlineViewModel, KlineState>(
+  KlineViewModel.new,
+  name: 'klineViewModelProvider',
+);
 
 /// Binance Kline key provider
 final binanceKlineKeyProvider = Provider.family<KlineKey, BinanceKlineParams>(

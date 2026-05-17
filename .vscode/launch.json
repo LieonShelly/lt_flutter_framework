@@ -19,6 +19,14 @@
             "program": "apps/lt_app/lib/main.dart",
             "flutterMode": "debug",
             "deviceId": "3C87ECBA-29BD-4D0E-BFF5-41BEDE4D0C4B"
+        },
+        {
+            "name": "KlineChart_Flutter",
+            "type": "dart",
+            "request": "launch",
+            "program": "apps/kline_chart/lib/main.dart",
+            "flutterMode": "debug",
+            "deviceId": "3C87ECBA-29BD-4D0E-BFF5-41BEDE4D0C4B"
         }
     ]
 }

@@ -49,6 +49,7 @@ workspace:
   - apps/compass_app
   - apps/shop_app
   - apps/answer_detail_module
+  - apps/kline_chart
   
   # Shell scripts
   - shell
