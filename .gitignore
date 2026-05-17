@@ -56,3 +56,6 @@ apps/figma_ui_mcp/server/venv/
 
 # Worktrees
 .worktrees/
+
+# Python virtual environments
+binance_gateway/.venv/
